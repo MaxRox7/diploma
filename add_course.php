@@ -87,22 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 </head>
 <body>
-<div class="ui menu">
-    <div class="ui container">
-        <a href="index.php" class="header item">CodeSphere</a>
-        <div class="right menu">
-            <a href="courses.php" class="item">Курсы</a>
-            <?php if (is_admin()): ?>
-                <a href="add_course.php" class="item">
-                    <i class="plus icon"></i>
-                    Добавить курс
-                </a>
-            <?php endif; ?>
-            <a href="profile.php" class="item">Профиль</a>
-            <a href="logout.php" class="item">Выход</a>
-        </div>
-    </div>
-</div>
+<?php include 'header.php'; ?>
 
 <div class="ui container" style="margin-top: 50px;">
     <div class="ui grid">

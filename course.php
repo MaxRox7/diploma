@@ -98,7 +98,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT f.*, u.fn_user
         FROM feedback f
-        JOIN users u ON f.id_feedback = u.id_user
+        JOIN users u ON f.id_user = u.id_user
         WHERE f.id_course = ?
         ORDER BY f.date_feedback DESC
     ");
@@ -110,7 +110,7 @@ try {
         $stmt = $pdo->prepare("
             SELECT COUNT(*) 
             FROM feedback 
-            WHERE id_course = ? AND id_feedback = ?
+            WHERE id_course = ? AND id_user = ?
         ");
         $stmt->execute([$course_id, $user_id]);
         $has_feedback = $stmt->fetchColumn() > 0;
@@ -147,7 +147,7 @@ try {
                 } else {
                     try {
                         $stmt = $pdo->prepare("
-                            INSERT INTO feedback (id_course, id_feedback, text_feedback, date_feedback, rate_feedback)
+                            INSERT INTO feedback (id_course, id_user, text_feedback, date_feedback, rate_feedback)
                             VALUES (?, ?, ?, CURRENT_DATE, ?)
                         ");
                         $stmt->execute([$course_id, $user_id, $text_feedback, $rate_feedback]);
@@ -157,7 +157,7 @@ try {
                         $stmt = $pdo->prepare("
                             SELECT f.*, u.fn_user
                             FROM feedback f
-                            JOIN users u ON f.id_feedback = u.id_user
+                            JOIN users u ON f.id_user = u.id_user
                             WHERE f.id_course = ?
                             ORDER BY f.date_feedback DESC
                         ");
@@ -187,22 +187,8 @@ try {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 </head>
 <body>
-<div class="ui menu">
-    <div class="ui container">
-        <a href="index.php" class="header item">CodeSphere</a>
-        <div class="right menu">
-            <a href="courses.php" class="item">Курсы</a>
-            <?php if (is_admin()): ?>
-                <a href="add_course.php" class="item">
-                    <i class="plus icon"></i>
-                    Добавить курс
-                </a>
-            <?php endif; ?>
-            <a href="profile.php" class="item">Профиль</a>
-            <a href="logout.php" class="item">Выход</a>
-        </div>
-    </div>
-</div>
+
+<?php include 'header.php'; ?>
 
 <div class="ui container" style="margin-top: 50px;">
     <?php if ($error): ?>
@@ -326,7 +312,7 @@ try {
                                                 <?php endif; ?>
                                             </a>
                                         </div>
-                                    <?php endforeach; ?>
+        <?php endforeach; ?>
                                 <?php else: ?>
                                     <div class="ui segment">
                                         <p>В курсе пока нет уроков</p>

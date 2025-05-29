@@ -15,24 +15,7 @@ require_once 'config.php';
 </head>
 <body>
 
-<!-- Шапка -->
-<div class="ui menu">
-    <div class="ui container">
-        <a href="index.php" class="header item">CodeSphere</a>
-        <div class="right menu">
-            <?php if (isset($_SESSION['user'])): ?>
-                <!-- Если пользователь авторизован -->
-                <a href="courses.php" class="item">Курсы</a>
-                <a href="profile.php" class="item">Профиль</a>
-                <a href="logout.php" class="item">Выход</a>
-            <?php else: ?>
-                <!-- Если пользователь не авторизован -->
-                <a href="login.php" class="item">Войти</a>
-                <a href="register.php" class="item">Регистрация</a>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
+<?php include 'header.php'; ?>
 
 <!-- Контент главной страницы -->
 <div class="ui container" style="margin-top: 50px;">

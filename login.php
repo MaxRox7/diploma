@@ -54,21 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 </head>
 <body>
-<div class="ui menu">
-    <div class="ui container">
-        <a href="index.php" class="header item">CodeSphere</a>
-        <div class="right menu">
-            <?php if (isset($_SESSION['user'])): ?>
-                <a href="courses.php" class="item">Курсы</a>
-                <a href="profile.php" class="item">Профиль</a>
-                <a href="logout.php" class="item">Выход</a>
-            <?php else: ?>
-                <a href="login.php" class="active item">Войти</a>
-                <a href="register.php" class="item">Регистрация</a>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
+<?php include 'header.php'; ?>
 
 <div class="ui container" style="margin-top: 50px;">
     <h1 class="ui header">Вход в систему</h1>

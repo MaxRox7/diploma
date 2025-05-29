@@ -315,6 +315,7 @@ id_course
 create table feedback (
    id_feedback          SERIAL               not null,
    id_course            INT4                 not null,
+   id_user              INT4                 not null,
    text_feedback        VARCHAR(5000)        null,
    date_feedback        DATE                 not null,
    rate_feedback        VARCHAR(5)           not null,
@@ -333,6 +334,13 @@ id_feedback
 /*==============================================================*/
 create  index has_FK on feedback (
 id_course
+);
+
+/*==============================================================*/
+/* Index: feedback_user_FK                                      */
+/*==============================================================*/
+create  index feedback_user_FK on feedback (
+id_user
 );
 
 /*==============================================================*/
@@ -472,6 +480,11 @@ alter table create_passes
 alter table feedback
    add constraint FK_FEEDBACK_HAS_COURSE foreign key (id_course)
       references course (id_course)
+      on delete restrict on update restrict;
+
+alter table feedback
+   add constraint FK_FEEDBACK_USER foreign key (id_user)
+      references users (id_user)
       on delete restrict on update restrict;
 
 alter table lessons

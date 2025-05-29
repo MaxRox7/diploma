@@ -2,24 +2,54 @@
 require_once 'config.php';
 redirect_unauthenticated();
 
+$error = '';
+
 try {
     $pdo = get_db_connection();
     
-    // Получаем все курсы из базы данных
-    $stmt = $pdo->query("
+    // Добавляем поиск
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+    $search_condition = '';
+    $params = [];
+    
+    if (!empty($search)) {
+        $search_condition = "AND (
+            c.name_course ILIKE ? OR 
+            c.desc_course ILIKE ? OR 
+            c.tags_course ILIKE ?
+        )";
+        $search_param = "%{$search}%";
+        $params = [$search_param, $search_param, $search_param];
+    }
+    
+    // Получаем курсы с учетом поиска
+    $stmt = $pdo->prepare("
         SELECT c.*, 
                COUNT(DISTINCT cp.id_user) as students_count,
-               COUNT(DISTINCT l.id_lesson) as lessons_count
+               COUNT(DISTINCT l.id_lesson) as lessons_count,
+               AVG(CAST(f.rate_feedback AS FLOAT)) as average_rating,
+               COUNT(DISTINCT f.id_feedback) as feedback_count,
+               EXISTS(
+                   SELECT 1 
+                   FROM create_passes cp2 
+                   WHERE cp2.id_course = c.id_course 
+                   AND cp2.id_user = ?
+               ) as is_enrolled
         FROM course c
         LEFT JOIN create_passes cp ON c.id_course = cp.id_course
         LEFT JOIN lessons l ON c.id_course = l.id_course
+        LEFT JOIN feedback f ON c.id_course = f.id_course
+        WHERE 1=1 " . $search_condition . "
         GROUP BY c.id_course
         ORDER BY c.id_course DESC
     ");
+    
+    $execute_params = array_merge([$_SESSION['user']['id_user']], $params);
+    $stmt->execute($execute_params);
     $courses = $stmt->fetchAll();
-
+    
 } catch (PDOException $e) {
-    die('Ошибка при получении курсов: ' . $e->getMessage());
+    $error = 'Ошибка базы данных: ' . $e->getMessage();
 }
 ?>
 <!DOCTYPE html>
@@ -28,88 +58,106 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Курсы - CodeSphere</title>
-    <!-- Подключение Semantic UI -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 </head>
 <body>
-<div class="ui menu">
-    <div class="ui container">
-        <a href="index.php" class="header item">CodeSphere</a>
-        <div class="right menu">
-            <?php if (isset($_SESSION['user'])): ?>
-                <!-- Если пользователь авторизован -->
-                <a href="courses.php" class="active item">Курсы</a>
-                <a href="profile.php" class="item">Профиль</a>
-                <a href="logout.php" class="item">Выход</a>
-            <?php else: ?>
-                <!-- Если пользователь не авторизован -->
-                <a href="login.php" class="item">Войти</a>
-                <a href="register.php" class="item">Регистрация</a>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
+
+<?php include 'header.php'; ?>
+
 <div class="ui container" style="margin-top: 50px;">
-    <div class="ui grid">
-        <div class="sixteen wide column">
-            <h1 class="ui header">Доступные курсы</h1>
-            
-            <?php if (is_admin()): ?>
-                <a href="add_course.php" class="ui primary button">
-                    <i class="plus icon"></i>
-                    Создать новый курс
-                </a>
-            <?php endif; ?>
+    <?php if ($error): ?>
+        <div class="ui error message">
+            <div class="header">Ошибка</div>
+            <p><?= htmlspecialchars($error) ?></p>
         </div>
-    </div>
+    <?php endif; ?>
 
     <?php if (empty($courses)): ?>
         <div class="ui placeholder segment">
             <div class="ui icon header">
-                <i class="book icon"></i>
-                Курсы пока не добавлены
+                <i class="search icon"></i>
+                <?php if (!empty($search)): ?>
+                    По вашему запросу ничего не найдено
+                <?php else: ?>
+                    Пока нет доступных курсов
+                <?php endif; ?>
             </div>
-            <?php if (is_admin()): ?>
-                <a href="add_course.php" class="ui primary button">Создать первый курс</a>
+            <?php if (is_admin() || is_teacher()): ?>
+                <a href="add_course.php" class="ui primary button">
+                    <i class="plus icon"></i>
+                    Добавить курс
+                </a>
             <?php endif; ?>
         </div>
     <?php else: ?>
-        <div class="ui three stackable cards" style="margin-top: 20px;">
+        <?php if (is_admin() || is_teacher()): ?>
+            <div class="ui right aligned container" style="margin-bottom: 20px;">
+                <a href="add_course.php" class="ui primary button">
+                    <i class="plus icon"></i>
+                    Добавить курс
+                </a>
+            </div>
+        <?php endif; ?>
+        
+        <div class="ui three stackable cards">
             <?php foreach ($courses as $course): ?>
-                <div class="ui raised card">
+                <div class="ui card">
                     <div class="content">
-                        <div class="header">
-                            <a href="course.php?id=<?= htmlspecialchars($course['id_course']) ?>">
-                                <?= htmlspecialchars($course['name_course']) ?>
-                            </a>
+                        <div class="header"><?= htmlspecialchars($course['name_course']) ?></div>
+                        <div class="meta">
+                            <?php if ($course['average_rating']): ?>
+                                <div class="ui star rating" data-rating="<?= round($course['average_rating']) ?>" data-max-rating="5"></div>
+                                (<?= number_format($course['average_rating'], 1) ?> / 5.0 - <?= $course['feedback_count'] ?> отзывов)
+                            <?php else: ?>
+                                Нет оценок
+                            <?php endif; ?>
                         </div>
-                        <?php if (!empty($course['desc_course'])): ?>
-                            <div class="description">
-                                <?= htmlspecialchars($course['desc_course']) ?>
-                            </div>
-                        <?php endif; ?>
+                        <div class="description">
+                            <?= nl2br(htmlspecialchars(mb_substr($course['desc_course'], 0, 150) . (mb_strlen($course['desc_course']) > 150 ? '...' : ''))) ?>
+                        </div>
                     </div>
                     <div class="extra content">
-                        <span class="left floated">
-                            <i class="user icon"></i>
-                            <?= $course['students_count'] ?> студент(ов)
-                        </span>
+                        <div class="ui labels">
+                            <?php foreach (explode(',', $course['tags_course']) as $tag): ?>
+                                <?php if (trim($tag)): ?>
+                                    <a href="?search=<?= urlencode(trim($tag)) ?>" class="ui label">
+                                        <?= htmlspecialchars(trim($tag)) ?>
+                                    </a>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <div class="extra content">
                         <span class="right floated">
-                            <i class="book icon"></i>
-                            <?= $course['lessons_count'] ?> урок(ов)
+                            <?= $course['students_count'] ?> студентов
                         </span>
+                        <span>
+                            <i class="book icon"></i>
+                            <?= $course['lessons_count'] ?> уроков
+                        </span>
+                    </div>
+                    <div class="extra content">
+                        <a href="course.php?id=<?= $course['id_course'] ?>" class="ui fluid primary button">
+                            <?php if ($course['is_enrolled']): ?>
+                                Перейти к курсу
+                            <?php else: ?>
+                                Подробнее
+                            <?php endif; ?>
+                        </a>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-
-    <p style="margin-top: 20px;">
-        <a href="logout.php" class="ui red button">Выйти</a>
-    </p>
 </div>
+
+<script>
+$(document).ready(function() {
+    $('.ui.rating').rating('disable');
+});
+</script>
 
 </body>
 </html>
