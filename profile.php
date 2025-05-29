@@ -36,13 +36,20 @@ $user = $_SESSION['user'];  // Получаем данные о пользова
 
 <!-- Контент профиля -->
 <div class="ui container" style="margin-top: 50px;">
-    <h1 class="ui header">Профиль пользователя</h1>
-    
-    <div class="ui segment">
-        <h3>Информация о пользователе:</h3>
-        <p><strong>Логин:</strong> <?= htmlspecialchars($user['username']) ?></p>
-        <p><strong>Роль:</strong> <?= htmlspecialchars($user['role']) ?></p>
-        <!-- Здесь можно добавить больше данных пользователя, если нужно -->
+    <h2 class="ui header">Профиль пользователя</h2>
+    <div class="ui list">
+        <div class="item">
+            <div class="header">Логин:</div>
+            <?= htmlspecialchars($_SESSION['user']['login_user']) ?>
+        </div>
+        <div class="item">
+            <div class="header">Имя:</div>
+            <?= htmlspecialchars($_SESSION['user']['fn_user']) ?>
+        </div>
+        <div class="item">
+            <div class="header">Роль:</div>
+            <?= htmlspecialchars($_SESSION['user']['is_admin'] ? 'Администратор' : 'Студент') ?>
+        </div>
     </div>
 
     <div class="ui segment">

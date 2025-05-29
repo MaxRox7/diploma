@@ -11,6 +11,11 @@ define('DB_PASS', 'pguser');
 define('JWT_SECRET', 'your-secret-key'); // В реальном приложении использовать безопасный ключ
 define('JWT_EXPIRATION', 60 * 60 * 24); // 24 часа
 
+// Константы ролей пользователей
+define('ROLE_ADMIN', 'admin');
+define('ROLE_TEACHER', 'teacher');
+define('ROLE_STUDENT', 'student');
+
 // Database connection
 function get_db_connection() {
     static $pdo = null;
@@ -99,7 +104,49 @@ function redirect_unauthenticated() {
     }
 }
 
+// Функция проверки роли администратора
 function is_admin() {
-    $user = get_authenticated_user();
-    return $user && $user['role_user'] === 'admin';
+    return isset($_SESSION['user']) && $_SESSION['user']['role_user'] === ROLE_ADMIN;
+}
+
+// Функция проверки роли преподавателя
+function is_teacher() {
+    return isset($_SESSION['user']) && $_SESSION['user']['role_user'] === ROLE_TEACHER;
+}
+
+// Функция проверки роли студента
+function is_student() {
+    return isset($_SESSION['user']) && $_SESSION['user']['role_user'] === ROLE_STUDENT;
+}
+
+// Функция проверки, является ли пользователь создателем курса
+function is_course_creator($pdo, $course_id, $user_id) {
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM create_passes 
+        WHERE id_course = ? AND id_user = ? 
+        AND id_user IN (
+            SELECT id_user 
+            FROM users 
+            WHERE role_user IN (?, ?)
+        )
+    ");
+    $stmt->execute([$course_id, $user_id, ROLE_ADMIN, ROLE_TEACHER]);
+    return $stmt->fetchColumn() > 0;
+}
+
+// Функция проверки, записан ли студент на курс
+function is_enrolled_student($pdo, $course_id, $user_id) {
+    $stmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM create_passes 
+        WHERE id_course = ? AND id_user = ? 
+        AND id_user IN (
+            SELECT id_user 
+            FROM users 
+            WHERE role_user = ?
+        )
+    ");
+    $stmt->execute([$course_id, $user_id, ROLE_STUDENT]);
+    return $stmt->fetchColumn() > 0;
 }

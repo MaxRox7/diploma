@@ -1,4 +1,3 @@
-
 /*==============================================================*/
 /* Table: Answer_options                                        */
 /*==============================================================*/
@@ -187,6 +186,7 @@ create table Steps (
    id_lesson            INT4                 not null,
    number_steps         VARCHAR(255)         not null,
    status_step          VARCHAR(255)         not null,
+   type_step           VARCHAR(50)          not null,
    constraint PK_STEPS primary key (id_step)
 );
 
