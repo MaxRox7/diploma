@@ -1,7 +1,7 @@
 <?php
 require_once 'config.php';
 redirect_unauthenticated();
-
+asd
 if (!is_admin()) {
     header('Location: courses.php');
     exit;

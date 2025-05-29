@@ -33,5 +33,10 @@
         "username": "asada",
         "password_hash": "$2y$10$bbzy\/Z2gnlBOzl5LJ3\/Gtu8gi\/1MN7wWstU1OgGaqgrZfBS6qgdxi",
         "role": "user"
+    },
+    {
+        "username": "maxim",
+        "password_hash": "$2y$12$ondRclvNUwrl2GfCxUEYvOanElF1brb.afqHRIg.dczcrBcrHv2M6",
+        "role": "user"
     }
 ]

@@ -1,32 +1,95 @@
 <?php
 session_start();
 
-define('USERS_JSON', 'data/users.json');
-define('COURSES_JSON', 'data/courses.json');
+// Database configuration
+define('DB_HOST', 'postgres');
+define('DB_NAME', 'diploma');
+define('DB_USER', 'pguser');
+define('DB_PASS', 'pguser');
 
-// Функции для работы с пользователями
-function get_users() {
-    return file_exists(USERS_JSON) ? 
-        json_decode(file_get_contents(USERS_JSON), true) : [];
+// JWT configuration
+define('JWT_SECRET', 'your-secret-key'); // В реальном приложении использовать безопасный ключ
+define('JWT_EXPIRATION', 60 * 60 * 24); // 24 часа
+
+// Database connection
+function get_db_connection() {
+    static $pdo = null;
+    if ($pdo === null) {
+        try {
+            $pdo = new PDO(
+                "pgsql:host=" . DB_HOST . ";dbname=" . DB_NAME,
+                DB_USER,
+                DB_PASS
+            );
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            die('Connection failed: ' . $e->getMessage());
+        }
+    }
+    return $pdo;
 }
 
-function save_users($users) {
-    file_put_contents(USERS_JSON, json_encode($users, JSON_PRETTY_PRINT));
+// JWT functions
+function generate_jwt($payload, $secret = JWT_SECRET) {
+    $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+    $header = base64_encode($header);
+    
+    $payload = json_encode($payload);
+    $payload = base64_encode($payload);
+    
+    $signature = hash_hmac('sha256', "$header.$payload", $secret, true);
+    $signature = base64_encode($signature);
+    
+    return "$header.$payload.$signature";
 }
 
-// Функции для работы с курсами
-function get_courses() {
-    return file_exists(COURSES_JSON) ? 
-        json_decode(file_get_contents(COURSES_JSON), true) : [];
+function verify_jwt($token, $secret = JWT_SECRET) {
+    $parts = explode('.', $token);
+    if (count($parts) !== 3) {
+        return false;
+    }
+
+    list($header, $payload, $signature) = $parts;
+
+    $valid_signature = base64_encode(
+        hash_hmac('sha256', "$header.$payload", $secret, true)
+    );
+
+    if ($signature !== $valid_signature) {
+        return false;
+    }
+
+    $payload = json_decode(base64_decode($payload), true);
+    
+    if (!isset($payload['exp']) || $payload['exp'] < time()) {
+        return false;
+    }
+
+    return $payload;
 }
 
-function save_courses($courses) {
-    file_put_contents(COURSES_JSON, json_encode($courses, JSON_PRETTY_PRINT));
-}
-
-// Проверки авторизации
+// Authentication functions
 function is_authenticated() {
-    return isset($_SESSION['user']);
+    if (!isset($_SESSION['jwt'])) {
+        return false;
+    }
+
+    $payload = verify_jwt($_SESSION['jwt']);
+    if (!$payload) {
+        unset($_SESSION['jwt']);
+        unset($_SESSION['user']);
+        return false;
+    }
+
+    return true;
+}
+
+function get_authenticated_user() {
+    if (!is_authenticated()) {
+        return null;
+    }
+    return $_SESSION['user'] ?? null;
 }
 
 function redirect_unauthenticated() {
@@ -37,6 +100,6 @@ function redirect_unauthenticated() {
 }
 
 function is_admin() {
-    return is_authenticated() && $_SESSION['user']['role'] === 'admin';
+    $user = get_authenticated_user();
+    return $user && $user['role_user'] === 'admin';
 }
-?>
