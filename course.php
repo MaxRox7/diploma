@@ -92,6 +92,16 @@ try {
             $completed_steps += $lesson['completed_steps'];
         }
         $progress_percentage = $total_steps > 0 ? round(($completed_steps / $total_steps) * 100) : 0;
+
+        // Обновляем дату завершения курса, если достигнут 100% прогресс
+        if ($progress_percentage == 100) {
+            $stmt = $pdo->prepare("
+                UPDATE create_passes 
+                SET date_complete = CURRENT_TIMESTAMP 
+                WHERE id_course = ? AND id_user = ? AND date_complete IS NULL
+            ");
+            $stmt->execute([$course_id, $user_id]);
+        }
     }
     
     // Получаем отзывы
@@ -124,8 +134,8 @@ try {
             if ($_POST['action'] === 'enroll' && is_student()) {
                 try {
                     $stmt = $pdo->prepare("
-                        INSERT INTO create_passes (id_course, id_user)
-                        VALUES (?, ?)
+                        INSERT INTO create_passes (id_course, id_user, date_complete)
+                        VALUES (?, ?, NULL)
                     ");
                     $stmt->execute([$course_id, $user_id]);
                     $success = 'Вы успешно записались на курс';

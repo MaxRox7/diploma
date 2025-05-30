@@ -56,8 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Добавляем создателя курса в таблицу create_passes
             $stmt = $pdo->prepare("
-                INSERT INTO create_passes (id_course, id_user)
-                VALUES (?, ?)
+                INSERT INTO create_passes (id_course, id_user, is_creator, date_complete)
+                VALUES (?, ?, true, NULL)
             ");
             
             $stmt->execute([$course_id, $_SESSION['user']['id_user']]);
