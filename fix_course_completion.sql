@@ -1,4 +1,8 @@
--- Сначала обновим все записи, где date_complete установлен автоматически при записи на курс
+-- Сначала добавим значение по умолчанию NULL для поля date_complete
+ALTER TABLE create_passes 
+ALTER COLUMN date_complete SET DEFAULT NULL;
+
+-- Обновим все записи, где date_complete мог быть установлен неправильно
 UPDATE create_passes 
 SET date_complete = NULL 
 WHERE date_complete IS NOT NULL 
@@ -8,7 +12,7 @@ AND id_user IN (
     WHERE role_user = 'student'
 )
 AND NOT EXISTS (
-    -- Проверяем, действительно ли студент завершил все шаги
+    -- Проверяем, действительно ли студент завершил все шаги в курсе
     SELECT 1 
     FROM lessons l
     JOIN Steps s ON l.id_lesson = s.id_lesson
@@ -33,4 +37,4 @@ AND NOT EXISTS (
 
 -- Добавим ограничение, чтобы date_complete не мог быть установлен по умолчанию
 ALTER TABLE create_passes 
-ALTER COLUMN date_complete DROP DEFAULT; 
+ALTER COLUMN date_complete DROP DEFAULT;

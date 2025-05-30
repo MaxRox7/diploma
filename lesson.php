@@ -60,7 +60,11 @@ try {
                m.path_matial as file_path,
                t.id_test,
                CASE 
-                   WHEN m.id_material IS NOT NULL AND s.status_step = 'completed' THEN true
+                   WHEN m.id_material IS NOT NULL AND EXISTS(
+                       SELECT 1 FROM user_material_progress ump
+                       WHERE ump.id_step = s.id_step
+                       AND ump.id_user = ?
+                   ) THEN true
                    WHEN t.id_test IS NOT NULL AND EXISTS(
                        SELECT 1 
                        FROM Results r 
@@ -77,7 +81,7 @@ try {
         WHERE s.id_lesson = ?
         ORDER BY s.id_step
     ");
-    $stmt->execute([$user_id, $lesson_id]);
+    $stmt->execute([$user_id, $user_id, $lesson_id]);
     $steps = $stmt->fetchAll();
     
     // Подсчитываем прогресс
@@ -102,13 +106,13 @@ try {
         
         if ($valid_step) {
             try {
-                // Обновляем статус шага
+                // Добавляем запись в таблицу прогресса пользователя
                 $stmt = $pdo->prepare("
-                    UPDATE Steps 
-                    SET status_step = 'completed' 
-                    WHERE id_step = ?
+                    INSERT INTO user_material_progress (id_user, id_step)
+                    VALUES (?, ?)
+                    ON CONFLICT (id_user, id_step) DO NOTHING
                 ");
-                $stmt->execute([$step_id]);
+                $stmt->execute([$user_id, $step_id]);
                 
                 $success = "Материал отмечен как прочитанный";
                 
@@ -118,7 +122,11 @@ try {
                            m.path_matial as file_path,
                            t.id_test,
                            CASE 
-                               WHEN m.id_material IS NOT NULL AND s.status_step = 'completed' THEN true
+                               WHEN m.id_material IS NOT NULL AND EXISTS(
+                                   SELECT 1 FROM user_material_progress ump
+                                   WHERE ump.id_step = s.id_step
+                                   AND ump.id_user = ?
+                               ) THEN true
                                WHEN t.id_test IS NOT NULL AND EXISTS(
                                    SELECT 1 
                                    FROM Results r 
@@ -135,7 +143,7 @@ try {
                     WHERE s.id_lesson = ?
                     ORDER BY s.id_step
                 ");
-                $stmt->execute([$user_id, $lesson_id]);
+                $stmt->execute([$user_id, $user_id, $lesson_id]);
                 $steps = $stmt->fetchAll();
                 
                 // Обновляем прогресс

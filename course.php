@@ -63,8 +63,9 @@ try {
                        EXISTS(
                            SELECT 1 FROM Material m 
                            JOIN Steps s2 ON m.id_step = s2.id_step 
+                           JOIN user_material_progress ump ON s2.id_step = ump.id_step
                            WHERE s2.id_step = s.id_step
-                           AND s2.status_step = 'completed'
+                           AND ump.id_user = ?
                        )
                        OR
                        EXISTS(
@@ -83,7 +84,7 @@ try {
             GROUP BY l.id_lesson
             ORDER BY l.id_lesson
         ");
-        $stmt->execute([$user_id, $course_id]);
+        $stmt->execute([$user_id, $user_id, $course_id]);
         $lessons = $stmt->fetchAll();
         
         // Подсчитываем общий прогресс
