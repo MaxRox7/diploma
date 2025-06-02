@@ -18,22 +18,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($password_user, $user['password_user'])) {
-                // Создаем JWT токен
-                $payload = [
-                    'user_id' => $user['id_user'],
-                    'login' => $user['login_user'],
-                    'role' => $user['role_user'],
-                    'exp' => time() + JWT_EXPIRATION
-                ];
-                
-                $jwt = generate_jwt($payload);
-                
-                // Сохраняем токен и данные пользователя в сессии
-                $_SESSION['jwt'] = $jwt;
-                $_SESSION['user'] = $user;
-                
-                header('Location: courses.php');
-                exit;
+                if ($user['status'] !== 'approved') {
+                    $error = 'Ваша заявка ещё не одобрена администратором.';
+                } else {
+                    // Создаем JWT токен
+                    $payload = [
+                        'user_id' => $user['id_user'],
+                        'login' => $user['login_user'],
+                        'role' => $user['role_user'],
+                        'exp' => time() + JWT_EXPIRATION
+                    ];
+                    
+                    $jwt = generate_jwt($payload);
+                    
+                    // Сохраняем токен и данные пользователя в сессии
+                    $_SESSION['jwt'] = $jwt;
+                    $_SESSION['user'] = $user;
+                    
+                    header('Location: courses.php');
+                    exit;
+                }
             } else {
                 $error = 'Неверный логин или пароль';
             }

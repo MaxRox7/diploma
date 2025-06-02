@@ -26,4 +26,11 @@ CREATE INDEX idx_test_attempts_user ON test_attempts(id_user);
 CREATE INDEX idx_test_attempts_test ON test_attempts(id_test);
 CREATE INDEX idx_test_answers_attempt ON test_answers(id_attempt);
 
-ALTER TABLE test_answers ADD COLUMN IF NOT EXISTS answer_text text; 
+ALTER TABLE test_answers ADD COLUMN IF NOT EXISTS answer_text text;
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'pending';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS moderation_comment TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS student_card VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS passport_file VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS diploma_file VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS criminal_record_file VARCHAR(255); 

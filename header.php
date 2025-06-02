@@ -41,6 +41,13 @@ function get_avatar_path($user_id) {
                     <?php endif; ?>
                 <?php endif; ?>
                 
+                <?php if (is_admin()): ?>
+                    <a href="moderation.php" class="item <?= basename($_SERVER['PHP_SELF']) === 'moderation.php' ? 'active' : '' ?>">
+                        <i class="users icon"></i>
+                        Заявки
+                    </a>
+                <?php endif; ?>
+                
                 <div class="ui dropdown item">
                     <img class="ui avatar image" src="<?= get_avatar_path($_SESSION['user']['id_user']) ?>">
                     <span style="margin-left: 5px;"><?= htmlspecialchars($_SESSION['user']['fn_user']) ?></span>

@@ -150,3 +150,43 @@ function is_enrolled_student($pdo, $course_id, $user_id) {
     $stmt->execute([$course_id, $user_id, ROLE_STUDENT]);
     return $stmt->fetchColumn() > 0;
 }
+
+// Функция отправки email через PHPMailer
+function send_email_smtp($to, $subject, $body_html) {
+    require_once __DIR__ . '/vendor/autoload.php';
+    $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'ssl://smtp.gmail.com';
+        $mail->Port = 465;
+        $mail->SMTPAuth = true;
+        $mail->Username = 'maximwork19@gmail.com'; // заменить на свой
+        $mail->Password = 'uvrwkhhpxolxchlg'; // заменить на свой app password
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+        $mail->setFrom('maximwork19@gmail.com', 'CodeSphere');
+        $mail->addAddress($to);
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = $body_html;
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        // Можно залогировать $mail->ErrorInfo
+        return false;
+    }
+}
+
+// Функция отправки email
+function send_email($to, $subject, $message) {
+    $headers = "Content-type: text/html; charset=utf-8\r\n";
+    $headers .= "From: CodeSphere <noreply@codesphere.local>\r\n";
+    return mail($to, $subject, $message, $headers);
+}
