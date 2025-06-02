@@ -170,30 +170,61 @@ if ($is_finish || $question_index === -1) {
     }
     // Очищаем сессию
     unset($_SESSION['test_answers'][$test_id]);
-    // Показываем отчет
-    echo '<div class="ui success message"><div class="header">Тест завершён!</div>';
-    echo '<p style="font-size:1.2em;">Ваш результат: <b>' . $score . ' из ' . $max_score . '</b></p>';
-    echo '</div>';
-    echo '<div class="ui segment"><h4>Разбор вопросов:</h4>';
-    foreach ($details as $i => $d) {
-        $color = $d['is_right'] ? 'green' : ($d['is_right'] === false ? 'red' : 'grey');
-        echo '<div class="ui ' . $color . ' message">';
-        echo '<b>Вопрос ' . ($i+1) . ':</b> ' . htmlspecialchars($d['question']) . '<br>';
-        if ($d['type'] === 'single' || $d['type'] === 'multi') {
-            echo 'Ваш ответ: <b>' . htmlspecialchars(is_array($d['user_answer']) ? implode(", ", $d['user_answer']) : $d['user_answer']) . '</b><br>';
-            echo 'Правильный ответ: <b>' . htmlspecialchars($d['right']) . '</b><br>';
-        } elseif ($d['type'] === 'match') {
-            echo 'Ваш ответ: <b>' . htmlspecialchars(json_encode($d['user_answer'], JSON_UNESCAPED_UNICODE)) . '</b><br>';
-        } elseif ($d['type'] === 'code') {
-            echo 'Ваш код отправлен на проверку.';
-        }
-        echo $d['is_right'] === true ? '<span style="color:green;">Верно!</span>' : ($d['is_right'] === false ? '<span style="color:red;">Неверно.</span>' : 'Без автоматической проверки.');
-        echo '</div>';
-    }
-    echo '</div>';
-    echo '<a href="lesson.php?id=' . htmlspecialchars($_GET['lesson_id'] ?? '') . '" class="ui button"><i class="arrow left icon"></i>Назад к уроку</a>';
-    exit;
-}
+    // Показываем красивую страницу результата
+    ?><!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Результат теста</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    </head>
+    <body>
+    <div class="ui container" style="margin-top: 50px; max-width: 700px;">
+        <div class="ui raised very padded segment">
+            <h2 class="ui center aligned header">
+                <i class="check circle outline green icon"></i>
+                Тест завершён!
+            </h2>
+            <div class="ui center aligned huge header" style="margin-top: 20px;">
+                Ваш результат: <span class="ui green text"><b><?= $score ?> / <?= $max_score ?></b></span>
+            </div>
+            <div class="ui divider"></div>
+            <h4 class="ui header">Разбор вопросов:</h4>
+            <div class="ui styled fluid accordion">
+                <?php foreach ($details as $i => $d): ?>
+                    <div class="title<?= $i === 0 ? ' active' : '' ?>">
+                        <i class="dropdown icon"></i>
+                        Вопрос <?= $i+1 ?>: <?= htmlspecialchars(mb_strimwidth($d['question'], 0, 60, '...')) ?>
+                        <span class="ui <?= $d['is_right'] ? 'green' : 'red' ?> text" style="margin-left: 10px;">
+                            <?= $d['is_right'] ? 'Верно' : 'Неверно' ?>
+                        </span>
+                    </div>
+                    <div class="content<?= $i === 0 ? ' active' : '' ?>">
+                        <p><b>Вопрос:</b> <?= htmlspecialchars($d['question']) ?></p>
+                        <?php if ($d['type'] === 'single' || $d['type'] === 'multi'): ?>
+                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(is_array($d['user_answer']) ? implode(", ", $d['user_answer']) : $d['user_answer']) ?></p>
+                            <p><b>Правильный ответ:</b> <?= htmlspecialchars($d['right']) ?></p>
+                        <?php elseif ($d['type'] === 'match'): ?>
+                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(json_encode($d['user_answer'], JSON_UNESCAPED_UNICODE)) ?></p>
+                        <?php elseif ($d['type'] === 'code'): ?>
+                            <p>Ваш код отправлен на проверку.</p>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="ui divider"></div>
+            <a href="lesson.php?id=<?= htmlspecialchars($_GET['lesson_id'] ?? '') ?>" class="ui big button"><i class="arrow left icon"></i>Назад к уроку</a>
+        </div>
+    </div>
+    <script>
+    $(function(){ $('.ui.accordion').accordion(); });
+    </script>
+    </body>
+    </html>
+    <?php exit; }
 
 // Получаем текущий вопрос
 $question = $questions[$question_index];

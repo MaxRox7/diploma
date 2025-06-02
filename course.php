@@ -71,11 +71,10 @@ try {
                        EXISTS(
                            SELECT 1 FROM Tests t 
                            JOIN Steps s2 ON t.id_step = s2.id_step 
-                           JOIN Results r ON t.id_test = r.id_test
-                           JOIN Answers a ON r.id_answer = a.id_answer
+                           JOIN test_attempts ta ON t.id_test = ta.id_test
                            WHERE s2.id_step = s.id_step
-                           AND a.id_user = ?
-                           AND CAST(r.score_result AS INTEGER) >= 60
+                           AND ta.id_user = ?
+                           AND ta.status = 'completed'
                        )
                    ) THEN s.id_step END) as completed_steps
             FROM lessons l

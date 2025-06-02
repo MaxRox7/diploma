@@ -66,12 +66,10 @@ try {
                        AND ump.id_user = ?
                    ) THEN true
                    WHEN t.id_test IS NOT NULL AND EXISTS(
-                       SELECT 1 
-                       FROM Results r 
-                       JOIN Answers a ON r.id_answer = a.id_answer
-                       WHERE r.id_test = t.id_test 
-                       AND a.id_user = ?
-                       AND CAST(r.score_result AS INTEGER) >= 60
+                       SELECT 1 FROM test_attempts ta
+                       WHERE ta.id_test = t.id_test 
+                       AND ta.id_user = ?
+                       AND ta.status = 'completed'
                    ) THEN true
                    ELSE false
                END as is_completed
@@ -128,12 +126,10 @@ try {
                                    AND ump.id_user = ?
                                ) THEN true
                                WHEN t.id_test IS NOT NULL AND EXISTS(
-                                   SELECT 1 
-                                   FROM Results r 
-                                   JOIN Answers a ON r.id_answer = a.id_answer
-                                   WHERE r.id_test = t.id_test 
-                                   AND a.id_user = ?
-                                   AND CAST(r.score_result AS INTEGER) >= 60
+                                   SELECT 1 FROM test_attempts ta
+                                   WHERE ta.id_test = t.id_test 
+                                   AND ta.id_user = ?
+                                   AND ta.status = 'completed'
                                ) THEN true
                                ELSE false
                            END as is_completed
