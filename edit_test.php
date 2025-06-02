@@ -56,45 +56,80 @@ try {
             // Добавление нового вопроса
             if ($_POST['action'] === 'add_question') {
                 $question_text = trim($_POST['question_text']);
-                $options = array_filter($_POST['options'], 'strlen');
-                $correct_option = (int)$_POST['correct_option'];
-                
+                $type_question = $_POST['type_question'] ?? 'single';
                 if (empty($question_text)) {
                     $error = 'Введите текст вопроса';
-                } elseif (count($options) < 2) {
-                    $error = 'Добавьте как минимум два варианта ответа';
-                } elseif ($correct_option >= count($options)) {
-                    $error = 'Выберите правильный вариант ответа';
                 } else {
                     try {
                         $pdo->beginTransaction();
-                        
                         // Добавляем вопрос
                         $stmt = $pdo->prepare("
-                            INSERT INTO Questions (id_test, text_question)
-                            VALUES (?, ?)
+                            INSERT INTO Questions (id_test, text_question, answer_question, type_question)
+                            VALUES (?, ?, '', ?)
                             RETURNING id_question
                         ");
-                        $stmt->execute([$test_id, $question_text]);
+                        $stmt->execute([$test_id, $question_text, $type_question]);
                         $question_id = $stmt->fetchColumn();
-                        
-                        // Добавляем варианты ответов
-                        $stmt = $pdo->prepare("
-                            INSERT INTO Answer_options (id_question, text_option, is_correct)
-                            VALUES (?, ?, ?)
-                        ");
-                        
-                        foreach ($options as $index => $option) {
-                            $stmt->execute([
-                                $question_id,
-                                $option,
-                                $index === $correct_option ? true : false
-                            ]);
+                        // SINGLE
+                        if ($type_question === 'single') {
+                            $options = array_filter($_POST['options'], 'strlen');
+                            $correct_option = (int)$_POST['correct_option'];
+                            $stmt = $pdo->prepare("
+                                UPDATE Questions SET answer_question = ? WHERE id_question = ?
+                            ");
+                            $stmt->execute([strval($correct_option), $question_id]);
+                            $stmt = $pdo->prepare("
+                                INSERT INTO Answer_options (id_question, text_option)
+                                VALUES (?, ?)
+                            ");
+                            foreach ($options as $option) {
+                                $stmt->execute([
+                                    $question_id,
+                                    $option
+                                ]);
+                            }
                         }
-                        
+                        // MULTI
+                        elseif ($type_question === 'multi') {
+                            $options = array_filter($_POST['options'], 'strlen');
+                            $correct_options = $_POST['correct_options'] ?? [];
+                            $stmt = $pdo->prepare("
+                                UPDATE Questions SET answer_question = ? WHERE id_question = ?
+                            ");
+                            $stmt->execute([implode(',', $correct_options), $question_id]);
+                            $stmt = $pdo->prepare("
+                                INSERT INTO Answer_options (id_question, text_option)
+                                VALUES (?, ?)
+                            ");
+                            foreach ($options as $option) {
+                                $stmt->execute([
+                                    $question_id,
+                                    $option
+                                ]);
+                            }
+                        }
+                        // MATCH
+                        elseif ($type_question === 'match') {
+                            $left = $_POST['match_left'] ?? [];
+                            $right = $_POST['match_right'] ?? [];
+                            $stmt = $pdo->prepare("
+                                INSERT INTO Answer_options (id_question, text_option)
+                                VALUES (?, ?)
+                            ");
+                            for ($i = 0; $i < count($left); $i++) {
+                                $pair = trim($left[$i]) . '||' . trim($right[$i]);
+                                $stmt->execute([
+                                    $question_id,
+                                    $pair
+                                ]);
+                            }
+                        }
+                        // CODE
+                        elseif ($type_question === 'code') {
+                            // Заглушка: только вопрос, без вариантов
+                        }
                         $pdo->commit();
                         $success = 'Вопрос успешно добавлен';
-                        
                         // Перезагружаем список вопросов
                         $stmt = $pdo->prepare("
                             SELECT q.*, 
@@ -105,7 +140,6 @@ try {
                         ");
                         $stmt->execute([$test_id]);
                         $questions = $stmt->fetchAll();
-                        
                     } catch (Exception $e) {
                         $pdo->rollBack();
                         $error = $e->getMessage();
@@ -150,48 +184,82 @@ try {
             elseif ($_POST['action'] === 'edit_question') {
                 $question_id = (int)$_POST['question_id'];
                 $question_text = trim($_POST['question_text']);
-                $options = array_filter($_POST['options'], 'strlen');
-                $correct_option = (int)$_POST['correct_option'];
-                
+                $type_question = $_POST['type_question'] ?? 'single';
                 if (empty($question_text)) {
                     $error = 'Введите текст вопроса';
-                } elseif (count($options) < 2) {
-                    $error = 'Добавьте как минимум два варианта ответа';
-                } elseif ($correct_option >= count($options)) {
-                    $error = 'Выберите правильный вариант ответа';
                 } else {
                     try {
                         $pdo->beginTransaction();
-                        
                         // Обновляем вопрос
                         $stmt = $pdo->prepare("
                             UPDATE Questions 
-                            SET text_question = ?
+                            SET text_question = ?, answer_question = '', type_question = ?
                             WHERE id_question = ? AND id_test = ?
                         ");
-                        $stmt->execute([$question_text, $question_id, $test_id]);
-                        
+                        $stmt->execute([$question_text, $type_question, $question_id, $test_id]);
                         // Удаляем старые варианты ответов
                         $stmt = $pdo->prepare("DELETE FROM Answer_options WHERE id_question = ?");
                         $stmt->execute([$question_id]);
-                        
-                        // Добавляем новые варианты ответов
-                        $stmt = $pdo->prepare("
-                            INSERT INTO Answer_options (id_question, text_option, is_correct)
-                            VALUES (?, ?, ?)
-                        ");
-                        
-                        foreach ($options as $index => $option) {
-                            $stmt->execute([
-                                $question_id,
-                                $option,
-                                $index === $correct_option ? true : false
-                            ]);
+                        // SINGLE
+                        if ($type_question === 'single') {
+                            $options = array_filter($_POST['options'], 'strlen');
+                            $correct_option = (int)$_POST['correct_option'];
+                            $stmt = $pdo->prepare("
+                                UPDATE Questions SET answer_question = ? WHERE id_question = ?
+                            ");
+                            $stmt->execute([strval($correct_option), $question_id]);
+                            $stmt = $pdo->prepare("
+                                INSERT INTO Answer_options (id_question, text_option)
+                                VALUES (?, ?)
+                            ");
+                            foreach ($options as $option) {
+                                $stmt->execute([
+                                    $question_id,
+                                    $option
+                                ]);
+                            }
                         }
-                        
+                        // MULTI
+                        elseif ($type_question === 'multi') {
+                            $options = array_filter($_POST['options'], 'strlen');
+                            $correct_options = $_POST['correct_options'] ?? [];
+                            $stmt = $pdo->prepare("
+                                UPDATE Questions SET answer_question = ? WHERE id_question = ?
+                            ");
+                            $stmt->execute([implode(',', $correct_options), $question_id]);
+                            $stmt = $pdo->prepare("
+                                INSERT INTO Answer_options (id_question, text_option)
+                                VALUES (?, ?)
+                            ");
+                            foreach ($options as $option) {
+                                $stmt->execute([
+                                    $question_id,
+                                    $option
+                                ]);
+                            }
+                        }
+                        // MATCH
+                        elseif ($type_question === 'match') {
+                            $left = $_POST['match_left'] ?? [];
+                            $right = $_POST['match_right'] ?? [];
+                            $stmt = $pdo->prepare("
+                                INSERT INTO Answer_options (id_question, text_option)
+                                VALUES (?, ?)
+                            ");
+                            for ($i = 0; $i < count($left); $i++) {
+                                $pair = trim($left[$i]) . '||' . trim($right[$i]);
+                                $stmt->execute([
+                                    $question_id,
+                                    $pair
+                                ]);
+                            }
+                        }
+                        // CODE
+                        elseif ($type_question === 'code') {
+                            // Только текст вопроса, без вариантов
+                        }
                         $pdo->commit();
                         $success = 'Вопрос успешно обновлен';
-                        
                         // Перезагружаем список вопросов
                         $stmt = $pdo->prepare("
                             SELECT q.*, 
@@ -202,7 +270,6 @@ try {
                         ");
                         $stmt->execute([$test_id]);
                         $questions = $stmt->fetchAll();
-                        
                     } catch (Exception $e) {
                         $pdo->rollBack();
                         $error = $e->getMessage();
@@ -279,38 +346,24 @@ function get_question_options($pdo, $question_id) {
             <!-- Форма добавления вопроса -->
             <div class="ui segment">
                 <h3>Добавить новый вопрос</h3>
-                <form method="post" class="ui form">
+                <form method="post" class="ui form" id="addQuestionForm">
                     <input type="hidden" name="action" value="add_question">
-                    
+                    <div class="field">
+                        <label>Тип вопроса</label>
+                        <select name="type_question" id="type_question" class="ui dropdown" required>
+                            <option value="single">Один правильный ответ</option>
+                            <option value="multi">Несколько правильных ответов</option>
+                            <option value="match">Сопоставление</option>
+                            <option value="code">Вопрос с кодом</option>
+                        </select>
+                    </div>
                     <div class="field">
                         <label>Текст вопроса</label>
                         <textarea name="question_text" rows="2" required></textarea>
                     </div>
-
-                    <div class="fields">
-                        <div class="twelve wide field">
-                            <label>Варианты ответов</label>
-                            <div id="options-container">
-                                <div class="field">
-                                    <input type="text" name="options[]" placeholder="Вариант ответа 1" required>
-                                </div>
-                                <div class="field">
-                                    <input type="text" name="options[]" placeholder="Вариант ответа 2" required>
-                                </div>
-                            </div>
-                            <button type="button" class="ui basic button" onclick="addOption()">
-                                <i class="plus icon"></i> Добавить вариант
-                            </button>
-                        </div>
-                        <div class="four wide field">
-                            <label>Правильный ответ</label>
-                            <select name="correct_option" class="ui dropdown" required>
-                                <option value="0">Вариант 1</option>
-                                <option value="1">Вариант 2</option>
-                            </select>
-                        </div>
+                    <div id="options-block">
+                        <!-- Здесь будут варианты в зависимости от типа -->
                     </div>
-
                     <button type="submit" class="ui primary button">Добавить вопрос</button>
                 </form>
             </div>
@@ -322,58 +375,81 @@ function get_question_options($pdo, $question_id) {
                     <?php foreach ($questions as $index => $question): ?>
                         <div class="title">
                             <i class="dropdown icon"></i>
-                            Вопрос <?= $index + 1 ?>: <?= htmlspecialchars(substr($question['text_question'], 0, 50)) ?>...
+                            Вопрос <?= $index + 1 ?> (<?= htmlspecialchars($question['type_question']) ?>): <?= htmlspecialchars(substr($question['text_question'], 0, 50)) ?>...
                         </div>
                         <div class="content">
                             <form method="post" class="ui form">
                                 <input type="hidden" name="action" value="edit_question">
                                 <input type="hidden" name="question_id" value="<?= $question['id_question'] ?>">
-                                
+                                <input type="hidden" name="type_question" value="<?= htmlspecialchars($question['type_question']) ?>">
                                 <div class="field">
                                     <label>Текст вопроса</label>
                                     <textarea name="question_text" rows="2" required><?= htmlspecialchars($question['text_question']) ?></textarea>
                                 </div>
-
-                                <div class="fields">
-                                    <div class="twelve wide field">
-                                        <label>Варианты ответов</label>
+                                <?php 
+                                $options = get_question_options($pdo, $question['id_question']);
+                                if ($question['type_question'] === 'single'): ?>
+                                    <div class="fields">
+                                        <div class="twelve wide field">
+                                            <label>Варианты ответов</label>
+                                            <div class="options-container">
+                                                <?php foreach ($options as $opt_index => $option): ?>
+                                                    <div class="field">
+                                                        <input type="text" name="options[]" value="<?= htmlspecialchars($option['text_option']) ?>" required>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <button type="button" class="ui basic button" onclick="addOptionToContainer(this)"><i class="plus icon"></i> Добавить вариант</button>
+                                        </div>
+                                        <div class="four wide field">
+                                            <label>Правильный ответ</label>
+                                            <select name="correct_option" class="ui dropdown" required>
+                                                <?php foreach ($options as $opt_index => $option): ?>
+                                                    <option value="<?= $opt_index ?>" <?= ((string)$opt_index === ($question['answer_question'] ?? '')) ? 'selected' : '' ?>>Вариант <?= $opt_index + 1 ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                <?php elseif ($question['type_question'] === 'multi'): ?>
+                                    <div class="field">
+                                        <label>Варианты ответов (отметьте правильные)</label>
                                         <div class="options-container">
-                                            <?php 
-                                            $options = get_question_options($pdo, $question['id_question']);
-                                            foreach ($options as $opt_index => $option): 
-                                            ?>
+                                            <?php foreach ($options as $opt_index => $option): ?>
                                                 <div class="field">
-                                                    <input type="text" 
-                                                           name="options[]" 
-                                                           value="<?= htmlspecialchars($option['text_option']) ?>" 
-                                                           required>
+                                                    <input type="text" name="options[]" value="<?= htmlspecialchars($option['text_option']) ?>" required>
+                                                    <input type="checkbox" name="correct_options[]" value="<?= $opt_index ?>" <?= in_array((string)$opt_index, explode(',', $question['answer_question'] ?? '')) ? 'checked' : '' ?>> Правильный
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
-                                        <button type="button" class="ui basic button" onclick="addOptionToContainer(this)">
-                                            <i class="plus icon"></i> Добавить вариант
-                                        </button>
+                                        <button type="button" class="ui basic button" onclick="addOptionMultiToContainer(this)"><i class="plus icon"></i> Добавить вариант</button>
                                     </div>
-                                    <div class="four wide field">
-                                        <label>Правильный ответ</label>
-                                        <select name="correct_option" class="ui dropdown" required>
-                                            <?php foreach ($options as $opt_index => $option): ?>
-                                                <option value="<?= $opt_index ?>" <?= $option['is_correct'] ? 'selected' : '' ?>>
-                                                    Вариант <?= $opt_index + 1 ?>
-                                                </option>
+                                <?php elseif ($question['type_question'] === 'match'): ?>
+                                    <div class="field">
+                                        <label>Пары для сопоставления (левая и правая части)</label>
+                                        <div class="match-container">
+                                            <?php foreach ($options as $opt_index => $option): 
+                                                $pair = explode('||', $option['text_option']);
+                                                $left = $pair[0] ?? '';
+                                                $right = $pair[1] ?? '';
+                                            ?>
+                                                <div class="fields">
+                                                    <div class="eight wide field">
+                                                        <input type="text" name="match_left[]" value="<?= htmlspecialchars($left) ?>" required>
+                                                    </div>
+                                                    <div class="eight wide field">
+                                                        <input type="text" name="match_right[]" value="<?= htmlspecialchars($right) ?>" required>
+                                                    </div>
+                                                </div>
                                             <?php endforeach; ?>
-                                        </select>
+                                        </div>
+                                        <button type="button" class="ui basic button" onclick="addMatchPairToContainer(this)"><i class="plus icon"></i> Добавить пару</button>
                                     </div>
-                                </div>
-
+                                <?php elseif ($question['type_question'] === 'code'): ?>
+                                    <div class="ui message">Редактирование вариантов для задания с кодом не требуется.</div>
+                                <?php endif; ?>
                                 <div class="ui buttons">
                                     <button type="submit" class="ui primary button">Сохранить изменения</button>
-                                    <button type="submit" 
-                                            class="ui negative button"
-                                            onclick="if(!confirm('Вы уверены, что хотите удалить этот вопрос?')) return false;
-                                                     this.form.action.value='delete_question';">
-                                        Удалить вопрос
-                                    </button>
+                                    <button type="submit" class="ui negative button" onclick="if(!confirm('Вы уверены, что хотите удалить этот вопрос?')) return false; this.form.action.value='delete_question';">Удалить вопрос</button>
                                 </div>
                             </form>
                         </div>
@@ -390,70 +466,120 @@ $(document).ready(function() {
     $('.ui.dropdown').dropdown();
 });
 
+// JS для динамического отображения вариантов
+function renderOptions(type) {
+    const block = document.getElementById('options-block');
+    if (type === 'single') {
+        block.innerHTML = `
+            <div class="fields">
+                <div class="twelve wide field">
+                    <label>Варианты ответов</label>
+                    <div id="options-container">
+                        <div class="field">
+                            <input type="text" name="options[]" placeholder="Вариант ответа 1" required>
+                        </div>
+                        <div class="field">
+                            <input type="text" name="options[]" placeholder="Вариант ответа 2" required>
+                        </div>
+                    </div>
+                    <button type="button" class="ui basic button" onclick="addOption()">
+                        <i class="plus icon"></i> Добавить вариант
+                    </button>
+                </div>
+                <div class="four wide field">
+                    <label>Правильный ответ</label>
+                    <select name="correct_option" class="ui dropdown" required>
+                        <option value="0">Вариант 1</option>
+                        <option value="1">Вариант 2</option>
+                    </select>
+                </div>
+            </div>
+        `;
+    } else if (type === 'multi') {
+        block.innerHTML = `
+            <div class="field">
+                <label>Варианты ответов (отметьте правильные)</label>
+                <div id="options-container">
+                    <div class="field">
+                        <input type="text" name="options[]" placeholder="Вариант ответа 1" required>
+                        <input type="checkbox" name="correct_options[]" value="0"> Правильный
+                    </div>
+                    <div class="field">
+                        <input type="text" name="options[]" placeholder="Вариант ответа 2" required>
+                        <input type="checkbox" name="correct_options[]" value="1"> Правильный
+                    </div>
+                </div>
+                <button type="button" class="ui basic button" onclick="addOptionMulti()">
+                    <i class="plus icon"></i> Добавить вариант
+                </button>
+            </div>
+        `;
+    } else if (type === 'match') {
+        block.innerHTML = `
+            <div class="field">
+                <label>Пары для сопоставления (левая и правая части)</label>
+                <div id="match-container">
+                    <div class="fields">
+                        <div class="eight wide field">
+                            <input type="text" name="match_left[]" placeholder="Левая часть 1" required>
+                        </div>
+                        <div class="eight wide field">
+                            <input type="text" name="match_right[]" placeholder="Правая часть 1" required>
+                        </div>
+                    </div>
+                    <div class="fields">
+                        <div class="eight wide field">
+                            <input type="text" name="match_left[]" placeholder="Левая часть 2" required>
+                        </div>
+                        <div class="eight wide field">
+                            <input type="text" name="match_right[]" placeholder="Правая часть 2" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="ui basic button" onclick="addMatchPair()">
+                    <i class="plus icon"></i> Добавить пару
+                </button>
+            </div>
+        `;
+    } else if (type === 'code') {
+        block.innerHTML = `<div class="ui message">Поля для кода появятся позже. Сейчас только текст вопроса.</div>`;
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    renderOptions('single');
+    document.getElementById('type_question').addEventListener('change', function() {
+        renderOptions(this.value);
+    });
+});
 function addOption() {
     const container = document.getElementById('options-container');
     const optionCount = container.children.length;
-    
     const newField = document.createElement('div');
     newField.className = 'field';
-    newField.innerHTML = `
-        <div class="ui action input">
-            <input type="text" name="options[]" placeholder="Вариант ответа ${optionCount + 1}" required>
-            <button type="button" class="ui icon button" onclick="removeOption(this)">
-                <i class="trash icon"></i>
-            </button>
-        </div>
-    `;
-    
+    newField.innerHTML = `<input type="text" name="options[]" placeholder="Вариант ответа ${optionCount + 1}" required>`;
     container.appendChild(newField);
     updateCorrectOptions();
 }
-
-function addOptionToContainer(button) {
-    const container = button.previousElementSibling;
+function addOptionMulti() {
+    const container = document.getElementById('options-container');
     const optionCount = container.children.length;
-    
     const newField = document.createElement('div');
     newField.className = 'field';
-    newField.innerHTML = `
-        <div class="ui action input">
-            <input type="text" name="options[]" placeholder="Вариант ответа ${optionCount + 1}" required>
-            <button type="button" class="ui icon button" onclick="removeOption(this)">
-                <i class="trash icon"></i>
-            </button>
-        </div>
-    `;
-    
+    newField.innerHTML = `<input type="text" name="options[]" placeholder="Вариант ответа ${optionCount + 1}" required> <input type="checkbox" name="correct_options[]" value="${optionCount}"> Правильный`;
     container.appendChild(newField);
-    updateCorrectOptionsInForm(button.closest('form'));
 }
-
-function removeOption(button) {
-    const field = button.closest('.field');
-    const form = field.closest('form');
-    field.remove();
-    updateCorrectOptionsInForm(form);
+function addMatchPair() {
+    const container = document.getElementById('match-container');
+    const pairCount = container.children.length / 2 + 1;
+    const newFields = document.createElement('div');
+    newFields.className = 'fields';
+    newFields.innerHTML = `<div class="eight wide field"><input type="text" name="match_left[]" placeholder="Левая часть ${pairCount}" required></div><div class="eight wide field"><input type="text" name="match_right[]" placeholder="Правая часть ${pairCount}" required></div>`;
+    container.appendChild(newFields);
 }
-
 function updateCorrectOptions() {
     const container = document.getElementById('options-container');
     const select = document.querySelector('select[name="correct_option"]');
     const optionCount = container.children.length;
-    
-    select.innerHTML = '';
-    for (let i = 0; i < optionCount; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = `Вариант ${i + 1}`;
-        select.appendChild(option);
-    }
-}
-
-function updateCorrectOptionsInForm(form) {
-    const container = form.querySelector('.options-container');
-    const select = form.querySelector('select[name="correct_option"]');
-    const optionCount = container.children.length;
-    
     select.innerHTML = '';
     for (let i = 0; i < optionCount; i++) {
         const option = document.createElement('option');

@@ -380,32 +380,10 @@ function get_question_options($pdo, $question_id) {
                                 <?php endif; ?>
                             <?php elseif ($step['type_step'] === 'test' && $step['id_test']): ?>
                                 <?php if (!$step['is_completed']): ?>
-                                    <?php
-                                    $questions = get_test_questions($pdo, $step['id_test']);
-                                    if (!empty($questions)):
-                                    ?>
-                                        <form class="ui form" method="post">
-                                            <input type="hidden" name="test_id" value="<?= $step['id_test'] ?>">
-                                            
-                                            <?php foreach ($questions as $question): ?>
-                                                <div class="field">
-                                                    <label><?= htmlspecialchars($question['text_question']) ?></label>
-                                                    <?php
-                                                    $options = get_question_options($pdo, $question['id_question']);
-                                                    foreach ($options as $option):
-                                                    ?>
-                                                        <div class="field">
-                                                            <div class="ui radio checkbox">
-                                                                <input type="radio" name="answer_<?= $question['id_question'] ?>" value="<?= $option['id_option'] ?>" required>
-                                                                <label><?= htmlspecialchars($option['text_option']) ?></label>
-                                                            </div>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                </div>
-                                            <?php endforeach; ?>
-                                            
-                                            <button type="submit" class="ui primary button">Отправить ответы</button>
-                                        </form>
+                                    <?php $questions = get_test_questions($pdo, $step['id_test']); if (!empty($questions)): ?>
+                                        <a href="test_pass.php?test_id=<?= $step['id_test'] ?>" class="ui primary button">
+                                            <i class="play icon"></i> Пройти тест
+                                        </a>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <div class="ui message">
