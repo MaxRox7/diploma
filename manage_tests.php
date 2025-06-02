@@ -3,49 +3,128 @@ require_once 'config.php';
 redirect_unauthenticated();
 
 $step_id = isset($_GET['step_id']) ? (int)$_GET['step_id'] : 0;
+$lesson_id = isset($_POST['lesson_id']) ? (int)$_POST['lesson_id'] : 0;
 $error = '';
 $success = '';
 
 try {
     $pdo = get_db_connection();
     
-    // Get step information and check access rights
-    $stmt = $pdo->prepare("
-        SELECT s.*, l.id_lesson, l.name_lesson, c.id_course, c.name_course
-        FROM Steps s
-        JOIN lessons l ON s.id_lesson = l.id_lesson
-        JOIN course c ON l.id_course = c.id_course
-        JOIN create_passes cp ON c.id_course = cp.id_course
-        WHERE s.id_step = ? AND cp.id_user = ? AND EXISTS (
-            SELECT 1 FROM users u 
-            WHERE u.id_user = cp.id_user AND u.role_user IN (?, ?)
-        )
-    ");
-    $stmt->execute([$step_id, $_SESSION['user']['id_user'], ROLE_ADMIN, ROLE_TEACHER]);
-    $step = $stmt->fetch();
-    
-    if (!$step) {
+    // Check access based on the context (either step_id or lesson_id)
+    if ($step_id > 0) {
+        // Get step information and check access rights
+        $stmt = $pdo->prepare("
+            SELECT s.*, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+            FROM Steps s
+            JOIN lessons l ON s.id_lesson = l.id_lesson
+            JOIN course c ON l.id_course = c.id_course
+            JOIN create_passes cp ON c.id_course = cp.id_course
+            WHERE s.id_step = ? AND cp.id_user = ? AND EXISTS (
+                SELECT 1 FROM users u 
+                WHERE u.id_user = cp.id_user AND u.role_user IN (?, ?)
+            )
+        ");
+        $stmt->execute([$step_id, $_SESSION['user']['id_user'], ROLE_ADMIN, ROLE_TEACHER]);
+        $step = $stmt->fetch();
+        
+        if (!$step) {
+            header('Location: courses.php');
+            exit;
+        }
+        
+        // Get tests for this step
+        $stmt = $pdo->prepare("
+            SELECT t.*,
+                   (SELECT COUNT(*) FROM Questions q WHERE q.id_test = t.id_test) as question_count,
+                   (SELECT COUNT(*) FROM test_attempts ta WHERE ta.id_test = t.id_test) as attempt_count
+            FROM Tests t
+            WHERE t.id_step = ?
+            ORDER BY t.id_test
+        ");
+        $stmt->execute([$step_id]);
+        $tests = $stmt->fetchAll();
+    } elseif ($lesson_id > 0 && isset($_POST['action']) && $_POST['action'] === 'create_test_step') {
+        // Check access for lesson
+        $stmt = $pdo->prepare("
+            SELECT l.*, c.id_course, c.name_course
+            FROM lessons l
+            JOIN course c ON l.id_course = c.id_course
+            JOIN create_passes cp ON c.id_course = cp.id_course
+            WHERE l.id_lesson = ? AND cp.id_user = ? AND EXISTS (
+                SELECT 1 FROM users u 
+                WHERE u.id_user = cp.id_user AND u.role_user IN (?, ?)
+            )
+        ");
+        $stmt->execute([$lesson_id, $_SESSION['user']['id_user'], ROLE_ADMIN, ROLE_TEACHER]);
+        $lesson = $stmt->fetch();
+        
+        if (!$lesson) {
+            header('Location: courses.php');
+            exit;
+        }
+    } else {
         header('Location: courses.php');
         exit;
     }
     
-    // Get tests for this step
-    $stmt = $pdo->prepare("
-        SELECT t.*,
-               (SELECT COUNT(*) FROM Questions q WHERE q.id_test = t.id_test) as question_count,
-               (SELECT COUNT(*) FROM test_attempts ta WHERE ta.id_test = t.id_test) as attempt_count
-        FROM Tests t
-        WHERE t.id_step = ?
-        ORDER BY t.id_test
-    ");
-    $stmt->execute([$step_id]);
-    $tests = $stmt->fetchAll();
-    
     // Process form submission
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['action'])) {
+            // Create test step (from edit_steps.php)
+            if ($_POST['action'] === 'create_test_step') {
+                $lesson_id = (int)$_POST['lesson_id'];
+                $name_step = trim($_POST['name_step']);
+                
+                if (empty($name_step)) {
+                    $error = 'Введите название шага';
+                } else {
+                    try {
+                        $pdo->beginTransaction();
+                        
+                        // Create step
+                        $stmt = $pdo->prepare("
+                            INSERT INTO Steps (id_lesson, number_steps, type_step)
+                            VALUES (?, ?, 'test')
+                            RETURNING id_step
+                        ");
+                        $stmt->execute([$lesson_id, $name_step]);
+                        $step_id = $stmt->fetchColumn();
+                        
+                        // Create test
+                        $stmt = $pdo->prepare("
+                            INSERT INTO Tests (id_step, name_test, desc_test)
+                            VALUES (?, 'Новый тест', '')
+                            RETURNING id_test
+                        ");
+                        $stmt->execute([$step_id]);
+                        $test_id = $stmt->fetchColumn();
+                        
+                        $pdo->commit();
+                        
+                        // Update step info for the page
+                        $stmt = $pdo->prepare("
+                            SELECT s.*, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+                            FROM Steps s
+                            JOIN lessons l ON s.id_lesson = l.id_lesson
+                            JOIN course c ON l.id_course = c.id_course
+                            WHERE s.id_step = ?
+                        ");
+                        $stmt->execute([$step_id]);
+                        $step = $stmt->fetch();
+                        
+                        $success = 'Шаг с тестом успешно создан';
+                        
+                        // Redirect back to edit_steps.php
+                        header("Location: edit_steps.php?lesson_id=" . $lesson_id);
+                        exit;
+                    } catch (Exception $e) {
+                        $pdo->rollBack();
+                        $error = 'Ошибка при создании шага с тестом: ' . $e->getMessage();
+                    }
+                }
+            }
             // Add new test
-            if ($_POST['action'] === 'add_test') {
+            elseif ($_POST['action'] === 'add_test') {
                 $test_name = trim($_POST['test_name']);
                 $test_description = trim($_POST['test_description']);
                 $passing_score = (int)$_POST['passing_score'];
@@ -78,19 +157,23 @@ try {
                 try {
                     $pdo->beginTransaction();
                     
-                    // Delete test attempts and answers
+                    // Delete test answers first
                     $stmt = $pdo->prepare("
                         DELETE FROM test_answers 
                         WHERE id_attempt IN (
                             SELECT id_attempt FROM test_attempts WHERE id_test = ?
                         )
+                        OR id_question IN (
+                            SELECT id_question FROM Questions WHERE id_test = ?
+                        )
                     ");
-                    $stmt->execute([$test_id]);
+                    $stmt->execute([$test_id, $test_id]);
                     
+                    // Then delete test attempts
                     $stmt = $pdo->prepare("DELETE FROM test_attempts WHERE id_test = ?");
                     $stmt->execute([$test_id]);
                     
-                    // Delete questions and answers
+                    // Then delete answer options
                     $stmt = $pdo->prepare("
                         DELETE FROM Answer_options 
                         WHERE id_question IN (
@@ -99,6 +182,7 @@ try {
                     ");
                     $stmt->execute([$test_id]);
                     
+                    // Delete questions
                     $stmt = $pdo->prepare("DELETE FROM Questions WHERE id_test = ?");
                     $stmt->execute([$test_id]);
                     

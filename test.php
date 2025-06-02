@@ -206,8 +206,17 @@ try {
 
             <?php if ($success): ?>
                 <div class="ui segment">
+                    <a href="lesson.php?id=<?= $test['id_lesson'] ?>" class="ui button">
+                        Назад к уроку
+                    </a>
                     <a href="course.php?id=<?= $test['id_course'] ?>" class="ui button">
                         Вернуться к курсу
+                    </a>
+                </div>
+            <?php else: ?>
+                <div class="ui segment">
+                    <a href="lesson.php?id=<?= $test['id_lesson'] ?>" class="ui button">
+                        Назад к уроку
                     </a>
                 </div>
             <?php endif; ?>

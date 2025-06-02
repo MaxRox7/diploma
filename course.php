@@ -291,7 +291,10 @@ try {
                                 </div>
 
                                 <?php if (!empty($lessons)): ?>
-                                    <?php foreach ($lessons as $lesson): ?>
+                                    <?php 
+                                    $can_access_lesson = true; // Флаг доступа к уроку
+                                    foreach ($lessons as $index => $lesson): 
+                                    ?>
                                         <div class="ui segment">
                                             <h4 class="ui header">
                                                 <?= htmlspecialchars($lesson['name_lesson']) ?>
@@ -309,20 +312,33 @@ try {
                                                 </div>
                                             <?php endif; ?>
                                             
-                                            <a href="lesson.php?id=<?= $lesson['id_lesson'] ?>" class="ui primary button">
-                                                <?php if ($lesson['completed_steps'] == $lesson['total_steps'] && $lesson['total_steps'] > 0): ?>
-                                                    <i class="check circle icon"></i>
-                                                    Повторить урок
-                                                <?php elseif ($lesson['completed_steps'] > 0): ?>
-                                                    <i class="sync icon"></i>
-                                                    Продолжить урок
-                                                <?php else: ?>
-                                                    <i class="play icon"></i>
-                                                    Начать урок
-                                                <?php endif; ?>
-                                            </a>
+                                            <?php if (!$can_access_lesson && $index > 0 && $lesson['completed_steps'] == 0): ?>
+                                                <div class="ui warning message">
+                                                    <i class="lock icon"></i>
+                                                    Сначала завершите предыдущие уроки
+                                                </div>
+                                            <?php else: ?>
+                                                <a href="lesson.php?id=<?= $lesson['id_lesson'] ?>" class="ui primary button">
+                                                    <?php if ($lesson['completed_steps'] == $lesson['total_steps'] && $lesson['total_steps'] > 0): ?>
+                                                        <i class="check circle icon"></i>
+                                                        Повторить урок
+                                                    <?php elseif ($lesson['completed_steps'] > 0): ?>
+                                                        <i class="sync icon"></i>
+                                                        Продолжить урок
+                                                    <?php else: ?>
+                                                        <i class="play icon"></i>
+                                                        Начать урок
+                                                    <?php endif; ?>
+                                                </a>
+                                            <?php endif; ?>
                                         </div>
-        <?php endforeach; ?>
+                                        <?php 
+                                        // Если урок не полностью завершен, блокируем доступ к следующим урокам
+                                        if ($lesson['total_steps'] > 0 && $lesson['completed_steps'] < $lesson['total_steps']) {
+                                            $can_access_lesson = false;
+                                        }
+                                        ?>
+                                    <?php endforeach; ?>
                                 <?php else: ?>
                                     <div class="ui segment">
                                         <p>В курсе пока нет уроков</p>

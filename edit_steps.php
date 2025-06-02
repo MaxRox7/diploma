@@ -49,7 +49,7 @@ try {
         if (isset($_POST['action'])) {
             if ($_POST['action'] === 'add_step') {
                 $name_step = trim($_POST['name_step']);
-                $type_step = $_POST['type_step'];
+                $type_step = trim($_POST['type_step']);
                 
                 if (empty($name_step)) {
                     $error = 'Введите название шага';
@@ -58,82 +58,42 @@ try {
                     $pdo->beginTransaction();
                     
                     try {
-                        // Добавляем шаг
+                        // Создаем шаг
                         $stmt = $pdo->prepare("
-                            INSERT INTO Steps (id_lesson, number_steps, status_step, type_step)
-                            VALUES (?, ?, 'not_started', ?)
+                            INSERT INTO Steps (id_lesson, number_steps, type_step)
+                            VALUES (?, ?, ?)
                             RETURNING id_step
                         ");
                         $stmt->execute([$lesson_id, $name_step, $type_step]);
                         $step_id = $stmt->fetchColumn();
                         
-                        // Если это материал, обрабатываем загрузку файла
-                        if ($type_step === 'material' && isset($_FILES['material_file'])) {
-                            $file = $_FILES['material_file'];
-                            if ($file['error'] === UPLOAD_ERR_OK) {
-                                $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-                                if ($file_extension === 'pdf') {
-                                    // Получаем безопасные имена для папок (заменяем пробелы и спецсимволы на подчеркивание)
-                                    $safe_course_name = preg_replace('/[^a-zA-Zа-яА-Я0-9]+/u', '_', $lesson['name_course']);
-                                    $safe_lesson_name = preg_replace('/[^a-zA-Zа-яА-Я0-9]+/u', '_', $lesson['name_lesson']);
-                                    $safe_step_name = preg_replace('/[^a-zA-Zа-яА-Я0-9]+/u', '_', $name_step);
-                                    
-                                    // Создаем структуру папок: materials/course_name/lesson_name/step_name_N/
-                                    $base_dir = 'materials/';
-                                    $course_dir = $base_dir . $safe_course_name . '/';
-                                    $lesson_dir = $course_dir . $safe_lesson_name . '/';
-                                    $step_dir = $lesson_dir . $safe_step_name . '_' . $step_id . '/';
-                                    
-                                    // Создаем все необходимые директории
-                                    foreach ([$base_dir, $course_dir, $lesson_dir, $step_dir] as $dir) {
-                                        if (!file_exists($dir)) {
-                                            if (!mkdir($dir, 0777, true)) {
-                                                throw new Exception('Не удалось создать директорию: ' . $dir);
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Генерируем имя файла, сохраняя оригинальное имя
-                                    $safe_filename = preg_replace('/[^a-zA-Zа-яА-Я0-9_.-]+/u', '_', $file['name']);
-                                    $file_path = $step_dir . $safe_filename;
-                                    
-                                    if (move_uploaded_file($file['tmp_name'], $file_path)) {
-                                        // Генерируем уникальный id_material
-                                        do {
-                                            $material_id = 'MAT' . str_pad(mt_rand(1, 9999999), 7, '0', STR_PAD_LEFT);
-                                            
-                                            // Проверяем, не существует ли уже такой ID
-                                            $check = $pdo->prepare("SELECT 1 FROM Material WHERE id_material = ?");
-                                            $check->execute([$material_id]);
-                                        } while ($check->fetch());
-                                        
-                                        $stmt = $pdo->prepare("
-                                            INSERT INTO Material (id_material, id_step, path_matial)
-                                            VALUES (?, ?, ?)
-                                        ");
-                                        $stmt->execute([$material_id, $step_id, $file_path]);
-                                    } else {
-                                        throw new Exception('Ошибка при загрузке файла');
-                                    }
-                                } else {
-                                    throw new Exception('Разрешены только PDF файлы');
+                        // Если это материал, загружаем файл
+                        if ($type_step === 'material') {
+                            if (isset($_FILES['material_file']) && $_FILES['material_file']['error'] === UPLOAD_ERR_OK) {
+                                $upload_dir = 'materials/' . $_SESSION['user']['login_user'] . '/' . $lesson['name_lesson'] . '/';
+                                
+                                // Создаем директорию, если не существует
+                                if (!file_exists($upload_dir)) {
+                                    mkdir($upload_dir, 0777, true);
                                 }
+                                
+                                $file_name = $_FILES['material_file']['name'];
+                                $file_name = $name_step . '_' . $step_id . '.' . pathinfo($file_name, PATHINFO_EXTENSION);
+                                $file_path = $upload_dir . $file_name;
+                                
+                                if (move_uploaded_file($_FILES['material_file']['tmp_name'], $file_path)) {
+                                    // Сохраняем путь к файлу в базу данных
+                                    $stmt = $pdo->prepare("
+                                        INSERT INTO Material (id_material, id_step, path_matial)
+                                        VALUES (?, ?, ?)
+                                    ");
+                                    $stmt->execute([uniqid(), $step_id, $file_path]);
+                                } else {
+                                    throw new Exception('Ошибка при загрузке файла');
+                                }
+                            } else {
+                                throw new Exception('Файл материала не был загружен');
                             }
-                        }
-                        // Если это тест, создаем пустой тест
-                        elseif ($type_step === 'test') {
-                            // Создаем тест с временным названием, которое можно будет изменить в manage_tests.php
-                            $stmt = $pdo->prepare("
-                                INSERT INTO Tests (id_step, name_test, desc_test)
-                                VALUES (?, 'Новый тест', '')
-                                RETURNING id_test
-                            ");
-                            $stmt->execute([$step_id]);
-                            $test_id = $stmt->fetchColumn();
-                            
-                            $pdo->commit();
-                            header("Location: manage_tests.php?step_id=" . $step_id);
-                            exit;
                         }
                         
                         $pdo->commit();
@@ -186,6 +146,31 @@ try {
                         }
                         // Если это тест, удаляем тест и все связанные данные
                         elseif ($step['type_step'] === 'test') {
+                            // Удаляем записи из test_answers
+                            $stmt = $pdo->prepare("
+                                DELETE FROM test_answers 
+                                WHERE id_attempt IN (
+                                    SELECT id_attempt FROM test_attempts WHERE id_test IN (
+                                        SELECT id_test FROM Tests WHERE id_step = ?
+                                    )
+                                )
+                                OR id_question IN (
+                                    SELECT id_question FROM Questions WHERE id_test IN (
+                                        SELECT id_test FROM Tests WHERE id_step = ?
+                                    )
+                                )
+                            ");
+                            $stmt->execute([$step_id, $step_id]);
+                            
+                            // Удаляем записи из test_attempts
+                            $stmt = $pdo->prepare("
+                                DELETE FROM test_attempts 
+                                WHERE id_test IN (
+                                    SELECT id_test FROM Tests WHERE id_step = ?
+                                )
+                            ");
+                            $stmt->execute([$step_id]);
+                            
                             $stmt = $pdo->prepare("
                                 DELETE FROM Answer_options WHERE id_question IN (
                                     SELECT id_question FROM Questions WHERE id_test IN (
@@ -205,6 +190,10 @@ try {
                             $stmt = $pdo->prepare("DELETE FROM Tests WHERE id_step = ?");
                             $stmt->execute([$step_id]);
                         }
+                        
+                        // Удаляем записи о прогрессе пользователей по этому шагу
+                        $stmt = $pdo->prepare("DELETE FROM user_material_progress WHERE id_step = ?");
+                        $stmt->execute([$step_id]);
                         
                         // Удаляем сам шаг
                         $stmt = $pdo->prepare("DELETE FROM Steps WHERE id_step = ?");
@@ -284,24 +273,39 @@ try {
             <?php endif; ?>
 
             <!-- Форма добавления шага -->
-            <form class="ui form" method="post" enctype="multipart/form-data" id="addStepForm">
+            <form class="ui form" method="post" enctype="multipart/form-data" id="addMaterialForm">
                 <input type="hidden" name="action" value="add_step">
+                <input type="hidden" name="type_step" value="material">
                 <div class="fields">
                     <div class="eight wide field">
                         <input type="text" name="name_step" placeholder="Название шага" required>
                     </div>
                     <div class="four wide field">
-                        <select class="ui dropdown" name="type_step" id="stepType" required>
-                            <option value="">Тип шага</option>
-                            <option value="material">Материал</option>
-                            <option value="test">Тест</option>
-                        </select>
-                    </div>
-                    <div class="four wide field" id="materialFileField" style="display: none;">
-                        <input type="file" name="material_file" accept=".pdf">
+                        <input type="file" name="material_file" accept=".pdf" required>
                     </div>
                     <div class="four wide field">
-                        <button type="submit" class="ui primary fluid button">Добавить шаг</button>
+                        <button type="submit" class="ui primary fluid button">
+                            <i class="file pdf icon"></i>
+                            Добавить материал
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="ui hidden divider"></div>
+
+            <form class="ui form" method="post" action="manage_tests.php">
+                <input type="hidden" name="action" value="create_test_step">
+                <input type="hidden" name="lesson_id" value="<?= $lesson_id ?>">
+                <div class="fields">
+                    <div class="twelve wide field">
+                        <input type="text" name="name_step" placeholder="Название шага" required>
+                    </div>
+                    <div class="four wide field">
+                        <button type="submit" class="ui teal fluid button">
+                            <i class="tasks icon"></i>
+                            Создать тест
+                        </button>
                     </div>
                 </div>
             </form>
@@ -358,20 +362,9 @@ try {
 $(document).ready(function() {
     $('.ui.dropdown').dropdown();
     
-    $('#stepType').change(function() {
-        if ($(this).val() === 'material') {
-            $('#materialFileField').show();
-            $('input[name="material_file"]').prop('required', true);
-        } else {
-            $('#materialFileField').hide();
-            $('input[name="material_file"]').prop('required', false);
-        }
-    });
-    
     $('.ui.form').form({
         fields: {
-            name_step: 'empty',
-            type_step: 'empty'
+            name_step: 'empty'
         }
     });
 });

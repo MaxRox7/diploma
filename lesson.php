@@ -12,6 +12,13 @@ $user_id = $_SESSION['user']['id_user'];
 $error = '';
 $success = '';
 
+// Проверяем наличие ошибки в URL
+if (isset($_GET['error'])) {
+    if ($_GET['error'] === 'complete_previous_steps') {
+        $error = 'Пожалуйста, завершите все предыдущие шаги перед тем, как проходить этот тест.';
+    }
+}
+
 try {
     $pdo = get_db_connection();
     
@@ -350,7 +357,10 @@ function get_question_options($pdo, $question_id) {
                 </div>
             <?php else: ?>
                 <div class="ui segments">
-                    <?php foreach ($steps as $step): ?>
+                    <?php 
+                    $can_access = true; // Флаг доступа к шагу
+                    foreach ($steps as $index => $step): 
+                    ?>
                         <div class="ui segment">
                             <h3 class="ui header">
                                 <?= htmlspecialchars($step['number_steps'] ?? 'Шаг') ?>
@@ -359,7 +369,12 @@ function get_question_options($pdo, $question_id) {
                                 <?php endif; ?>
                             </h3>
                             
-                            <?php if ($step['type_step'] === 'material' && $step['file_path']): ?>
+                            <?php if (!$can_access && !$step['is_completed']): ?>
+                                <div class="ui warning message">
+                                    <i class="lock icon"></i>
+                                    Сначала завершите предыдущие шаги
+                                </div>
+                            <?php elseif ($step['type_step'] === 'material' && $step['file_path']): ?>
                                 <a href="<?= htmlspecialchars($step['file_path']) ?>" class="ui primary button" target="_blank">
                                     <i class="file pdf icon"></i>
                                     Открыть материал
@@ -389,6 +404,12 @@ function get_question_options($pdo, $question_id) {
                                 <?php endif; ?>
                             <?php endif; ?>
                         </div>
+                        <?php 
+                        // Если текущий шаг не завершен, блокируем доступ к следующим
+                        if (!$step['is_completed']) {
+                            $can_access = false;
+                        }
+                        ?>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>

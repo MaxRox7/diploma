@@ -16,6 +16,73 @@ if (!$test_id) {
 
 $pdo = get_db_connection();
 
+// Получаем информацию о тесте и шаге
+$stmt = $pdo->prepare("
+    SELECT t.*, s.id_step, s.id_lesson, l.id_lesson, l.id_course
+    FROM Tests t
+    JOIN Steps s ON t.id_step = s.id_step
+    JOIN lessons l ON s.id_lesson = l.id_lesson
+    WHERE t.id_test = ?
+");
+$stmt->execute([$test_id]);
+$test_info = $stmt->fetch();
+
+if (!$test_info) {
+    header('Location: courses.php');
+    exit;
+}
+
+// Проверяем, что пользователь завершил все предыдущие шаги
+$user_id = $_SESSION['user']['id_user'];
+$stmt = $pdo->prepare("
+    SELECT s.*,
+           m.path_matial as file_path,
+           t.id_test,
+           CASE 
+               WHEN m.id_material IS NOT NULL AND EXISTS(
+                   SELECT 1 FROM user_material_progress ump
+                   WHERE ump.id_step = s.id_step
+                   AND ump.id_user = ?
+               ) THEN true
+               WHEN t.id_test IS NOT NULL AND EXISTS(
+                   SELECT 1 FROM test_attempts ta
+                   WHERE ta.id_test = t.id_test 
+                   AND ta.id_user = ?
+                   AND ta.status = 'completed'
+               ) THEN true
+               ELSE false
+           END as is_completed
+    FROM Steps s
+    LEFT JOIN Material m ON s.id_step = m.id_step
+    LEFT JOIN Tests t ON s.id_step = t.id_step
+    WHERE s.id_lesson = ?
+    ORDER BY s.id_step
+");
+$stmt->execute([$user_id, $user_id, $test_info['id_lesson']]);
+$steps = $stmt->fetchAll();
+
+// Проверяем, можно ли пользователю проходить этот тест
+$can_access = true;
+$current_step_found = false;
+
+foreach ($steps as $step) {
+    if ($step['id_step'] == $test_info['id_step']) {
+        $current_step_found = true;
+        break;
+    }
+    
+    if (!$step['is_completed']) {
+        $can_access = false;
+        break;
+    }
+}
+
+if (!$can_access) {
+    // Перенаправляем на страницу урока
+    header('Location: lesson.php?id=' . $test_info['id_lesson'] . '&error=complete_previous_steps');
+    exit;
+}
+
 // Получаем все вопросы теста
 $stmt = $pdo->prepare("SELECT * FROM Questions WHERE id_test = ? ORDER BY id_question");
 $stmt->execute([$test_id]);
@@ -80,7 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Завершение теста
 if ($is_finish || $question_index === -1) {
     // Проверяем, не проходил ли пользователь этот тест ранее
-    $user_id = $_SESSION['user']['id_user'];
     $stmt = $pdo->prepare("SELECT * FROM test_attempts WHERE id_test = ? AND id_user = ? AND status = 'completed'");
     $stmt->execute([$test_id, $user_id]);
     $existing_attempt = $stmt->fetch();
