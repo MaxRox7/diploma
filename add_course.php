@@ -3,7 +3,7 @@ require_once 'config.php';
 redirect_unauthenticated();
 
 // Проверяем, является ли пользователь администратором
-if (!is_admin()) {
+if (!is_admin() && !is_teacher()) {
     header('Location: courses.php');
     exit;
 }
@@ -35,11 +35,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("
                 INSERT INTO course (
                     name_course, desc_course, with_certificate, hourse_course,
-                    requred_year, required_spec, required_uni, level_course, tags_course
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    requred_year, required_spec, required_uni, level_course, tags_course, status_course
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING id_course
             ");
             
+            $status = is_teacher() ? 'draft' : 'approved';
             $stmt->execute([
                 $name_course,
                 $desc_course,
@@ -49,7 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $required_spec ?: null,
                 $required_uni ?: null,
                 $level_course ?: null,
-                $tags_course
+                $tags_course,
+                $status
             ]);
             
             $course_id = $stmt->fetchColumn();

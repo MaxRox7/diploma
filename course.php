@@ -41,6 +41,27 @@ try {
     $is_creator = is_course_creator($pdo, $course_id, $user_id);
     $is_enrolled = is_enrolled_student($pdo, $course_id, $user_id);
     
+    // Если администратор просматривает курс с параметром admin_view=1, 
+    // даем ему права создателя курса
+    if (is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1) {
+        $is_creator = true;
+        
+        // Получаем информацию о создателе курса для отображения
+        $stmt = $pdo->prepare("
+            SELECT u.fn_user, u.login_user
+            FROM create_passes cp
+            JOIN users u ON cp.id_user = u.id_user
+            WHERE cp.id_course = ? AND cp.is_creator = true
+        ");
+        $stmt->execute([$course_id]);
+        $creator = $stmt->fetch();
+        
+        // Добавляем информацию о режиме просмотра администратора
+        $admin_view = true;
+    } else {
+        $admin_view = false;
+    }
+    
     // Если пользователь не создатель и не записан на курс - показываем только общую информацию
     // и кнопку записи на курс
     $course['is_creator'] = $is_creator;
@@ -157,6 +178,17 @@ try {
                     $error = 'Ошибка при записи на курс: ' . $e->getMessage();
                 }
             }
+            // Отправка курса на модерацию
+            elseif ($_POST['action'] === 'send_to_moderation' && $is_creator) {
+                try {
+                    $stmt = $pdo->prepare("UPDATE course SET status_course='pending', moderation_comment=NULL WHERE id_course=?");
+                    $stmt->execute([$course_id]);
+                    $success = 'Курс успешно отправлен на модерацию';
+                    $course['status_course'] = 'pending';
+                } catch (PDOException $e) {
+                    $error = 'Ошибка при отправке курса на модерацию: ' . $e->getMessage();
+                }
+            }
             // Добавление отзыва
             elseif ($_POST['action'] === 'add_feedback' && $can_leave_feedback) {
                 $text_feedback = trim($_POST['text_feedback']);
@@ -219,6 +251,13 @@ try {
             <p><?= htmlspecialchars($error) ?></p>
         </div>
     <?php elseif ($course): ?>
+        <?php if (isset($admin_view) && $admin_view): ?>
+            <div class="ui info message">
+                <i class="eye icon"></i>
+                <strong>Режим администратора:</strong> Вы просматриваете курс как преподаватель <?= htmlspecialchars($creator['fn_user']) ?> (<?= htmlspecialchars($creator['login_user']) ?>)
+                <a href="course.php?id=<?= $course_id ?>" class="ui small right floated button">Выйти из режима просмотра</a>
+            </div>
+        <?php endif; ?>
         <div class="ui grid">
             <!-- Основная информация о курсе -->
             <div class="sixteen wide column">
@@ -262,6 +301,35 @@ try {
                         <!-- Панель управления для создателя курса -->
                         <div class="ui segment">
                             <h3 class="ui header">Панель управления курсом</h3>
+                            
+                            <?php 
+                            $status_labels = [
+                                'draft' => ['Черновик', 'grey'],
+                                'pending' => ['На модерации', 'yellow'],
+                                'correction' => ['Требует доработки', 'orange'],
+                                'approved' => ['Одобрен', 'green'],
+                                'rejected' => ['Отклонен', 'red']
+                            ];
+                            $status_info = $status_labels[$course['status_course']] ?? ['Неизвестно', 'black'];
+                            ?>
+                            
+                            <div class="ui <?= $status_info[1] ?> label" style="margin-bottom: 15px;">
+                                <i class="info circle icon"></i>
+                                Статус: <?= $status_info[0] ?>
+                            </div>
+                            
+                            <?php if ($course['status_course'] === 'correction' && !empty($course['moderation_comment'])): ?>
+                                <div class="ui warning message">
+                                    <div class="header">Комментарий модератора:</div>
+                                    <p><?= nl2br(htmlspecialchars($course['moderation_comment'])) ?></p>
+                                </div>
+                            <?php elseif ($course['status_course'] === 'rejected' && !empty($course['moderation_comment'])): ?>
+                                <div class="ui negative message">
+                                    <div class="header">Причина отклонения:</div>
+                                    <p><?= nl2br(htmlspecialchars($course['moderation_comment'])) ?></p>
+                                </div>
+                            <?php endif; ?>
+                            
                             <div class="ui buttons">
                                 <a href="edit_course.php?id=<?= $course_id ?>" class="ui primary button">
                                     <i class="edit icon"></i>
@@ -276,6 +344,15 @@ try {
                                     Удалить курс
                                 </button>
                             </div>
+                            
+                            <?php if ($course['status_course'] === 'draft' || $course['status_course'] === 'correction'): ?>
+                                <form method="post" style="margin-top: 10px;">
+                                    <input type="hidden" name="action" value="send_to_moderation">
+                                    <button type="submit" class="ui orange button">
+                                        <i class="paper plane icon"></i> Отправить на модерацию
+                                    </button>
+                                </form>
+                            <?php endif; ?>
                         </div>
                     <?php elseif (is_student()): ?>
                         <?php if (!$is_enrolled): ?>

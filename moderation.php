@@ -37,18 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("UPDATE users SET status='approved', moderation_comment=? WHERE id_user=?");
             $stmt->execute([$moderation_comment, $user_id]);
             // Отправка письма
-            $stmt = $pdo->prepare("SELECT login_user, fn_user FROM users WHERE id_user=?");
+            $stmt = $pdo->prepare("SELECT login_user FROM users WHERE id_user=?");
             $stmt->execute([$user_id]);
             $user = $stmt->fetch();
             if ($user) {
-                $html = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
-                    <h2 style="color:#2185d0;">Ваша заявка на регистрацию одобрена!</h2>
-                    <p>Здравствуйте, <b>' . htmlspecialchars($user['fn_user']) . '</b>!</p>
-                    <p>Ваша заявка на регистрацию в системе <b>CodeSphere</b> была успешно одобрена администратором.</p>
-                    <p>Теперь вы можете войти в систему, используя свою почту и пароль.</p>
-                    <p style="margin-top:32px;color:#888;font-size:14px;">С уважением,<br>Команда CodeSphere</p>
-                </div>';
-                send_email_smtp($user['login_user'], 'Ваша заявка одобрена — CodeSphere', $html);
+                send_email($user['login_user'], 'Ваша заявка одобрена', 'Ваша заявка на CodeSphere одобрена. Теперь вы можете войти в систему.');
             }
             header('Location: moderation.php?success=approve');
             exit;
@@ -56,19 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("UPDATE users SET status='rejected', moderation_comment=? WHERE id_user=?");
             $stmt->execute([$moderation_comment, $user_id]);
             // Отправка письма
-            $stmt = $pdo->prepare("SELECT login_user, fn_user FROM users WHERE id_user=?");
+            $stmt = $pdo->prepare("SELECT login_user FROM users WHERE id_user=?");
             $stmt->execute([$user_id]);
             $user = $stmt->fetch();
             if ($user) {
-                $html = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
-                    <h2 style="color:#d01919;">Ваша заявка на регистрацию отклонена</h2>
-                    <p>Здравствуйте, <b>' . htmlspecialchars($user['fn_user']) . '</b>!</p>
-                    <p>К сожалению, ваша заявка на регистрацию в системе <b>CodeSphere</b> была отклонена администратором.</p>';
-                if ($moderation_comment) {
-                    $html .= '<p><b>Причина:</b> ' . htmlspecialchars($moderation_comment) . '</p>';
-                }
-                $html .= '<p style="margin-top:32px;color:#888;font-size:14px;">С уважением,<br>Команда CodeSphere</p></div>';
-                send_email_smtp($user['login_user'], 'Ваша заявка отклонена — CodeSphere', $html);
+                send_email($user['login_user'], 'Ваша заявка отклонена', 'Ваша заявка на CodeSphere отклонена. Причина: ' . htmlspecialchars($moderation_comment));
             }
             header('Location: moderation.php?success=reject');
             exit;
@@ -88,6 +73,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } catch (PDOException $e) {
         header('Location: moderation.php?error=' . urlencode($e->getMessage()));
+        exit;
+    }
+
+    if (isset($_POST['action']) && in_array($_POST['action'], ['approve_course','correction_course','reject_course'])) {
+        $course_id = (int)($_POST['course_id'] ?? 0);
+        $moderation_comment = trim($_POST['moderation_comment'] ?? '');
+        $status = $_POST['action'] === 'approve_course' ? 'approved' : ($_POST['action'] === 'correction_course' ? 'correction' : 'rejected');
+        $stmt = $pdo->prepare("UPDATE course SET status_course=?, moderation_comment=? WHERE id_course=?");
+        $stmt->execute([$status, $moderation_comment, $course_id]);
+        // Получаем автора
+        $stmt = $pdo->prepare("SELECT u.login_user, u.fn_user, c.name_course FROM users u JOIN create_passes cp ON u.id_user=cp.id_user JOIN course c ON cp.id_course=c.id_course WHERE cp.id_course=? AND cp.is_creator=true");
+        $stmt->execute([$course_id]);
+        $author = $stmt->fetch();
+        if ($author) {
+            $subject = '';
+            $body = '';
+            if ($status === 'approved') {
+                $subject = 'Ваш курс одобрен!';
+                $body = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
+                    <h2 style="color:#2185d0;">Поздравляем!</h2>
+                    <p>Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> прошёл модерацию и теперь доступен студентам на платформе CodeSphere.</p>
+                    <p>Спасибо за ваш вклад в развитие образования!</p>
+                    <p style="color:#888;font-size:13px;margin-top:24px;">С уважением, команда CodeSphere</p>
+                </div>';
+            } elseif ($status === 'correction') {
+                $subject = 'Курс отправлен на доработку';
+                $body = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
+                    <h2 style="color:#f2711c;">Курс требует доработки</h2>
+                    <p>Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> отправлен на доработку модератором.</p>';
+                if ($moderation_comment) {
+                    $body .= '<p><b>Комментарий:</b><br>' . nl2br(htmlspecialchars($moderation_comment)) . '</p>';
+                }
+                $body .= '<p style="color:#888;font-size:13px;margin-top:24px;">С уважением, команда CodeSphere</p></div>';
+            } else {
+                $subject = 'Курс отклонён';
+                $body = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
+                    <h2 style="color:#db2828;">Курс отклонён</h2>
+                    <p>Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> был отклонён модератором.</p>';
+                if ($moderation_comment) {
+                    $body .= '<p><b>Комментарий:</b><br>' . nl2br(htmlspecialchars($moderation_comment)) . '</p>';
+                }
+                $body .= '<p style="color:#888;font-size:13px;margin-top:24px;">С уважением, команда CodeSphere</p></div>';
+            }
+            send_email_smtp($author['login_user'], $subject, $body);
+        }
+        header('Location: moderation.php?tab=courses&success=1');
         exit;
     }
 }
@@ -131,10 +162,11 @@ function file_link($path) {
         <div class="ui success message"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     <div class="ui top attached tabular menu">
-        <a class="item active" data-tab="students">Студенты</a>
-        <a class="item" data-tab="teachers">Преподаватели</a>
+        <a href="?tab=students" class="item<?= !isset($_GET['tab']) || $_GET['tab'] === 'students' ? ' active' : '' ?>" data-tab="students">Студенты</a>
+        <a href="?tab=teachers" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'teachers' ? ' active' : '' ?>" data-tab="teachers">Преподаватели</a>
+        <a href="?tab=courses" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'courses' ? ' active' : '' ?>" data-tab="courses">Курсы</a>
     </div>
-    <div class="ui bottom attached tab segment active" data-tab="students">
+    <div class="ui bottom attached tab segment<?= !isset($_GET['tab']) || $_GET['tab'] === 'students' ? ' active' : '' ?>" data-tab="students">
         <?php if (empty($students)): ?>
             <div class="ui message">Нет заявок студентов.</div>
         <?php else: ?>
@@ -175,7 +207,7 @@ function file_link($path) {
             </table>
         <?php endif; ?>
     </div>
-    <div class="ui bottom attached tab segment" data-tab="teachers">
+    <div class="ui bottom attached tab segment<?= isset($_GET['tab']) && $_GET['tab'] === 'teachers' ? ' active' : '' ?>" data-tab="teachers">
         <?php if (empty($teachers)): ?>
             <div class="ui message">Нет заявок преподавателей.</div>
         <?php else: ?>
@@ -218,12 +250,140 @@ function file_link($path) {
             </table>
         <?php endif; ?>
     </div>
+    <div class="ui bottom attached tab segment<?= isset($_GET['tab']) && $_GET['tab'] === 'courses' ? ' active' : '' ?>" data-tab="courses">
+        <h2 class="ui header">Заявки на курсы</h2>
+        <?php
+        // Получаем курсы на модерации
+        $courses = $pdo->query("SELECT c.*, u.fn_user, u.login_user FROM course c JOIN create_passes cp ON c.id_course=cp.id_course AND cp.is_creator=true JOIN users u ON cp.id_user=u.id_user WHERE c.status_course IN ('pending','correction') ORDER BY c.id_course DESC")->fetchAll();
+        if ($courses):
+        ?>
+        <table class="ui celled table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Автор</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($courses as $course): ?>
+                <tr>
+                    <td><?= $course['id_course'] ?></td>
+                    <td><?= htmlspecialchars($course['name_course']) ?></td>
+                    <td><?= htmlspecialchars($course['fn_user']) ?><br><small><?= htmlspecialchars($course['login_user']) ?></small></td>
+                    <td><?= nl2br(htmlspecialchars(mb_substr($course['desc_course'],0,200))) ?></td>
+                    <td>
+                        <a href="?tab=courses&view=<?= $course['id_course'] ?>" class="ui button">Просмотреть</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php else: ?>
+            <div class="ui message">Нет курсов на модерации.</div>
+        <?php endif; ?>
+
+        <?php
+        // Просмотр курса
+        if (isset($_GET['view'])) {
+            $cid = (int)$_GET['view'];
+            $stmt = $pdo->prepare("SELECT c.*, u.fn_user, u.login_user, cp.id_user as author_id FROM course c JOIN create_passes cp ON c.id_course=cp.id_course AND cp.is_creator=true JOIN users u ON cp.id_user=u.id_user WHERE c.id_course=?");
+            $stmt->execute([$cid]);
+            $course = $stmt->fetch();
+            if ($course):
+                // Получаем уроки и шаги
+                $lessons = $pdo->prepare("SELECT * FROM lessons WHERE id_course=? ORDER BY id_lesson");
+                $lessons->execute([$cid]);
+                $lessons = $lessons->fetchAll();
+        ?>
+        <div class="ui segment">
+            <h3 class="ui header">Курс: <?= htmlspecialchars($course['name_course']) ?></h3>
+            <p><b>Автор:</b> <?= htmlspecialchars($course['fn_user']) ?> (<?= htmlspecialchars($course['login_user']) ?>)</p>
+            <p><b>Описание:</b> <?= nl2br(htmlspecialchars($course['desc_course'])) ?></p>
+            <p><b>Требования:</b> <?= htmlspecialchars($course['requred_year'] ?? '') ?> курс, <?= htmlspecialchars($course['required_spec'] ?? '') ?>, <?= htmlspecialchars($course['required_uni'] ?? '') ?></p>
+            <h4>Уроки и шаги:</h4>
+            <ul>
+                <?php foreach ($lessons as $lesson): ?>
+                    <li><b><?= htmlspecialchars($lesson['name_lesson']) ?></b>
+                        <?php
+                        $steps = $pdo->prepare("SELECT * FROM Steps WHERE id_lesson=? ORDER BY id_step");
+                        $steps->execute([$lesson['id_lesson']]);
+                        $steps = $steps->fetchAll();
+                        if ($steps): ?>
+                            <ul>
+                            <?php foreach ($steps as $step): ?>
+                                <li><?= htmlspecialchars($step['number_steps'] ?? 'Без названия') ?> (<?= htmlspecialchars($step['type_step'] ?? 'unknown') ?>)
+                                    <?php
+                                    // Материалы
+                                    $materials = $pdo->prepare("SELECT * FROM Material WHERE id_step=?");
+                                    $materials->execute([$step['id_step']]);
+                                    $materials = $materials->fetchAll();
+                                    if ($materials): ?>
+                                        <ul>
+                                        <?php foreach ($materials as $mat): ?>
+                                            <li>Материал: <a href="<?= htmlspecialchars(($mat['path_matial'] ?? '') ?: ($mat['link_material'] ?? '')) ?>" target="_blank" class="ui mini button">Открыть материал</a></li>
+                                        <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif; ?>
+                                    <?php
+                                    // Тесты
+                                    $tests = $pdo->prepare("SELECT * FROM Tests WHERE id_step=?");
+                                    $tests->execute([$step['id_step']]);
+                                    $tests = $tests->fetchAll();
+                                    if ($tests): ?>
+                                        <ul>
+                                        <?php foreach ($tests as $test): ?>
+                                            <li>Тест: <?= htmlspecialchars($test['name_test']) ?> (<?= $test['id_test'] ?>)
+                                                <a href="test.php?test_id=<?= $test['id_test'] ?>" target="_blank" class="ui mini button">Пройти</a>
+                                            </li>
+                                        <?php endforeach; ?>
+                                        </ul>
+                                    <?php endif; ?>
+                                </li>
+                            <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+            <form method="post" class="ui form" style="margin-top:20px;">
+                <input type="hidden" name="course_id" value="<?= $course['id_course'] ?>">
+                <div class="field">
+                    <label>Комментарий автору (если требуется)</label>
+                    <textarea name="moderation_comment" rows="2"></textarea>
+                </div>
+                <button name="action" value="approve_course" class="ui positive button">Одобрить</button>
+                <button name="action" value="correction_course" class="ui orange button">На доработку</button>
+                <button name="action" value="reject_course" class="ui negative button">Отклонить</button>
+                <a href="?tab=courses" class="ui button">Назад</a>
+                <a href="course.php?id=<?= $course['id_course'] ?>&admin_view=1" class="ui teal button" target="_blank">
+                    <i class="eye icon"></i> Просмотр как преподаватель
+                </a>
+                <a href="edit_course.php?id=<?= $course['id_course'] ?>&admin_view=1" class="ui blue button" target="_blank">
+                    <i class="edit icon"></i> Редактировать как преподаватель
+                </a>
+                <a href="edit_lessons.php?course_id=<?= $course['id_course'] ?>&admin_view=1" class="ui violet button" target="_blank">
+                    <i class="list icon"></i> Управление уроками как преподаватель
+                </a>
+            </form>
+        </div>
+        <?php endif; } ?>
+    </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 <script>
 $(function() {
-    $('.menu .item').tab();
+    // Переключение вкладок по клику с изменением URL
+    $('.menu .item').on('click', function(e) {
+        e.preventDefault();
+        const tab = $(this).data('tab');
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.location.href = url.toString();
+    });
 });
 </script>
 </body>

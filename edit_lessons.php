@@ -15,8 +15,10 @@ $success = '';
 try {
     $pdo = get_db_connection();
     
-    // Проверяем, является ли пользователь создателем курса
-    if (!is_course_creator($pdo, $course_id, $_SESSION['user']['id_user'])) {
+    // Проверяем, является ли пользователь создателем курса или администратором в режиме просмотра
+    $is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
+    
+    if (!$is_admin_view && !is_course_creator($pdo, $course_id, $_SESSION['user']['id_user'])) {
         header('Location: courses.php');
         exit;
     }
@@ -33,6 +35,18 @@ try {
     if (!$course) {
         header('Location: courses.php');
         exit;
+    }
+    
+    // Если администратор просматривает курс, получаем информацию о создателе
+    if ($is_admin_view) {
+        $stmt = $pdo->prepare("
+            SELECT u.fn_user, u.login_user
+            FROM create_passes cp
+            JOIN users u ON cp.id_user = u.id_user
+            WHERE cp.id_course = ? AND cp.is_creator = true
+        ");
+        $stmt->execute([$course_id]);
+        $creator = $stmt->fetch();
     }
     
     // Получаем уроки курса
@@ -117,6 +131,14 @@ try {
                     <a href="course.php?id=<?= $course_id ?>" class="ui primary button">Просмотр курса</a>
                 </div>
             </div>
+
+            <?php if ($is_admin_view): ?>
+                <div class="ui info message">
+                    <i class="eye icon"></i>
+                    <strong>Режим администратора:</strong> Вы редактируете уроки курса как преподаватель <?= htmlspecialchars($creator['fn_user']) ?> (<?= htmlspecialchars($creator['login_user']) ?>)
+                    <a href="edit_lessons.php?course_id=<?= $course_id ?>" class="ui small right floated button">Выйти из режима редактирования</a>
+                </div>
+            <?php endif; ?>
 
             <?php if ($error): ?>
                 <div class="ui error message">

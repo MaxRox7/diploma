@@ -7,7 +7,7 @@ if (!isset($_GET['id'])) {
     exit;
 }
 
-$course_id = (int)$_GET['id'];
+$course_id = isset($_GET['id']) ? (int)$_GET['id'] : (isset($_POST['course_id']) ? (int)$_POST['course_id'] : 0);
 $user_id = $_SESSION['user']['id_user'];
 $error = '';
 $success = '';
@@ -25,13 +25,49 @@ try {
     $stmt->execute([$course_id, $user_id]);
     $course = $stmt->fetch();
     
-    if (!$course) {
+    // Если администратор просматривает курс с параметром admin_view=1
+    if (is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1) {
+        if (!$course) {
+            // Если курс не найден для текущего пользователя, получаем его напрямую
+            $stmt = $pdo->prepare("
+                SELECT c.*, cp.id_user
+                FROM course c
+                JOIN create_passes cp ON c.id_course = cp.id_course
+                WHERE c.id_course = ? AND cp.is_creator = true
+                LIMIT 1
+            ");
+            $stmt->execute([$course_id]);
+            $course = $stmt->fetch();
+            
+            if (!$course) {
+                header('Location: courses.php');
+                exit;
+            }
+            
+            // Получаем информацию о создателе курса для отображения
+            $stmt = $pdo->prepare("
+                SELECT u.fn_user, u.login_user
+                FROM users u
+                WHERE u.id_user = ?
+            ");
+            $stmt->execute([$course['id_user']]);
+            $creator = $stmt->fetch();
+            
+            $admin_view = true;
+        }
+    } else if (!$course) {
         header('Location: courses.php');
         exit;
     }
     
     // Обработка формы редактирования
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_POST['action']) && $_POST['action'] === 'send_to_moderation') {
+            $stmt = $pdo->prepare("UPDATE course SET status_course='pending', moderation_comment=NULL WHERE id_course=?");
+            $stmt->execute([$course_id]);
+            header('Location: edit_course.php?id=' . $course_id);
+            exit;
+        }
         $name_course = trim($_POST['name_course']);
         $desc_course = trim($_POST['desc_course']);
         $with_certificate = isset($_POST['with_certificate']) ? true : false;
@@ -116,6 +152,14 @@ try {
                 </div>
             </div>
 
+            <?php if (isset($admin_view) && $admin_view): ?>
+                <div class="ui info message">
+                    <i class="eye icon"></i>
+                    <strong>Режим администратора:</strong> Вы редактируете курс как преподаватель <?= htmlspecialchars($creator['fn_user']) ?> (<?= htmlspecialchars($creator['login_user']) ?>)
+                    <a href="edit_course.php?id=<?= $course_id ?>" class="ui small right floated button">Выйти из режима редактирования</a>
+                </div>
+            <?php endif; ?>
+
             <?php if ($error): ?>
                 <div class="ui error message">
                     <div class="header">Ошибка</div>
@@ -193,6 +237,37 @@ try {
                 <button type="submit" class="ui primary button">Сохранить изменения</button>
                 <a href="course.php?id=<?= $course_id ?>" class="ui button">Отмена</a>
             </form>
+
+            <?php if (($course['status_course'] === 'draft' || $course['status_course'] === 'correction') && $course['id_user'] == $user_id): ?>
+                <form method="post" style="margin-top: 20px;">
+                    <input type="hidden" name="action" value="send_to_moderation">
+                    <input type="hidden" name="course_id" value="<?= $course_id ?>">
+                    <button type="submit" class="ui orange button">
+                        <i class="paper plane icon"></i> Отправить на модерацию
+                    </button>
+                    <?php if ($course['status_course'] === 'correction' && !empty($course['moderation_comment'])): ?>
+                        <div class="ui warning message" style="margin-top:10px;">
+                            <b>Комментарий модератора:</b><br>
+                            <?= nl2br(htmlspecialchars($course['moderation_comment'])) ?>
+                        </div>
+                    <?php endif; ?>
+                </form>
+            <?php elseif ($course['status_course'] === 'pending'): ?>
+                <div class="ui info message" style="margin-top:20px;">
+                    Курс отправлен на модерацию. Ожидайте решения администратора.
+                </div>
+            <?php elseif ($course['status_course'] === 'approved'): ?>
+                <div class="ui positive message" style="margin-top:20px;">
+                    Курс одобрен и доступен студентам.
+                </div>
+            <?php elseif ($course['status_course'] === 'rejected'): ?>
+                <div class="ui negative message" style="margin-top:20px;">
+                    Курс отклонён модератором.
+                    <?php if (!empty($course['moderation_comment'])): ?>
+                        <br><b>Комментарий:</b> <?= nl2br(htmlspecialchars($course['moderation_comment'])) ?>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -22,6 +22,13 @@ try {
         $params = [$search_param, $search_param, $search_param];
     }
     
+    $user = $_SESSION['user'] ?? null;
+    $where = [];
+    if (!is_admin()) {
+        $where[] = "status_course='approved'";
+    }
+    $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+    
     // Получаем курсы с учетом поиска
     $stmt = $pdo->prepare("
         SELECT c.*, 
@@ -39,7 +46,7 @@ try {
         LEFT JOIN create_passes cp ON c.id_course = cp.id_course
         LEFT JOIN lessons l ON c.id_course = l.id_course
         LEFT JOIN feedback f ON c.id_course = f.id_course
-        WHERE 1=1 " . $search_condition . "
+        $where_sql $search_condition
         GROUP BY c.id_course
         ORDER BY c.id_course DESC
     ");
@@ -48,7 +55,6 @@ try {
     $stmt->execute($execute_params);
     $courses = $stmt->fetchAll();
     
-    $user = $_SESSION['user'];
     $filtered_courses = [];
     foreach ($courses as $course) {
         $ok = true;

@@ -25,9 +25,24 @@ try {
     $stmt->execute([$lesson_id]);
     $lesson = $stmt->fetch();
     
-    if (!$lesson || !is_course_creator($pdo, $lesson['id_course'], $_SESSION['user']['id_user'])) {
+    // Проверяем, является ли пользователь создателем курса или администратором в режиме просмотра
+    $is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
+    
+    if (!$lesson || (!$is_admin_view && !is_course_creator($pdo, $lesson['id_course'], $_SESSION['user']['id_user']))) {
         header('Location: courses.php');
         exit;
+    }
+    
+    // Если администратор просматривает курс, получаем информацию о создателе
+    if ($is_admin_view) {
+        $stmt = $pdo->prepare("
+            SELECT u.fn_user, u.login_user
+            FROM create_passes cp
+            JOIN users u ON cp.id_user = u.id_user
+            WHERE cp.id_course = ? AND cp.is_creator = true
+        ");
+        $stmt->execute([$lesson['id_course']]);
+        $creator = $stmt->fetch();
     }
     
     // Получаем шаги урока
@@ -252,11 +267,18 @@ try {
                     </div>
                 </h2>
                 <div class="ui right floated buttons">
-                    <a href="edit_lessons.php?course_id=<?= $lesson['id_course'] ?>" class="ui button">
-                        Назад к урокам
-                    </a>
+                    <a href="edit_lessons.php?course_id=<?= $lesson['id_course'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui button">Назад к урокам</a>
+                    <a href="course.php?id=<?= $lesson['id_course'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui primary button">Просмотр курса</a>
                 </div>
             </div>
+
+            <?php if ($is_admin_view): ?>
+                <div class="ui info message">
+                    <i class="eye icon"></i>
+                    <strong>Режим администратора:</strong> Вы редактируете шаги урока как преподаватель <?= htmlspecialchars($creator['fn_user']) ?> (<?= htmlspecialchars($creator['login_user']) ?>)
+                    <a href="edit_steps.php?lesson_id=<?= $lesson_id ?>" class="ui small right floated button">Выйти из режима редактирования</a>
+                </div>
+            <?php endif; ?>
 
             <?php if ($error): ?>
                 <div class="ui error message">
