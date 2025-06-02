@@ -11,7 +11,7 @@ try {
     
     // Get test information and check access rights
     $stmt = $pdo->prepare("
-        SELECT t.*, s.id_step, s.name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+        SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course
         FROM Tests t
         JOIN Steps s ON t.id_step = s.id_step
         JOIN lessons l ON s.id_lesson = l.id_lesson
@@ -23,14 +23,13 @@ try {
     $test = $stmt->fetch();
     
     if (!$test) {
-        header('Location: courses.php');
-        exit;
+        $error = 'Тест не найден или у вас нет доступа.';
     }
 
     // Get attempt information
     if ($attempt_id) {
         $stmt = $pdo->prepare("
-            SELECT ta.*, u.name_user, u.surname_user, u.email_user
+            SELECT ta.*, u.fn_user
             FROM test_attempts ta
             JOIN users u ON ta.id_user = u.id_user
             WHERE ta.id_attempt = ? AND (
@@ -56,12 +55,12 @@ try {
         $attempt = $stmt->fetch();
 
         if ($attempt) {
-            // Get detailed answers
+            // Получаем подробные ответы
             $stmt = $pdo->prepare("
                 SELECT 
-                    ta.*,
-                    q.text_question,
-                    ao.text_option as selected_option,
+                    ta.*, 
+                    q.text_question, 
+                    q.type_question, 
                     (
                         SELECT text_option 
                         FROM Answer_options 
@@ -70,44 +69,40 @@ try {
                     ) as correct_option
                 FROM test_answers ta
                 JOIN Questions q ON ta.id_question = q.id_question
-                JOIN Answer_options ao ON ta.id_selected_option = ao.id_option
                 WHERE ta.id_attempt = ?
                 ORDER BY q.id_question
             ");
             $stmt->execute([$attempt_id]);
             $answers = $stmt->fetchAll();
+            // Для каждого ответа подгружаем варианты и декодируем данные
+            foreach ($answers as $k => $ans) {
+                // Получаем все варианты ответа
+                $stmt_opts = $pdo->prepare("SELECT * FROM Answer_options WHERE id_question = ? ORDER BY id_option");
+                $stmt_opts->execute([$ans['id_question']]);
+                $answers[$k]['options'] = $stmt_opts->fetchAll();
+                // Для multi/match/code декодируем текст ответа, если есть
+                if ($ans['type_question'] === 'multi' || $ans['type_question'] === 'match' || $ans['type_question'] === 'code') {
+                    if (isset($ans['answer_text'])) {
+                        $answers[$k]['answer_text'] = $ans['answer_text'];
+                    }
+                }
+            }
         }
     }
 
     // Get all attempts for this test
-    if (is_teacher() || is_admin()) {
+    $attempts = [];
+    if ($test) {
         $stmt = $pdo->prepare("
-            SELECT 
-                ta.*,
-                u.name_user,
-                u.surname_user,
-                u.email_user
+            SELECT ta.*, u.fn_user
             FROM test_attempts ta
             JOIN users u ON ta.id_user = u.id_user
             WHERE ta.id_test = ?
             ORDER BY ta.start_time DESC
         ");
         $stmt->execute([$test_id]);
-    } else {
-        $stmt = $pdo->prepare("
-            SELECT 
-                ta.*,
-                u.name_user,
-                u.surname_user,
-                u.email_user
-            FROM test_attempts ta
-            JOIN users u ON ta.id_user = u.id_user
-            WHERE ta.id_test = ? AND ta.id_user = ?
-            ORDER BY ta.start_time DESC
-        ");
-        $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+        $attempts = $stmt->fetchAll();
     }
-    $attempts = $stmt->fetchAll();
 
 } catch (PDOException $e) {
     $error = 'Ошибка базы данных: ' . $e->getMessage();
@@ -134,7 +129,7 @@ try {
                 <div class="sub header">
                     Курс: <?= htmlspecialchars($test['name_course']) ?><br>
                     Урок: <?= htmlspecialchars($test['name_lesson']) ?><br>
-                    Шаг: <?= htmlspecialchars($test['name_step']) ?>
+                    Шаг: <?= htmlspecialchars($test['number_steps']) ?>
                 </div>
             </h1>
 
@@ -152,7 +147,7 @@ try {
                         <tbody>
                             <tr>
                                 <td><strong>Студент</strong></td>
-                                <td><?= htmlspecialchars($attempt['name_user'] . ' ' . $attempt['surname_user']) ?></td>
+                                <td><?= htmlspecialchars($attempt['fn_user']) ?></td>
                             </tr>
                             <tr>
                                 <td><strong>Дата начала</strong></td>
@@ -184,7 +179,55 @@ try {
                                 </div>
                                 <div class="<?= $index === 0 ? 'active' : '' ?> content">
                                     <p><strong>Вопрос:</strong> <?= htmlspecialchars($answer['text_question']) ?></p>
-                                    <p><strong>Ваш ответ:</strong> <?= htmlspecialchars($answer['selected_option']) ?></p>
+                                    <p><strong>Ваш ответ:</strong>
+                                        <?php
+                                        if ($answer['type_question'] === 'single') {
+                                            // Для single — текст выбранного варианта
+                                            $opt = null;
+                                            foreach ($answer['options'] as $o) {
+                                                if ($o['id_option'] == $answer['id_selected_option']) $opt = $o['text_option'];
+                                            }
+                                            echo $opt ? htmlspecialchars($opt) : '<span class="text-muted">Нет ответа</span>';
+                                        } elseif ($answer['type_question'] === 'multi') {
+                                            // Для multi — список выбранных вариантов (answer_text — JSON с id_option)
+                                            $selected = [];
+                                            if (!empty($answer['answer_text'])) {
+                                                $ids = json_decode($answer['answer_text'], true);
+                                                if (is_array($ids)) {
+                                                    foreach ($answer['options'] as $o) {
+                                                        if (in_array($o['id_option'], $ids)) $selected[] = $o['text_option'];
+                                                    }
+                                                }
+                                            }
+                                            echo $selected ? htmlspecialchars(implode(', ', $selected)) : '<span class="text-muted">Нет ответа</span>';
+                                        } elseif ($answer['type_question'] === 'match') {
+                                            // Для match — пары (answer_text — JSON с парами)
+                                            if (!empty($answer['answer_text'])) {
+                                                $pairs = json_decode($answer['answer_text'], true);
+                                                if (is_array($pairs)) {
+                                                    echo '<ul>';
+                                                    foreach ($pairs as $left => $right) {
+                                                        echo '<li>' . htmlspecialchars($left) . ' → ' . htmlspecialchars($right) . '</li>';
+                                                    }
+                                                    echo '</ul>';
+                                                } else {
+                                                    echo '<span class="text-muted">Нет ответа</span>';
+                                                }
+                                            } else {
+                                                echo '<span class="text-muted">Нет ответа</span>';
+                                            }
+                                        } elseif ($answer['type_question'] === 'code') {
+                                            // Для code — текст кода (answer_text)
+                                            if (!empty($answer['answer_text'])) {
+                                                echo '<pre>' . htmlspecialchars($answer['answer_text']) . '</pre>';
+                                            } else {
+                                                echo '<span class="text-muted">Ответ не сохранён</span>';
+                                            }
+                                        } else {
+                                            echo '<span class="text-muted">Нет ответа</span>';
+                                        }
+                                        ?>
+                                    </p>
                                     <?php if (!$answer['is_correct']): ?>
                                         <p><strong>Правильный ответ:</strong> <?= htmlspecialchars($answer['correct_option']) ?></p>
                                     <?php endif; ?>
@@ -210,7 +253,7 @@ try {
                     <tbody>
                         <?php foreach ($attempts as $attempt): ?>
                             <tr>
-                                <td><?= htmlspecialchars($attempt['name_user'] . ' ' . $attempt['surname_user']) ?></td>
+                                <td><?= htmlspecialchars($attempt['fn_user']) ?></td>
                                 <td><?= htmlspecialchars($attempt['start_time']) ?></td>
                                 <td><?= htmlspecialchars($attempt['status']) ?></td>
                                 <td>

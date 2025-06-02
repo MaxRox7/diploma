@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS test_answers (
     id_question INTEGER REFERENCES Questions(id_question),
     id_selected_option INTEGER REFERENCES Answer_options(id_option),
     is_correct BOOLEAN,
-    answer_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    answer_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    answer_text text
 );
 
 -- Add indexes for better performance
