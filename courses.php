@@ -48,6 +48,17 @@ try {
     $stmt->execute($execute_params);
     $courses = $stmt->fetchAll();
     
+    $user = $_SESSION['user'];
+    $filtered_courses = [];
+    foreach ($courses as $course) {
+        $ok = true;
+        if (!empty($course['required_uni']) && $course['required_uni'] !== $user['uni_user']) $ok = false;
+        if (!empty($course['required_spec']) && $course['required_spec'] !== $user['spec_user']) $ok = false;
+        if (!empty($course['requred_year']) && (string)$course['requred_year'] !== (string)$user['year_user']) $ok = false;
+        if ($ok) $filtered_courses[] = $course;
+    }
+    $courses = $filtered_courses;
+    
 } catch (PDOException $e) {
     $error = 'Ошибка базы данных: ' . $e->getMessage();
 }

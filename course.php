@@ -127,6 +127,18 @@ try {
         $can_leave_feedback = !$has_feedback;
     }
     
+    // Проверка ограничений курса
+    $user = $_SESSION['user'];
+    if (!empty($course['required_uni']) && $course['required_uni'] !== $user['uni_user']) {
+        throw new Exception('Этот курс доступен только для студентов вуза: ' . htmlspecialchars($course['required_uni']));
+    }
+    if (!empty($course['required_spec']) && $course['required_spec'] !== $user['spec_user']) {
+        throw new Exception('Этот курс доступен только для специальности: ' . htmlspecialchars($course['required_spec']));
+    }
+    if (!empty($course['requred_year']) && (string)$course['requred_year'] !== (string)$user['year_user']) {
+        throw new Exception('Этот курс доступен только для студентов ' . htmlspecialchars($course['requred_year']) . ' года обучения');
+    }
+    
     // Обработка POST запросов
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['action'])) {

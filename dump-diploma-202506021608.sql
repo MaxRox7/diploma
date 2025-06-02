@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.0
 
--- Started on 2025-06-02 13:30:04
+-- Started on 2025-06-02 16:08:39
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -333,7 +333,7 @@ ALTER SEQUENCE public.lessons_id_lesson_seq OWNED BY public.lessons.id_lesson;
 --
 
 CREATE TABLE public.material (
-    id_material character(10) NOT NULL,
+    id_material character(1000) NOT NULL,
     id_step integer,
     path_matial character varying(1024),
     link_material character varying(5000)
@@ -517,7 +517,8 @@ CREATE TABLE public.test_answers (
     id_question integer,
     id_selected_option integer,
     is_correct boolean,
-    answer_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    answer_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    answer_text text
 );
 
 
@@ -822,6 +823,22 @@ ALTER TABLE ONLY public.users ALTER COLUMN id_user SET DEFAULT nextval('public.u
 --
 
 COPY public.answer_options (id_option, id_question, text_option) FROM stdin;
+30	21	to get
+31	21	to the
+32	21	other side
+33	22	АСУ
+34	22	Что  то
+35	22	что то
+36	23	Элизиум||Киберспорт
+37	23	Зевс||Спорт
+38	25	Потому что
+39	25	Не потому что
+40	26	Как то так
+41	26	Ну вот так
+42	27	1||1
+43	27	2||2
+44	28	1111
+45	28	11111
 \.
 
 
@@ -867,6 +884,9 @@ COPY public.course (id_course, name_course, desc_course, with_certificate, hours
 16	fxg	dfg	f	1	\N	\N	\N	\N	dfg
 17	курс	курс	f	1	\N	\N	\N	\N	12
 18	asd	asd	t	1	\N	\N	\N	\N	asd
+19	Курс для крутой проверки	Этот курс я щас сделаю круто и полноценно	f	5	\N	\N	\N	\N	php, web. krutyak
+20	asd	asd	f	12	\N	\N	\N	\N	12
+21	ytuytu	tyutyu	t	12	1	Информатика	\N	beginner	dfg
 \.
 
 
@@ -881,14 +901,39 @@ COPY public.create_passes (id_course, id_user, is_creator, date_complete) FROM s
 18	3	f	2025-05-30 14:22:16.677608
 18	16	f	2025-05-30 14:22:38.374152
 18	2	f	2025-05-30 14:25:12.458045
+17	2	f	\N
+18	17	f	\N
+17	17	f	\N
+18	10	f	\N
+17	10	f	\N
+18	18	f	\N
+17	18	f	\N
+17	16	f	\N
+18	19	f	\N
+17	19	f	\N
 16	1	t	\N
+18	20	f	\N
+17	20	f	\N
+19	1	t	\N
+19	2	f	2025-06-02 12:16:54.787512
+19	10	f	\N
+16	10	f	\N
+19	3	f	2025-06-02 12:24:09.234734
+19	9	f	\N
 17	1	t	\N
 8	13	f	\N
 8	14	f	\N
 8	2	f	\N
 16	2	f	\N
 16	9	f	\N
+20	1	t	\N
+20	17	f	\N
 8	9	f	\N
+20	9	f	2025-06-02 12:38:15.67285
+20	3	f	2025-06-02 12:49:37.314823
+20	10	f	\N
+18	9	f	2025-06-02 13:01:16.152397
+21	1	t	\N
 18	1	t	\N
 18	15	f	\N
 17	9	f	\N
@@ -911,6 +956,8 @@ COPY public.create_passes (id_course, id_user, is_creator, date_complete) FROM s
 
 COPY public.feedback (id_feedback, id_course, text_feedback, date_feedback, rate_feedback, id_user) FROM stdin;
 9	18	sdfdsf	2025-05-30	5	2
+10	19	Классный курс	2025-06-02	5	2
+11	19	asas	2025-06-02	5	3
 \.
 
 
@@ -927,6 +974,10 @@ COPY public.lessons (id_lesson, id_course, id_stat, name_lesson, status_lesson) 
 21	17	\N	фывфыв	new
 22	18	\N	Переменные	new
 23	18	\N	asd	new
+24	18	\N	Васька	new
+25	19	\N	Что такое программирование?	new
+26	19	\N	Что такое жизнь?	new
+27	20	\N	Переменные	new
 \.
 
 
@@ -937,12 +988,14 @@ COPY public.lessons (id_lesson, id_course, id_stat, name_lesson, status_lesson) 
 --
 
 COPY public.material (id_material, id_step, path_matial, link_material) FROM stdin;
-MAT8677937	21	materials/jjjjjjjjj/vbvbvb/Читайте_21/Приказ_фиджитал.pdf	\N
-MAT0129978	27	materials/fxg/Переменные/asd_27/Приказ_фиджитал.pdf	\N
-MAT5371039	28	materials/курс/Условные_операторы/фыв_28/PrakticheskayaRabota7.pdf	\N
-MAT6220053	29	materials/курс/Условные_операторы/фывфывфыв_29/Rekvizity_schyota.pdf	\N
-MAT4266619	30	materials/курс/Условные_операторы/фывфывфыв_30/Rekvizity_schyota.pdf	\N
-MAT4782742	31	materials/asd/Переменные/asd_31/Практика._Характеристика.pdf	\N
+MAT8677937                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              	21	materials/jjjjjjjjj/vbvbvb/Читайте_21/Приказ_фиджитал.pdf	\N
+MAT0129978                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              	27	materials/fxg/Переменные/asd_27/Приказ_фиджитал.pdf	\N
+MAT6051717                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              	50	materials/asd/Переменные/фы_50/2025-pravila-provedenia-konkursa-formirovanie-rezerva-liderov-kibersporta.pdf	\N
+683d9589ea386                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	54	materials/garshina/Что такое программирование?/материал1_54.pdf	\N
+683d95915e282                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	55	materials/garshina/Что такое программирование?/материал2_55.pdf	\N
+683d95f81e73f                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	57	materials/garshina/Что такое жизнь?/Жизнь_57.pdf	\N
+683d987c87004                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	59	materials/garshina/Переменные/as_59.pdf	\N
+683d9b50db7f6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	60	materials/garshina/asd/asas_60.pdf	\N
 \.
 
 
@@ -953,6 +1006,15 @@ MAT4782742	31	materials/asd/Переменные/asd_31/Практика._Хар
 --
 
 COPY public.questions (id_question, id_test, text_question, answer_question, type_question, image_question) FROM stdin;
+21	20	why did the chicken crossed the road?	0,1,2	multi	\N
+22	20	Какая лучшая кафедра?	0	single	\N
+23	20	Деятельность актива ЛГТУ		match	\N
+24	20	Напиши		code	\N
+25	21	ну почему?	0	single	\N
+26	21	Как	0	multi	\N
+27	22	asdsad		match	\N
+28	22	111	0,1	multi	\N
+29	22	sdfsdfsdfsdf		code	\N
 \.
 
 
@@ -983,14 +1045,17 @@ COPY public.stat (id_stat, id_user, id_course, id_result, prec_through) FROM std
 --
 
 COPY public.steps (id_step, id_lesson, number_steps, status_step, type_step) FROM stdin;
-36	23	пропро	not_started	test
-37	23	Тест	not_started	test
+50	22	фы	not_started	material
+54	25	материал1	not_started	material
+55	25	материал2	not_started	material
+56	25	тест после материала	not_started	test
+57	26	Жизнь	not_started	material
+58	26	Тест	not_started	test
+59	27	as	not_started	material
+60	23	asas	not_started	material
+61	24	test	not_started	test
 21	10	Читайте	completed	material
 27	19	asd	completed	material
-29	20	фывфывфыв	completed	material
-30	20	фывфывфыв	completed	material
-28	20	фыв	completed	material
-31	22	asd	not_started	material
 \.
 
 
@@ -1000,7 +1065,32 @@ COPY public.steps (id_step, id_lesson, number_steps, status_step, type_step) FRO
 -- Data for Name: test_answers; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
-COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option, is_correct, answer_time) FROM stdin;
+COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option, is_correct, answer_time, answer_text) FROM stdin;
+23	14	21	30	t	2025-06-02 12:16:43.789087	\N
+24	14	22	33	t	2025-06-02 12:16:43.792159	\N
+25	14	23	\N	t	2025-06-02 12:16:43.794578	\N
+26	14	24	\N	t	2025-06-02 12:16:43.796107	\N
+27	15	25	38	t	2025-06-02 12:16:52.801221	\N
+28	15	26	40	t	2025-06-02 12:16:52.804085	\N
+29	16	21	30	t	2025-06-02 12:18:37.024189	\N
+30	16	22	33	t	2025-06-02 12:18:37.026426	\N
+31	16	23	\N	t	2025-06-02 12:18:37.028279	\N
+32	16	24	\N	t	2025-06-02 12:18:37.029565	\N
+33	17	21	30	t	2025-06-02 12:23:51.53388	\N
+34	17	22	33	t	2025-06-02 12:23:51.536793	\N
+35	17	23	\N	t	2025-06-02 12:23:51.539218	\N
+36	17	24	\N	t	2025-06-02 12:23:51.540791	\N
+37	18	25	38	t	2025-06-02 12:24:02.097131	\N
+38	18	26	40	t	2025-06-02 12:24:02.100062	\N
+39	19	27	\N	t	2025-06-02 12:39:51.331882	\N
+40	19	28	44	t	2025-06-02 12:39:51.334951	\N
+41	19	29	\N	t	2025-06-02 12:39:51.336564	\N
+42	20	27	\N	f	2025-06-02 12:49:55.77388	\N
+43	20	28	44	t	2025-06-02 12:49:55.779871	\N
+44	20	29	\N	t	2025-06-02 12:49:55.782486	\N
+45	21	27	\N	t	2025-06-02 12:55:07.325412	["0","1"]
+46	21	28	44	t	2025-06-02 12:55:07.328549	["0","1"]
+47	21	29	\N	t	2025-06-02 12:55:07.330248	123123
 \.
 
 
@@ -1011,6 +1101,14 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 --
 
 COPY public.test_attempts (id_attempt, id_test, id_user, start_time, end_time, score, max_score, status) FROM stdin;
+14	20	2	2025-06-02 12:16:43.782236	2025-06-02 12:16:43.782236	4	4	completed
+15	21	2	2025-06-02 12:16:52.759146	2025-06-02 12:16:52.759146	2	2	completed
+16	20	10	2025-06-02 12:18:37.017315	2025-06-02 12:18:37.017315	4	4	completed
+17	20	3	2025-06-02 12:23:51.493151	2025-06-02 12:23:51.493151	4	4	completed
+18	21	3	2025-06-02 12:24:02.055365	2025-06-02 12:24:02.055365	2	2	completed
+19	22	9	2025-06-02 12:39:51.291529	2025-06-02 12:39:51.291529	3	3	completed
+20	22	3	2025-06-02 12:49:55.768919	2025-06-02 12:49:55.768919	2	3	completed
+21	22	10	2025-06-02 12:55:07.283706	2025-06-02 12:55:07.283706	3	3	completed
 \.
 
 
@@ -1021,8 +1119,9 @@ COPY public.test_attempts (id_attempt, id_test, id_user, start_time, end_time, s
 --
 
 COPY public.tests (id_test, id_step, name_test, desc_test) FROM stdin;
-2	36	Новый тест	
-3	37	Новый тест	
+20	56	Новый тест	
+21	58	Новый тест	
+22	61	Новый тест	
 \.
 
 
@@ -1034,9 +1133,24 @@ COPY public.tests (id_test, id_step, name_test, desc_test) FROM stdin;
 
 COPY public.user_material_progress (id_user, id_step, completed_at) FROM stdin;
 15	27	2025-05-30 14:21:58.760134
-3	31	2025-05-30 14:22:14.645706
-16	31	2025-05-30 14:22:36.653135
-2	31	2025-05-30 14:25:11.377129
+2	54	2025-06-02 12:16:33.661684
+2	55	2025-06-02 12:16:34.467987
+2	57	2025-06-02 12:16:48.979706
+10	54	2025-06-02 12:18:28.562323
+10	55	2025-06-02 12:18:29.192111
+10	57	2025-06-02 12:19:10.277269
+3	54	2025-06-02 12:23:41.556144
+3	55	2025-06-02 12:23:44.009788
+3	57	2025-06-02 12:23:57.576582
+9	54	2025-06-02 12:26:03.299362
+9	50	2025-06-02 12:38:02.863157
+9	59	2025-06-02 12:38:14.492136
+10	50	2025-06-02 12:38:47.964909
+10	60	2025-06-02 12:38:49.707266
+9	60	2025-06-02 12:39:42.719693
+3	59	2025-06-02 12:49:36.5386
+3	50	2025-06-02 12:49:42.794859
+3	60	2025-06-02 12:49:46.648917
 \.
 
 
@@ -1062,6 +1176,11 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 14	Болдырев Максим Романович	2003-03-19	asd	student	asd	1	\N	\N	\N	maxaaa	$2y$12$1bjYwQK39JrB60R2G8ulrODe8AAoQEiGVW0H.r9st0x6dvozqScuG
 15	Болдырев Максим Романович	2003-03-19	ысвм	student	длоит	5	\N	\N	\N	cat1	$2y$12$vLBn1cyuIjtT2/obwCxkZu0SbvFN.oUs/wCbwhvoGvm1F2KIlVOJW
 16	asdsadas	0203-03-19	kjb	student	kjb	2	\N	\N	\N	maxi	$2y$12$.QZy.iCVW5OXcrJG1G1jyuIXiP3eTSoX4bVcdIPxO5wWdPsyRw1.O
+17	Гаршина Юлия	2003-03-19	asd	student	sad	3	\N	\N	\N	max	$2y$12$jiZgCcQVQCS/0cZoz/9xkOddBOEo7rF/n/QmYGhYJfhWdKcpXbD1C
+18	Гаршина Юлия	2003-03-19	фыа	student	фыва	2	\N	\N	\N	rox2	$2y$12$.dAcyngBQg7FtyWNKLg8fe2Ba4NFx14M6CuRsMQFJajRr..gJYN6O
+19	asdasdasd	2003-03-19	asd	student	asd	2	\N	\N	\N	okak	$2y$12$Y3XpprFz4xhnXxGFcxyrmuv0/4fH.corayejUPn5bjmGXRWXAKL6W
+20	Болдырев Максим Романович	2003-03-19	asd	student	asd	3	\N	\N	\N	max1	$2y$12$DesbJupvhqEH7hsFhMXo3uOTvrrelfSA.rIrXQD4m0vsgx5KnZoGa
+21	Maxim Boldyrev	2003-03-19	ЛГТУ	student	Информатика	1	\N	\N	\N	oops	$2y$12$O4xRZxgvK/WJPH0JKq9XV.YtyN7eGZjqDNu3ZwBh5wHDnLNYbknlu
 \.
 
 
@@ -1071,7 +1190,7 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 -- Name: answer_options_id_option_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.answer_options_id_option_seq', 1, false);
+SELECT pg_catalog.setval('public.answer_options_id_option_seq', 45, true);
 
 
 --
@@ -1107,7 +1226,7 @@ SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 1, false);
 -- Name: course_id_course_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.course_id_course_seq', 18, true);
+SELECT pg_catalog.setval('public.course_id_course_seq', 21, true);
 
 
 --
@@ -1116,7 +1235,7 @@ SELECT pg_catalog.setval('public.course_id_course_seq', 18, true);
 -- Name: feedback_id_feedback_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 9, true);
+SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 11, true);
 
 
 --
@@ -1125,7 +1244,7 @@ SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 9, true);
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 23, true);
+SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 27, true);
 
 
 --
@@ -1134,7 +1253,7 @@ SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 23, true);
 -- Name: questions_id_question_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.questions_id_question_seq', 1, false);
+SELECT pg_catalog.setval('public.questions_id_question_seq', 29, true);
 
 
 --
@@ -1143,7 +1262,7 @@ SELECT pg_catalog.setval('public.questions_id_question_seq', 1, false);
 -- Name: results_id_result_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.results_id_result_seq', 1, false);
+SELECT pg_catalog.setval('public.results_id_result_seq', 31, true);
 
 
 --
@@ -1161,7 +1280,7 @@ SELECT pg_catalog.setval('public.stat_id_stat_seq', 1, false);
 -- Name: steps_id_step_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.steps_id_step_seq', 37, true);
+SELECT pg_catalog.setval('public.steps_id_step_seq', 61, true);
 
 
 --
@@ -1170,7 +1289,7 @@ SELECT pg_catalog.setval('public.steps_id_step_seq', 37, true);
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 1, false);
+SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 47, true);
 
 
 --
@@ -1179,7 +1298,7 @@ SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 1, false);
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 1, false);
+SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 21, true);
 
 
 --
@@ -1188,7 +1307,7 @@ SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 1, false);
 -- Name: tests_id_test_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.tests_id_test_seq', 3, true);
+SELECT pg_catalog.setval('public.tests_id_test_seq', 22, true);
 
 
 --
@@ -1197,7 +1316,7 @@ SELECT pg_catalog.setval('public.tests_id_test_seq', 3, true);
 -- Name: users_id_user_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.users_id_user_seq', 16, true);
+SELECT pg_catalog.setval('public.users_id_user_seq', 21, true);
 
 
 --
@@ -1273,7 +1392,7 @@ ALTER TABLE ONLY public.lessons
 
 
 --
--- TOC entry 3370 (class 2606 OID 24603)
+-- TOC entry 3370 (class 2606 OID 24908)
 -- Name: material pk_material; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1532,7 +1651,7 @@ CREATE UNIQUE INDEX lessons_pk ON public.lessons USING btree (id_lesson);
 
 
 --
--- TOC entry 3367 (class 1259 OID 24604)
+-- TOC entry 3367 (class 1259 OID 24909)
 -- Name: material_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1904,7 +2023,7 @@ ALTER TABLE ONLY public.user_material_progress
     ADD CONSTRAINT user_material_progress_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.users(id_user);
 
 
--- Completed on 2025-06-02 13:30:06
+-- Completed on 2025-06-02 16:08:41
 
 --
 -- PostgreSQL database dump complete
