@@ -15,17 +15,23 @@ $success = '';
 try {
     $pdo = get_db_connection();
     
+    // Инициализируем переменную questions
+    $questions = [];
+    
     // Получаем информацию о тесте и проверяем права доступа
     $stmt = $pdo->prepare("
-        SELECT t.*, s.id_step, s.name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course, cp.id_user
+        SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course, cp.id_user
         FROM Tests t
         JOIN Steps s ON t.id_step = s.id_step
         JOIN lessons l ON s.id_lesson = l.id_lesson
         JOIN course c ON l.id_course = c.id_course
         JOIN create_passes cp ON c.id_course = cp.id_course
-        WHERE t.id_test = ? AND cp.id_user = ?
+        WHERE t.id_test = ? AND cp.id_user = ? AND EXISTS (
+            SELECT 1 FROM users u 
+            WHERE u.id_user = cp.id_user AND u.role_user IN (?, ?)
+        )
     ");
-    $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+    $stmt->execute([$test_id, $_SESSION['user']['id_user'], ROLE_ADMIN, ROLE_TEACHER]);
     $test = $stmt->fetch();
     
     if (!$test) {
@@ -241,12 +247,15 @@ function get_question_options($pdo, $question_id) {
                 <h2 class="ui left floated header">
                     Редактирование теста
                     <div class="sub header">
-                        Курс: <?= htmlspecialchars($test['name_course']) ?><br>
-                        Урок: <?= htmlspecialchars($test['name_lesson']) ?><br>
-                        Шаг: <?= htmlspecialchars($test['name_step']) ?>
+                        Курс: <?= htmlspecialchars($test['name_course'] ?? '') ?><br>
+                        Урок: <?= htmlspecialchars($test['name_lesson'] ?? '') ?><br>
+                        Шаг: <?= htmlspecialchars($test['number_steps'] ?? '') ?>
                     </div>
                 </h2>
                 <div class="ui right floated buttons">
+                    <a href="test_results.php?test_id=<?= $test_id ?>" class="ui button">
+                        Результаты теста
+                    </a>
                     <a href="edit_steps.php?lesson_id=<?= $test['id_lesson'] ?>" class="ui button">
                         Назад к шагам
                     </a>
@@ -262,147 +271,197 @@ function get_question_options($pdo, $question_id) {
 
             <?php if ($success): ?>
                 <div class="ui success message">
-                    <div class="header">Успех</div>
+                    <div class="header">Успех!</div>
                     <p><?= htmlspecialchars($success) ?></p>
                 </div>
             <?php endif; ?>
 
             <!-- Форма добавления вопроса -->
             <div class="ui segment">
-                <h3 class="ui header">Добавить новый вопрос</h3>
-                <form class="ui form" method="post" id="addQuestionForm">
+                <h3>Добавить новый вопрос</h3>
+                <form method="post" class="ui form">
                     <input type="hidden" name="action" value="add_question">
                     
                     <div class="field">
                         <label>Текст вопроса</label>
-                        <input type="text" name="question_text" placeholder="Введите вопрос" required>
+                        <textarea name="question_text" rows="2" required></textarea>
                     </div>
-                    
-                    <div class="field">
-                        <label>Варианты ответов</label>
-                        <div class="options-container">
-                            <div class="fields">
-                                <div class="twelve wide field">
+
+                    <div class="fields">
+                        <div class="twelve wide field">
+                            <label>Варианты ответов</label>
+                            <div id="options-container">
+                                <div class="field">
                                     <input type="text" name="options[]" placeholder="Вариант ответа 1" required>
                                 </div>
-                                <div class="four wide field">
-                                    <div class="ui radio checkbox">
-                                        <input type="radio" name="correct_option" value="0" required checked>
-                                        <label>Правильный ответ</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="fields">
-                                <div class="twelve wide field">
+                                <div class="field">
                                     <input type="text" name="options[]" placeholder="Вариант ответа 2" required>
                                 </div>
-                                <div class="four wide field">
-                                    <div class="ui radio checkbox">
-                                        <input type="radio" name="correct_option" value="1" required>
-                                        <label>Правильный ответ</label>
-                                    </div>
-                                </div>
                             </div>
+                            <button type="button" class="ui basic button" onclick="addOption()">
+                                <i class="plus icon"></i> Добавить вариант
+                            </button>
                         </div>
-                        <button type="button" class="ui basic button" id="addOptionBtn">
-                            <i class="plus icon"></i>
-                            Добавить вариант
-                        </button>
+                        <div class="four wide field">
+                            <label>Правильный ответ</label>
+                            <select name="correct_option" class="ui dropdown" required>
+                                <option value="0">Вариант 1</option>
+                                <option value="1">Вариант 2</option>
+                            </select>
+                        </div>
                     </div>
-                    
+
                     <button type="submit" class="ui primary button">Добавить вопрос</button>
                 </form>
             </div>
 
-            <!-- Список вопросов -->
-            <?php if (empty($questions)): ?>
-                <div class="ui placeholder segment">
-                    <div class="ui icon header">
-                        <i class="tasks icon"></i>
-                        В тесте пока нет вопросов
-                    </div>
-                </div>
-            <?php else: ?>
-                <div class="ui segments">
-                    <?php foreach ($questions as $question): ?>
-                        <?php $options = get_question_options($pdo, $question['id_question']); ?>
-                        <div class="ui segment">
-                            <form class="ui form" method="post">
+            <!-- Список существующих вопросов -->
+            <div class="ui segment">
+                <h3>Вопросы теста</h3>
+                <div class="ui styled fluid accordion">
+                    <?php foreach ($questions as $index => $question): ?>
+                        <div class="title">
+                            <i class="dropdown icon"></i>
+                            Вопрос <?= $index + 1 ?>: <?= htmlspecialchars(substr($question['text_question'], 0, 50)) ?>...
+                        </div>
+                        <div class="content">
+                            <form method="post" class="ui form">
                                 <input type="hidden" name="action" value="edit_question">
                                 <input type="hidden" name="question_id" value="<?= $question['id_question'] ?>">
                                 
                                 <div class="field">
                                     <label>Текст вопроса</label>
-                                    <div class="ui action input">
-                                        <input type="text" name="question_text" value="<?= htmlspecialchars($question['text_question']) ?>" required>
-                                        <button type="submit" class="ui primary button">Сохранить</button>
-                                        <button type="submit" class="ui red button" 
-                                                formaction="?test_id=<?= $test_id ?>" 
-                                                onclick="return confirm('Вы уверены, что хотите удалить этот вопрос?');"
-                                                name="action" value="delete_question">
-                                            Удалить
+                                    <textarea name="question_text" rows="2" required><?= htmlspecialchars($question['text_question']) ?></textarea>
+                                </div>
+
+                                <div class="fields">
+                                    <div class="twelve wide field">
+                                        <label>Варианты ответов</label>
+                                        <div class="options-container">
+                                            <?php 
+                                            $options = get_question_options($pdo, $question['id_question']);
+                                            foreach ($options as $opt_index => $option): 
+                                            ?>
+                                                <div class="field">
+                                                    <input type="text" 
+                                                           name="options[]" 
+                                                           value="<?= htmlspecialchars($option['text_option']) ?>" 
+                                                           required>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <button type="button" class="ui basic button" onclick="addOptionToContainer(this)">
+                                            <i class="plus icon"></i> Добавить вариант
                                         </button>
                                     </div>
+                                    <div class="four wide field">
+                                        <label>Правильный ответ</label>
+                                        <select name="correct_option" class="ui dropdown" required>
+                                            <?php foreach ($options as $opt_index => $option): ?>
+                                                <option value="<?= $opt_index ?>" <?= $option['is_correct'] ? 'selected' : '' ?>>
+                                                    Вариант <?= $opt_index + 1 ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                 </div>
-                                
-                                <div class="field">
-                                    <label>Варианты ответов</label>
-                                    <?php foreach ($options as $index => $option): ?>
-                                        <div class="fields">
-                                            <div class="twelve wide field">
-                                                <input type="text" name="options[]" value="<?= htmlspecialchars($option['text_option']) ?>" required>
-                                            </div>
-                                            <div class="four wide field">
-                                                <div class="ui radio checkbox">
-                                                    <input type="radio" name="correct_option" value="<?= $index ?>" <?= $option['is_correct'] ? 'checked' : '' ?> required>
-                                                    <label>Правильный ответ</label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
+
+                                <div class="ui buttons">
+                                    <button type="submit" class="ui primary button">Сохранить изменения</button>
+                                    <button type="submit" 
+                                            class="ui negative button"
+                                            onclick="if(!confirm('Вы уверены, что хотите удалить этот вопрос?')) return false;
+                                                     this.form.action.value='delete_question';">
+                                        Удалить вопрос
+                                    </button>
                                 </div>
                             </form>
                         </div>
                     <?php endforeach; ?>
                 </div>
-            <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
 $(document).ready(function() {
-    $('.ui.checkbox').checkbox();
-    
-    let optionCount = 2;
-    
-    $('#addOptionBtn').click(function() {
-        optionCount++;
-        const newOption = `
-            <div class="fields">
-                <div class="twelve wide field">
-                    <input type="text" name="options[]" placeholder="Вариант ответа ${optionCount}" required>
-                </div>
-                <div class="four wide field">
-                    <div class="ui radio checkbox">
-                        <input type="radio" name="correct_option" value="${optionCount - 1}" required>
-                        <label>Правильный ответ</label>
-                    </div>
-                </div>
-            </div>
-        `;
-        $('.options-container').append(newOption);
-        $('.ui.checkbox').checkbox();
-    });
-    
-    $('.ui.form').form({
-        fields: {
-            question_text: 'empty',
-            'options[]': 'empty',
-            correct_option: 'checked'
-        }
-    });
+    $('.ui.accordion').accordion();
+    $('.ui.dropdown').dropdown();
 });
+
+function addOption() {
+    const container = document.getElementById('options-container');
+    const optionCount = container.children.length;
+    
+    const newField = document.createElement('div');
+    newField.className = 'field';
+    newField.innerHTML = `
+        <div class="ui action input">
+            <input type="text" name="options[]" placeholder="Вариант ответа ${optionCount + 1}" required>
+            <button type="button" class="ui icon button" onclick="removeOption(this)">
+                <i class="trash icon"></i>
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(newField);
+    updateCorrectOptions();
+}
+
+function addOptionToContainer(button) {
+    const container = button.previousElementSibling;
+    const optionCount = container.children.length;
+    
+    const newField = document.createElement('div');
+    newField.className = 'field';
+    newField.innerHTML = `
+        <div class="ui action input">
+            <input type="text" name="options[]" placeholder="Вариант ответа ${optionCount + 1}" required>
+            <button type="button" class="ui icon button" onclick="removeOption(this)">
+                <i class="trash icon"></i>
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(newField);
+    updateCorrectOptionsInForm(button.closest('form'));
+}
+
+function removeOption(button) {
+    const field = button.closest('.field');
+    const form = field.closest('form');
+    field.remove();
+    updateCorrectOptionsInForm(form);
+}
+
+function updateCorrectOptions() {
+    const container = document.getElementById('options-container');
+    const select = document.querySelector('select[name="correct_option"]');
+    const optionCount = container.children.length;
+    
+    select.innerHTML = '';
+    for (let i = 0; i < optionCount; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Вариант ${i + 1}`;
+        select.appendChild(option);
+    }
+}
+
+function updateCorrectOptionsInForm(form) {
+    const container = form.querySelector('.options-container');
+    const select = form.querySelector('select[name="correct_option"]');
+    const optionCount = container.children.length;
+    
+    select.innerHTML = '';
+    for (let i = 0; i < optionCount; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Вариант ${i + 1}`;
+        select.appendChild(option);
+    }
+}
 </script>
 
 </body>

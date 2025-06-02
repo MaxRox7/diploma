@@ -122,11 +122,18 @@ try {
                         }
                         // Если это тест, создаем пустой тест
                         elseif ($type_step === 'test') {
+                            // Создаем тест с временным названием, которое можно будет изменить в manage_tests.php
                             $stmt = $pdo->prepare("
-                                INSERT INTO Tests (id_step)
-                                VALUES (?)
+                                INSERT INTO Tests (id_step, name_test, desc_test)
+                                VALUES (?, 'Новый тест', '')
+                                RETURNING id_test
                             ");
                             $stmt->execute([$step_id]);
+                            $test_id = $stmt->fetchColumn();
+                            
+                            $pdo->commit();
+                            header("Location: manage_tests.php?step_id=" . $step_id);
+                            exit;
                         }
                         
                         $pdo->commit();
