@@ -182,31 +182,32 @@ try {
                                     <p><strong>Ваш ответ:</strong>
                                         <?php
                                         if ($answer['type_question'] === 'single') {
-                                            // Для single — текст выбранного варианта
                                             $opt = null;
                                             foreach ($answer['options'] as $o) {
                                                 if ($o['id_option'] == $answer['id_selected_option']) $opt = $o['text_option'];
                                             }
                                             echo $opt ? htmlspecialchars($opt) : '<span class="text-muted">Нет ответа</span>';
                                         } elseif ($answer['type_question'] === 'multi') {
-                                            // Для multi — список выбранных вариантов (answer_text — JSON с id_option)
                                             $selected = [];
                                             if (!empty($answer['answer_text'])) {
-                                                $ids = json_decode($answer['answer_text'], true);
-                                                if (is_array($ids)) {
-                                                    foreach ($answer['options'] as $o) {
-                                                        if (in_array($o['id_option'], $ids)) $selected[] = $o['text_option'];
+                                                $indices = json_decode($answer['answer_text'], true);
+                                                if (is_array($indices)) {
+                                                    foreach ($indices as $idx) {
+                                                        if (isset($answer['options'][$idx])) {
+                                                            $selected[] = $answer['options'][$idx]['text_option'];
+                                                        }
                                                     }
                                                 }
                                             }
                                             echo $selected ? htmlspecialchars(implode(', ', $selected)) : '<span class="text-muted">Нет ответа</span>';
                                         } elseif ($answer['type_question'] === 'match') {
-                                            // Для match — пары (answer_text — JSON с парами)
                                             if (!empty($answer['answer_text'])) {
                                                 $pairs = json_decode($answer['answer_text'], true);
                                                 if (is_array($pairs)) {
                                                     echo '<ul>';
-                                                    foreach ($pairs as $left => $right) {
+                                                    foreach ($pairs as $left_idx => $right_idx) {
+                                                        $left = isset($answer['options'][$left_idx]) ? explode('||', $answer['options'][$left_idx]['text_option'])[0] : $left_idx;
+                                                        $right = isset($answer['options'][$right_idx]) ? explode('||', $answer['options'][$right_idx]['text_option'])[1] : $right_idx;
                                                         echo '<li>' . htmlspecialchars($left) . ' → ' . htmlspecialchars($right) . '</li>';
                                                     }
                                                     echo '</ul>';
@@ -217,7 +218,6 @@ try {
                                                 echo '<span class="text-muted">Нет ответа</span>';
                                             }
                                         } elseif ($answer['type_question'] === 'code') {
-                                            // Для code — текст кода (answer_text)
                                             if (!empty($answer['answer_text'])) {
                                                 echo '<pre>' . htmlspecialchars($answer['answer_text']) . '</pre>';
                                             } else {
@@ -229,7 +229,7 @@ try {
                                         ?>
                                     </p>
                                     <?php if (!$answer['is_correct']): ?>
-                                        <p><strong>Правильный ответ:</strong> <?= htmlspecialchars($answer['correct_option']) ?></p>
+                                        <p><strong>Правильный ответ:</strong> <?= $answer['correct_option'] !== null ? htmlspecialchars($answer['correct_option']) : '<span class="text-muted">Нет данных</span>' ?></p>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>

@@ -24,4 +24,6 @@ CREATE TABLE IF NOT EXISTS test_answers (
 -- Add indexes for better performance
 CREATE INDEX idx_test_attempts_user ON test_attempts(id_user);
 CREATE INDEX idx_test_attempts_test ON test_attempts(id_test);
-CREATE INDEX idx_test_answers_attempt ON test_answers(id_attempt); 
+CREATE INDEX idx_test_answers_attempt ON test_answers(id_attempt);
+
+ALTER TABLE test_answers ADD COLUMN IF NOT EXISTS answer_text text; 

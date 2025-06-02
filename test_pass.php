@@ -205,7 +205,14 @@ if ($is_finish || $question_index === -1) {
         $user_answer = $_SESSION['test_answers'][$test_id][$i];
         $is_right = $details[$i]['is_right'];
         $is_right_bool = $is_right ? true : false;
-        $stmt = $pdo->prepare("INSERT INTO test_answers (id_attempt, id_question, id_selected_option, is_correct) VALUES (?, ?, ?, ?)");
+        // answer_text для сложных типов
+        $answer_text = null;
+        if ($type === 'multi' || $type === 'match') {
+            $answer_text = json_encode($user_answer, JSON_UNESCAPED_UNICODE);
+        } elseif ($type === 'code') {
+            $answer_text = $user_answer;
+        }
+        $stmt = $pdo->prepare("INSERT INTO test_answers (id_attempt, id_question, id_selected_option, is_correct, answer_text) VALUES (?, ?, ?, ?, ?)");
         // Получаем варианты ответа для текущего вопроса
         $options = [];
         if (in_array($type, ['single', 'multi', 'match'])) {
@@ -232,6 +239,7 @@ if ($is_finish || $question_index === -1) {
             $stmt->bindValue(3, $selected, PDO::PARAM_INT);
         }
         $stmt->bindValue(4, $is_right_bool, PDO::PARAM_BOOL);
+        $stmt->bindValue(5, $answer_text, $answer_text === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
         $stmt->execute();
     }
     // Очищаем сессию
