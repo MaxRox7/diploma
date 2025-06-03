@@ -1,4 +1,7 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 session_start();
 
 // Database configuration
@@ -156,4 +159,58 @@ function send_email($to, $subject, $message) {
     $headers = "Content-type: text/html; charset=utf-8\r\n";
     $headers .= "From: CodeSphere <noreply@codesphere.local>\r\n";
     return mail($to, $subject, $message, $headers);
+}
+
+// Функция отправки email через SMTP с использованием PHPMailer
+function send_email_smtp($to, $subject, $message) {
+    require_once 'vendor/autoload.php';
+    
+    $mail = new PHPMailer(true);
+    
+    try {
+        // SSL/TLS settings to avoid certificate verification issues
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        
+        // Server settings
+        $mail->SMTPDebug = 0;  // 0 = off, 1 = errors and messages, 2 = messages only
+        $mail->isSMTP();
+        $mail->Host = 'ssl://smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'maximwork19@gmail.com';
+        $mail->Password = 'uvrwkhhpxolxchlg';
+        $mail->Port = 465;
+        $mail->CharSet = 'UTF-8';
+        $mail->Encoding = 'base64';
+        
+        // Recipients
+        $mail->setFrom('maximwork19@gmail.com', 'CodeSphere');
+        $mail->addAddress($to);
+        
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        
+        // Add standard email styling wrapper if not already present
+        if (strpos($message, 'font-family:Arial,sans-serif') === false) {
+            $message = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
+                <h2 style="color:#2185d0;">CodeSphere</h2>
+                ' . $message . '
+                <p style="color:#888;font-size:13px;margin-top:24px;border-top:1px solid #eee;padding-top:12px;">С уважением, команда CodeSphere</p>
+            </div>';
+        }
+        
+        $mail->Body = $message;
+        
+        return $mail->send();
+    } catch (Exception $e) {
+        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        // Fallback to regular mail function if SMTP fails
+        return send_email($to, $subject, $message);
+    }
 }

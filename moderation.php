@@ -37,11 +37,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("UPDATE users SET status='approved', moderation_comment=? WHERE id_user=?");
             $stmt->execute([$moderation_comment, $user_id]);
             // Отправка письма
-            $stmt = $pdo->prepare("SELECT login_user FROM users WHERE id_user=?");
+            $stmt = $pdo->prepare("SELECT login_user, fn_user FROM users WHERE id_user=?");
             $stmt->execute([$user_id]);
             $user = $stmt->fetch();
             if ($user) {
-                send_email($user['login_user'], 'Ваша заявка одобрена', 'Ваша заявка на CodeSphere одобрена. Теперь вы можете войти в систему.');
+                $subject = 'Ваша заявка одобрена';
+                $body = '
+                <h2 style="color:#2185d0;">Поздравляем!</h2>
+                <p>Уважаемый(ая) ' . htmlspecialchars($user['fn_user']) . ',</p>
+                <p>Мы рады сообщить, что Ваша заявка на регистрацию в CodeSphere одобрена.</p>
+                <p>Теперь Вы можете войти в систему, используя свой email и пароль, указанные при регистрации.</p>
+                <p>Добро пожаловать в наше образовательное сообщество!</p>';
+                send_email_smtp($user['login_user'], $subject, $body);
             }
             header('Location: moderation.php?success=approve');
             exit;
@@ -49,11 +56,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("UPDATE users SET status='rejected', moderation_comment=? WHERE id_user=?");
             $stmt->execute([$moderation_comment, $user_id]);
             // Отправка письма
-            $stmt = $pdo->prepare("SELECT login_user FROM users WHERE id_user=?");
+            $stmt = $pdo->prepare("SELECT login_user, fn_user FROM users WHERE id_user=?");
             $stmt->execute([$user_id]);
             $user = $stmt->fetch();
             if ($user) {
-                send_email($user['login_user'], 'Ваша заявка отклонена', 'Ваша заявка на CodeSphere отклонена. Причина: ' . htmlspecialchars($moderation_comment));
+                $subject = 'Ваша заявка отклонена';
+                $body = '
+                <h2 style="color:#db2828;">Заявка отклонена</h2>
+                <p>Уважаемый(ая) ' . htmlspecialchars($user['fn_user']) . ',</p>
+                <p>К сожалению, Ваша заявка на регистрацию в CodeSphere была отклонена.</p>';
+                if ($moderation_comment) {
+                    $body .= '<p><b>Причина отклонения:</b><br>' . nl2br(htmlspecialchars($moderation_comment)) . '</p>';
+                }
+                $body .= '<p>Если у Вас возникли вопросы, пожалуйста, свяжитесь с нашей службой поддержки.</p>';
+                send_email_smtp($user['login_user'], $subject, $body);
             }
             header('Location: moderation.php?success=reject');
             exit;
@@ -91,30 +107,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $body = '';
             if ($status === 'approved') {
                 $subject = 'Ваш курс одобрен!';
-                $body = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
-                    <h2 style="color:#2185d0;">Поздравляем!</h2>
-                    <p>Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> прошёл модерацию и теперь доступен студентам на платформе CodeSphere.</p>
-                    <p>Спасибо за ваш вклад в развитие образования!</p>
-                    <p style="color:#888;font-size:13px;margin-top:24px;">С уважением, команда CodeSphere</p>
-                </div>';
+                $body = '
+                <h2 style="color:#2185d0;">Поздравляем!</h2>
+                <p>Уважаемый преподаватель,</p>
+                <p>Мы рады сообщить, что Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> успешно прошёл модерацию и теперь доступен студентам на платформе CodeSphere.</p>
+                <p>Теперь студенты могут записаться на Ваш курс и начать обучение. Вы можете отслеживать прогресс студентов в личном кабинете.</p>
+                <p>Благодарим Вас за вклад в развитие нашей образовательной платформы!</p>';
             } elseif ($status === 'correction') {
                 $subject = 'Курс отправлен на доработку';
-                $body = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
-                    <h2 style="color:#f2711c;">Курс требует доработки</h2>
-                    <p>Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> отправлен на доработку модератором.</p>';
+                $body = '
+                <h2 style="color:#f2711c;">Курс требует доработки</h2>
+                <p>Уважаемый преподаватель,</p>
+                <p>Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> был рассмотрен нашими модераторами, и мы обнаружили некоторые аспекты, требующие доработки.</p>';
                 if ($moderation_comment) {
-                    $body .= '<p><b>Комментарий:</b><br>' . nl2br(htmlspecialchars($moderation_comment)) . '</p>';
+                    $body .= '<p><b>Комментарий модератора:</b><br>' . nl2br(htmlspecialchars($moderation_comment)) . '</p>';
                 }
-                $body .= '<p style="color:#888;font-size:13px;margin-top:24px;">С уважением, команда CodeSphere</p></div>';
+                $body .= '<p>Пожалуйста, внесите необходимые изменения и повторно отправьте курс на модерацию. После внесения всех необходимых корректировок, Ваш курс будет опубликован на платформе.</p>
+                <p>Если у Вас возникнут вопросы, не стесняйтесь обращаться в службу поддержки.</p>';
             } else {
                 $subject = 'Курс отклонён';
-                $body = '<div style="font-family:Arial,sans-serif;font-size:16px;color:#222;max-width:600px;margin:auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;">
-                    <h2 style="color:#db2828;">Курс отклонён</h2>
-                    <p>Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> был отклонён модератором.</p>';
+                $body = '
+                <h2 style="color:#db2828;">Курс отклонён</h2>
+                <p>Уважаемый преподаватель,</p>
+                <p>К сожалению, Ваш курс <b>' . htmlspecialchars($author['name_course']) . '</b> не был одобрен для публикации на платформе CodeSphere.</p>';
                 if ($moderation_comment) {
-                    $body .= '<p><b>Комментарий:</b><br>' . nl2br(htmlspecialchars($moderation_comment)) . '</p>';
+                    $body .= '<p><b>Причина отклонения:</b><br>' . nl2br(htmlspecialchars($moderation_comment)) . '</p>';
                 }
-                $body .= '<p style="color:#888;font-size:13px;margin-top:24px;">С уважением, команда CodeSphere</p></div>';
+                $body .= '<p>Вы можете создать новый курс с учетом указанных замечаний или обратиться в службу поддержки для получения дополнительной информации.</p>
+                <p>Мы ценим Ваше стремление делиться знаниями и надеемся на дальнейшее сотрудничество.</p>';
             }
             send_email_smtp($author['login_user'], $subject, $body);
         }
