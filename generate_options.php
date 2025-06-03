@@ -1,4 +1,7 @@
 <?php
+require 'vendor/autoload.php';
+Dotenv\Dotenv::createUnsafeImmutable(__DIR__)->load();
+
 // Включаем отображение ошибок
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -42,7 +45,7 @@ if (empty($question) || empty($correct_answer)) {
 }
 
 // API-ключ Яндекс GPT
-$api_key = 'AQVNyhcT-k2ec-45ag_8yiZXy9MPuSuhH7ARRFWd';
+$api_key = getenv('API_KEY');
 
 // Формируем запрос к API
 $prompt = "Вопрос: {$question}\n\nПравильный ответ: {$correct_answer}\n\nСгенерируй {$num_options} неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации.";

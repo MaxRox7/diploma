@@ -180,3 +180,391 @@ Final options: Array
 
 === END ===
 
+=== 2025-06-03 12:32:11 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.073044 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:32:17 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.376956 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ase  \nand  \nasd"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"9","totalTokens":"84","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ase  
+and  
+asd
+Final options: Array
+(
+    [0] => ase
+    [1] => and
+    [2] => asd
+)
+
+=== END ===
+
+=== 2025-06-03 12:34:58 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.104609 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:35:49 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.072463 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:36:28 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.081335 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:38:04 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.105876 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:38:42 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.087183 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:38:50 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.070325 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:38:58 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.092269 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:42:09 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 401
+Время запроса: 0.373319 сек
+API response: {"error":{"grpcCode":16,"httpCode":401,"message":"IAM token or API key has to be passed in request","httpStatus":"Unauthorized","details":[]}}
+Unexpected API response format
+Response structure: Array
+(
+    [error] => Array
+        (
+            [grpcCode] => 16
+            [httpCode] => 401
+            [message] => IAM token or API key has to be passed in request
+            [httpStatus] => Unauthorized
+            [details] => Array
+                (
+                )
+
+        )
+
+)
+
+=== 2025-06-03 12:45:47 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.416892 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ase  \nasd  \nass"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"9","totalTokens":"84","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ase  
+asd  
+ass
+Final options: Array
+(
+    [0] => ase
+    [1] => asd
+    [2] => ass
+)
+
+=== END ===
+
