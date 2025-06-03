@@ -175,6 +175,14 @@ function file_link($path) {
 <?php include 'header.php'; ?>
 <div class="ui container" style="margin-top: 40px;">
     <h2 class="ui header">Модерация заявок</h2>
+    <div class="ui buttons" style="margin-bottom: 15px;">
+        <a href="courses.php" class="ui primary button">
+            <i class="arrow left icon"></i> Вернуться к курсам
+        </a>
+        <a href="profile.php" class="ui button">
+            <i class="user icon"></i> Мой профиль
+        </a>
+    </div>
     <?php if ($error): ?>
         <div class="ui error message"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
@@ -391,7 +399,7 @@ function file_link($path) {
 <script>
 $(function() {
     // Переключение вкладок по клику с изменением URL
-    $('.menu .item').on('click', function(e) {
+    $('.ui.top.attached.tabular.menu .item').on('click', function(e) {
         e.preventDefault();
         const tab = $(this).data('tab');
         const url = new URL(window.location.href);
