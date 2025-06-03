@@ -568,3 +568,340 @@ Final options: Array
 
 === END ===
 
+=== 2025-06-03 12:52:35 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.408131 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"фыр  \nфырк  \nффф"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"10","totalTokens":"85","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: фыр  
+фырк  
+ффф
+Final options: Array
+(
+    [0] => фыр
+    [1] => фырк
+    [2] => ффф
+)
+
+=== END ===
+
+=== 2025-06-03 12:54:49 ===
+Raw input: {"question":"Как выбрать фрейм в фигме?","correct_answer":"Нажать на него мышкой","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Как выбрать фрейм в фигме?\n\nПравильный ответ: Нажать на него мышкой\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.530127 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Использовать сочетание клавиш Ctrl + Z.\nНажать на клавиатуре клавишу Tab.\nИспользовать панель слоёв для выбора фрейма."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"86","completionTokens":"25","totalTokens":"111","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Использовать сочетание клавиш Ctrl + Z.
+Нажать на клавиатуре клавишу Tab.
+Использовать панель слоёв для выбора фрейма.
+Final options: Array
+(
+    [0] => Использовать сочетание клавиш Ctrl + Z.
+    [1] => Нажать на клавиатуре клавишу Tab.
+    [2] => Использовать панель слоёв для выбора фрейма.
+)
+
+=== END ===
+
+=== 2025-06-03 13:02:27 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: фы\n\nОдин из правильных ответов: фы\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.61249 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"1. Фы — это междометие, выражающее удивление.\n2. Фы — это название города.\n3. Фы — это буква в алфавите."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"101","completionTokens":"38","totalTokens":"139","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: 1. Фы — это междометие, выражающее удивление.
+2. Фы — это название города.
+3. Фы — это буква в алфавите.
+Final options: Array
+(
+    [0] => 1. Фы — это междометие, выражающее удивление.
+    [1] => 2. Фы — это название города.
+    [2] => 3. Фы — это буква в алфавите.
+)
+
+=== END ===
+
+=== 2025-06-03 13:02:54 ===
+Raw input: {"question":"Какая лучшая машина?","correct_answer":"BMW","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какая лучшая машина?\n\nОдин из правильных ответов: BMW\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.32611 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Mercedes-Benz\nAudi\nChevrolet"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"104","completionTokens":"7","totalTokens":"111","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Mercedes-Benz
+Audi
+Chevrolet
+Final options: Array
+(
+    [0] => Mercedes-Benz
+    [1] => Audi
+    [2] => Chevrolet
+)
+
+=== END ===
+
+=== 2025-06-03 13:03:02 ===
+Raw input: {"question":"Какая лучшая машина?","correct_answer":"BMW","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какая лучшая машина?\n\nОдин из правильных ответов: BMW\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.358961 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Toyota\nMercedes-Benz\nAudi"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"104","completionTokens":"7","totalTokens":"111","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Toyota
+Mercedes-Benz
+Audi
+Final options: Array
+(
+    [0] => Toyota
+    [1] => Mercedes-Benz
+    [2] => Audi
+)
+
+=== END ===
+
+=== 2025-06-03 13:03:39 ===
+Raw input: {"question":"Чем занимаются клубы в ЛГТУ?","correct_answer":"Элизиум | Киберспорт","num_options":3,"question_type":"match"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос на сопоставление: Чем занимаются клубы в ЛГТУ?\n\nПример пары для сопоставления: Элизиум | Киберспорт\n\nСгенерируй 3 пар для сопоставления по этой теме. Каждая пара должна содержать левую и правую части, разделенные символом '||'. Выведи только пары для сопоставления, каждую с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.74265 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Клуб интеллектуальных игр | Интеллектуальные соревнования  \nКлуб робототехники | Разработка и конструирование роботов  \nКлуб волонтёров ЛГТУ | Помощь в организации мероприятий и благотворительных акций  \n\nВопрос 1 из 1 решён."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"83","completionTokens":"47","totalTokens":"130","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Клуб интеллектуальных игр | Интеллектуальные соревнования  
+Клуб робототехники | Разработка и конструирование роботов  
+Клуб волонтёров ЛГТУ | Помощь в организации мероприятий и благотворительных акций  
+
+Вопрос 1 из 1 решён.
+Final options: Array
+(
+    [0] => Клуб интеллектуальных игр | Интеллектуальные соревнования
+    [1] => Клуб робототехники | Разработка и конструирование роботов
+    [2] => Клуб волонтёров ЛГТУ | Помощь в организации мероприятий и благотворительных акций
+    [3] => Вопрос 1 из 1 решён.
+)
+
+=== END ===
+
+=== 2025-06-03 13:08:18 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":4,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 4 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.361496 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"фы-фы  \nфыр  \nфыва  \nфываыф"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"17","totalTokens":"92","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: фы-фы  
+фыр  
+фыва  
+фываыф
+Final options: Array
+(
+    [0] => фы-фы
+    [1] => фыр
+    [2] => фыва
+    [3] => фываыф
+)
+
+=== END ===
+
+=== 2025-06-03 13:08:21 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":5,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 5 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.418361 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"фыф  \nффы  \nыф  \nфф  \nыффф"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"18","totalTokens":"93","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: фыф  
+ффы  
+ыф  
+фф  
+ыффф
+Final options: Array
+(
+    [0] => фыф
+    [1] => ффы
+    [2] => ыф
+    [3] => фф
+    [4] => ыффф
+)
+
+=== END ===
+
+=== 2025-06-03 13:08:27 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":6,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 6 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.454948 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"фыв  \nфыва  \nфывап  \nфывапро  \nфывапрол  \nфывапролд"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"28","totalTokens":"103","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: фыв  
+фыва  
+фывап  
+фывапро  
+фывапрол  
+фывапролд
+Final options: Array
+(
+    [0] => фыв
+    [1] => фыва
+    [2] => фывап
+    [3] => фывапро
+    [4] => фывапрол
+    [5] => фывапролд
+)
+
+=== END ===
+
+=== 2025-06-03 13:08:49 ===
+Raw input: {"question":"Какая машина лучше?","correct_answer":"BMW","num_options":4,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какая машина лучше?\n\nОдин из правильных ответов: BMW\n\nСгенерируй 4 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.49698 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"1. Audi.\n2. Mercedes-Benz.\n3. BMW.\n4. Toyota."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"104","completionTokens":"22","totalTokens":"126","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: 1. Audi.
+2. Mercedes-Benz.
+3. BMW.
+4. Toyota.
+Final options: Array
+(
+    [0] => 1. Audi.
+    [1] => 2. Mercedes-Benz.
+    [2] => 3. BMW.
+    [3] => 4. Toyota.
+)
+
+=== END ===
+
