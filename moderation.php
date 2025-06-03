@@ -356,7 +356,7 @@ function file_link($path) {
                                         <ul>
                                         <?php foreach ($tests as $test): ?>
                                             <li>Тест: <?= htmlspecialchars($test['name_test']) ?> (<?= $test['id_test'] ?>)
-                                                <a href="test.php?test_id=<?= $test['id_test'] ?>" target="_blank" class="ui mini button">Пройти</a>
+                                                <a href="test.php?test_id=<?= $test['id_test'] ?>&admin_view=1" target="_blank" class="ui mini button">Пройти</a>
                                             </li>
                                         <?php endforeach; ?>
                                         </ul>
@@ -378,12 +378,6 @@ function file_link($path) {
                 <button name="action" value="correction_course" class="ui orange button">На доработку</button>
                 <button name="action" value="reject_course" class="ui negative button">Отклонить</button>
                 <a href="?tab=courses" class="ui button">Назад</a>
-                <a href="course.php?id=<?= $course['id_course'] ?>&admin_view=1" class="ui teal button" target="_blank">
-                    <i class="eye icon"></i> Просмотр как преподаватель
-                </a>
-                <a href="edit_course.php?id=<?= $course['id_course'] ?>&admin_view=1" class="ui blue button" target="_blank">
-                    <i class="edit icon"></i> Редактировать как преподаватель
-                </a>
                 <a href="edit_lessons.php?course_id=<?= $course['id_course'] ?>&admin_view=1" class="ui violet button" target="_blank">
                     <i class="list icon"></i> Управление уроками как преподаватель
                 </a>

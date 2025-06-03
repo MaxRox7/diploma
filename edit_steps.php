@@ -28,7 +28,21 @@ try {
     // Проверяем, является ли пользователь создателем курса или администратором в режиме просмотра
     $is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
     
-    if (!$lesson || (!$is_admin_view && !is_course_creator($pdo, $lesson['id_course'], $_SESSION['user']['id_user']))) {
+    // Для преподавателей проверяем, что они действительно создатели курса
+    if (!$is_admin_view) {
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) 
+            FROM create_passes 
+            WHERE id_course = ? AND id_user = ? AND is_creator = true
+        ");
+        $stmt->execute([$lesson['id_course'], $_SESSION['user']['id_user']]);
+        $is_actual_creator = $stmt->fetchColumn() > 0;
+        
+        if (!$lesson || (!$is_actual_creator && !is_admin())) {
+            header('Location: courses.php');
+            exit;
+        }
+    } else if (!$lesson) {
         header('Location: courses.php');
         exit;
     }
@@ -319,6 +333,9 @@ try {
             <form class="ui form" method="post" action="manage_tests.php">
                 <input type="hidden" name="action" value="create_test_step">
                 <input type="hidden" name="lesson_id" value="<?= $lesson_id ?>">
+                <?php if ($is_admin_view): ?>
+                <input type="hidden" name="admin_view" value="1">
+                <?php endif; ?>
                 <div class="fields">
                     <div class="twelve wide field">
                         <input type="text" name="name_step" placeholder="Название шага" required>
@@ -351,9 +368,13 @@ try {
                                         Просмотр материала
                                     </a>
                                 <?php elseif ($step['type_step'] === 'test' && $step['test_id']): ?>
-                                    <a href="edit_test.php?test_id=<?= $step['test_id'] ?>" class="ui blue button">
+                                    <a href="edit_test.php?test_id=<?= $step['test_id'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui blue button">
                                         <i class="edit icon"></i>
                                         Редактировать тест
+                                    </a>
+                                    <a href="test.php?test_id=<?= $step['test_id'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui green button" target="_blank">
+                                        <i class="play icon"></i>
+                                        Пройти тест
                                     </a>
                                 <?php endif; ?>
                                 <form method="post" style="display: inline;">

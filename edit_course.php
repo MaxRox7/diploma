@@ -17,7 +17,7 @@ try {
     
     // Проверяем права доступа (должен быть создателем курса)
     $stmt = $pdo->prepare("
-        SELECT c.*, cp.id_user
+        SELECT c.*, cp.id_user, cp.is_creator
         FROM course c
         JOIN create_passes cp ON c.id_course = cp.id_course
         WHERE c.id_course = ? AND cp.id_user = ?
@@ -55,7 +55,7 @@ try {
             
             $admin_view = true;
         }
-    } else if (!$course) {
+    } else if (!$course || !$course['is_creator']) {
         header('Location: courses.php');
         exit;
     }

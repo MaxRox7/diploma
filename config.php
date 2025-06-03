@@ -124,17 +124,23 @@ function is_student() {
 
 // Функция проверки, является ли пользователь создателем курса
 function is_course_creator($pdo, $course_id, $user_id) {
+    // Если пользователь - администратор, всегда возвращаем true
+    if (is_admin()) {
+        return true;
+    }
+    
+    // Для преподавателей проверяем, что они действительно создатели курса
     $stmt = $pdo->prepare("
         SELECT COUNT(*) 
         FROM create_passes 
-        WHERE id_course = ? AND id_user = ? 
+        WHERE id_course = ? AND id_user = ? AND is_creator = true
         AND id_user IN (
             SELECT id_user 
             FROM users 
-            WHERE role_user IN (?, ?)
+            WHERE role_user = ?
         )
     ");
-    $stmt->execute([$course_id, $user_id, ROLE_ADMIN, ROLE_TEACHER]);
+    $stmt->execute([$course_id, $user_id, ROLE_TEACHER]);
     return $stmt->fetchColumn() > 0;
 }
 

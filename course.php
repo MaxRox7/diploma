@@ -41,6 +41,18 @@ try {
     $is_creator = is_course_creator($pdo, $course_id, $user_id);
     $is_enrolled = is_enrolled_student($pdo, $course_id, $user_id);
     
+    // Проверяем, является ли преподаватель создателем курса
+    $is_actual_creator = false;
+    if (is_teacher()) {
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) 
+            FROM create_passes 
+            WHERE id_course = ? AND id_user = ? AND is_creator = true
+        ");
+        $stmt->execute([$course_id, $user_id]);
+        $is_actual_creator = $stmt->fetchColumn() > 0;
+    }
+    
     // Если администратор просматривает курс с параметром admin_view=1, 
     // даем ему права создателя курса
     if (is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1) {
@@ -297,7 +309,7 @@ try {
                         </div>
                     </div>
                     
-                    <?php if ($is_creator): ?>
+                    <?php if ($is_creator && ($is_actual_creator || isset($admin_view))): ?>
                         <!-- Панель управления для создателя курса -->
                         <div class="ui segment">
                             <h3 class="ui header">Панель управления курсом</h3>

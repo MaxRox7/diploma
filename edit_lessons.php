@@ -18,9 +18,20 @@ try {
     // Проверяем, является ли пользователь создателем курса или администратором в режиме просмотра
     $is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
     
-    if (!$is_admin_view && !is_course_creator($pdo, $course_id, $_SESSION['user']['id_user'])) {
-        header('Location: courses.php');
-        exit;
+    // Для преподавателей проверяем, что они действительно создатели курса
+    if (!$is_admin_view) {
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) 
+            FROM create_passes 
+            WHERE id_course = ? AND id_user = ? AND is_creator = true
+        ");
+        $stmt->execute([$course_id, $_SESSION['user']['id_user']]);
+        $is_actual_creator = $stmt->fetchColumn() > 0;
+        
+        if (!$is_actual_creator && !is_admin()) {
+            header('Location: courses.php');
+            exit;
+        }
     }
     
     // Получаем информацию о курсе
@@ -180,7 +191,7 @@ try {
                     <?php foreach ($lessons as $lesson): ?>
                         <div class="item">
                             <div class="right floated content">
-                                <a href="edit_steps.php?lesson_id=<?= $lesson['id_lesson'] ?>" class="ui primary button">
+                                <a href="edit_steps.php?lesson_id=<?= $lesson['id_lesson'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui primary button">
                                     <i class="tasks icon"></i>
                                     Шаги урока
                                 </a>

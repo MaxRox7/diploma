@@ -4,22 +4,37 @@ redirect_unauthenticated();
 
 $test_id = isset($_GET['test_id']) ? (int)$_GET['test_id'] : 0;
 $attempt_id = isset($_GET['attempt_id']) ? (int)$_GET['attempt_id'] : 0;
+$is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
 $error = '';
 
 try {
     $pdo = get_db_connection();
     
     // Get test information and check access rights
-    $stmt = $pdo->prepare("
-        SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course
-        FROM Tests t
-        JOIN Steps s ON t.id_step = s.id_step
-        JOIN lessons l ON s.id_lesson = l.id_lesson
-        JOIN course c ON l.id_course = c.id_course
-        JOIN create_passes cp ON c.id_course = cp.id_course
-        WHERE t.id_test = ? AND cp.id_user = ?
-    ");
-    $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+    if ($is_admin_view) {
+        // Admin in view mode can access any test
+        $stmt = $pdo->prepare("
+            SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+            FROM Tests t
+            JOIN Steps s ON t.id_step = s.id_step
+            JOIN lessons l ON s.id_lesson = l.id_lesson
+            JOIN course c ON l.id_course = c.id_course
+            WHERE t.id_test = ?
+        ");
+        $stmt->execute([$test_id]);
+    } else {
+        // Regular access check
+        $stmt = $pdo->prepare("
+            SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+            FROM Tests t
+            JOIN Steps s ON t.id_step = s.id_step
+            JOIN lessons l ON s.id_lesson = l.id_lesson
+            JOIN course c ON l.id_course = c.id_course
+            JOIN create_passes cp ON c.id_course = cp.id_course
+            WHERE t.id_test = ? AND cp.id_user = ?
+        ");
+        $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+    }
     $test = $stmt->fetch();
     
     if (!$test) {
@@ -132,6 +147,14 @@ try {
                     Шаг: <?= htmlspecialchars($test['number_steps']) ?>
                 </div>
             </h1>
+
+            <?php if ($is_admin_view): ?>
+                <div class="ui info message">
+                    <i class="eye icon"></i>
+                    <strong>Режим администратора:</strong> Вы просматриваете результаты теста как преподаватель
+                    <a href="test_results.php?test_id=<?= $test_id ?><?= isset($attempt_id) && $attempt_id ? '&attempt_id='.$attempt_id : '' ?>" class="ui small right floated button">Выйти из режима просмотра</a>
+                </div>
+            <?php endif; ?>
 
             <?php if ($error): ?>
                 <div class="ui error message">
@@ -264,7 +287,7 @@ try {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="test_results.php?test_id=<?= $test_id ?>&attempt_id=<?= $attempt['id_attempt'] ?>" 
+                                    <a href="test_results.php?test_id=<?= $test_id ?>&attempt_id=<?= $attempt['id_attempt'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" 
                                        class="ui tiny button">
                                         Подробнее
                                     </a>
@@ -276,8 +299,8 @@ try {
             </div>
 
             <div class="ui segment">
-                <a href="course.php?id=<?= $test['id_course'] ?>" class="ui button">
-                    Вернуться к курсу
+                <a href="edit_test.php?test_id=<?= $test_id ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui button">
+                    Вернуться к тесту
                 </a>
             </div>
         </div>

@@ -4,6 +4,7 @@ redirect_unauthenticated();
 
 $step_id = isset($_GET['step_id']) ? (int)$_GET['step_id'] : 0;
 $lesson_id = isset($_POST['lesson_id']) ? (int)$_POST['lesson_id'] : 0;
+$is_admin_view = is_admin() && (isset($_GET['admin_view']) && $_GET['admin_view'] == 1) || (isset($_POST['admin_view']) && $_POST['admin_view'] == 1);
 $error = '';
 $success = '';
 
@@ -13,18 +14,32 @@ try {
     // Check access based on the context (either step_id or lesson_id)
     if ($step_id > 0) {
         // Get step information and check access rights
-        $stmt = $pdo->prepare("
-            SELECT s.*, l.id_lesson, l.name_lesson, c.id_course, c.name_course
-            FROM Steps s
-            JOIN lessons l ON s.id_lesson = l.id_lesson
-            JOIN course c ON l.id_course = c.id_course
-            JOIN create_passes cp ON c.id_course = cp.id_course
-            WHERE s.id_step = ? AND cp.id_user = ? AND EXISTS (
-                SELECT 1 FROM users u 
-                WHERE u.id_user = cp.id_user AND u.role_user IN (?, ?)
-            )
-        ");
-        $stmt->execute([$step_id, $_SESSION['user']['id_user'], ROLE_ADMIN, ROLE_TEACHER]);
+        if ($is_admin_view) {
+            // Admin in view mode can access any step
+            $stmt = $pdo->prepare("
+                SELECT s.*, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+                FROM Steps s
+                JOIN lessons l ON s.id_lesson = l.id_lesson
+                JOIN course c ON l.id_course = c.id_course
+                WHERE s.id_step = ?
+            ");
+            $stmt->execute([$step_id]);
+        } else {
+            // Regular access check
+            $stmt = $pdo->prepare("
+                SELECT s.*, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+                FROM Steps s
+                JOIN lessons l ON s.id_lesson = l.id_lesson
+                JOIN course c ON l.id_course = c.id_course
+                JOIN create_passes cp ON c.id_course = cp.id_course
+                WHERE s.id_step = ? AND cp.id_user = ? AND cp.is_creator = true
+                AND EXISTS (
+                    SELECT 1 FROM users u 
+                    WHERE u.id_user = cp.id_user AND u.role_user = ?
+                )
+            ");
+            $stmt->execute([$step_id, $_SESSION['user']['id_user'], ROLE_TEACHER]);
+        }
         $step = $stmt->fetch();
         
         if (!$step) {
@@ -45,17 +60,30 @@ try {
         $tests = $stmt->fetchAll();
     } elseif ($lesson_id > 0 && isset($_POST['action']) && $_POST['action'] === 'create_test_step') {
         // Check access for lesson
-        $stmt = $pdo->prepare("
-            SELECT l.*, c.id_course, c.name_course
-            FROM lessons l
-            JOIN course c ON l.id_course = c.id_course
-            JOIN create_passes cp ON c.id_course = cp.id_course
-            WHERE l.id_lesson = ? AND cp.id_user = ? AND EXISTS (
-                SELECT 1 FROM users u 
-                WHERE u.id_user = cp.id_user AND u.role_user IN (?, ?)
-            )
-        ");
-        $stmt->execute([$lesson_id, $_SESSION['user']['id_user'], ROLE_ADMIN, ROLE_TEACHER]);
+        if ($is_admin_view) {
+            // Admin in view mode can access any lesson
+            $stmt = $pdo->prepare("
+                SELECT l.*, c.id_course, c.name_course
+                FROM lessons l
+                JOIN course c ON l.id_course = c.id_course
+                WHERE l.id_lesson = ?
+            ");
+            $stmt->execute([$lesson_id]);
+        } else {
+            // Regular access check
+            $stmt = $pdo->prepare("
+                SELECT l.*, c.id_course, c.name_course
+                FROM lessons l
+                JOIN course c ON l.id_course = c.id_course
+                JOIN create_passes cp ON c.id_course = cp.id_course
+                WHERE l.id_lesson = ? AND cp.id_user = ? AND cp.is_creator = true
+                AND EXISTS (
+                    SELECT 1 FROM users u 
+                    WHERE u.id_user = cp.id_user AND u.role_user = ?
+                )
+            ");
+            $stmt->execute([$lesson_id, $_SESSION['user']['id_user'], ROLE_TEACHER]);
+        }
         $lesson = $stmt->fetch();
         
         if (!$lesson) {
@@ -115,7 +143,7 @@ try {
                         $success = 'Шаг с тестом успешно создан';
                         
                         // Redirect back to edit_steps.php
-                        header("Location: edit_steps.php?lesson_id=" . $lesson_id);
+                        header("Location: edit_steps.php?lesson_id=" . $lesson_id . ($is_admin_view ? "&admin_view=1" : ""));
                         exit;
                     } catch (Exception $e) {
                         $pdo->rollBack();

@@ -9,6 +9,7 @@ if (!isset($_GET['test_id'])) {
 }
 
 $test_id = (int)$_GET['test_id'];
+$is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
 $error = '';
 $success = '';
 
@@ -19,19 +20,34 @@ try {
     $questions = [];
     
     // Получаем информацию о тесте и проверяем права доступа
-    $stmt = $pdo->prepare("
-        SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course, cp.id_user
-        FROM Tests t
-        JOIN Steps s ON t.id_step = s.id_step
-        JOIN lessons l ON s.id_lesson = l.id_lesson
-        JOIN course c ON l.id_course = c.id_course
-        JOIN create_passes cp ON c.id_course = cp.id_course
-        WHERE t.id_test = ? AND cp.id_user = ? AND EXISTS (
-            SELECT 1 FROM users u 
-            WHERE u.id_user = cp.id_user AND u.role_user IN (?, ?)
-        )
-    ");
-    $stmt->execute([$test_id, $_SESSION['user']['id_user'], ROLE_ADMIN, ROLE_TEACHER]);
+    if ($is_admin_view) {
+        // Admin in view mode can access any test
+        $stmt = $pdo->prepare("
+            SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+            FROM Tests t
+            JOIN Steps s ON t.id_step = s.id_step
+            JOIN lessons l ON s.id_lesson = l.id_lesson
+            JOIN course c ON l.id_course = c.id_course
+            WHERE t.id_test = ?
+        ");
+        $stmt->execute([$test_id]);
+    } else {
+        // Regular access check
+        $stmt = $pdo->prepare("
+            SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course, cp.id_user
+            FROM Tests t
+            JOIN Steps s ON t.id_step = s.id_step
+            JOIN lessons l ON s.id_lesson = l.id_lesson
+            JOIN course c ON l.id_course = c.id_course
+            JOIN create_passes cp ON c.id_course = cp.id_course
+            WHERE t.id_test = ? AND cp.id_user = ? AND cp.is_creator = true
+            AND EXISTS (
+                SELECT 1 FROM users u 
+                WHERE u.id_user = cp.id_user AND u.role_user = ?
+            )
+        ");
+        $stmt->execute([$test_id, $_SESSION['user']['id_user'], ROLE_TEACHER]);
+    }
     $test = $stmt->fetch();
     
     if (!$test) {
@@ -320,14 +336,22 @@ function get_question_options($pdo, $question_id) {
                     </div>
                 </h2>
                 <div class="ui right floated buttons">
-                    <a href="test_results.php?test_id=<?= $test_id ?>" class="ui button">
+                    <a href="test_results.php?test_id=<?= $test_id ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui button">
                         Результаты теста
                     </a>
-                    <a href="edit_steps.php?lesson_id=<?= $test['id_lesson'] ?>" class="ui button">
+                    <a href="edit_steps.php?lesson_id=<?= $test['id_lesson'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui button">
                         Назад к шагам
                     </a>
                 </div>
             </div>
+
+            <?php if ($is_admin_view): ?>
+                <div class="ui info message">
+                    <i class="eye icon"></i>
+                    <strong>Режим администратора:</strong> Вы редактируете тест как преподаватель
+                    <a href="edit_test.php?test_id=<?= $test_id ?>" class="ui small right floated button">Выйти из режима редактирования</a>
+                </div>
+            <?php endif; ?>
 
             <?php if ($error): ?>
                 <div class="ui error message">

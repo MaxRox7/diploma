@@ -3,6 +3,7 @@ require_once 'config.php';
 redirect_unauthenticated();
 
 $test_id = isset($_GET['test_id']) ? (int)$_GET['test_id'] : 0;
+$is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
 $error = '';
 $success = '';
 
@@ -10,16 +11,45 @@ try {
     $pdo = get_db_connection();
     
     // Get test information and check access rights
-    $stmt = $pdo->prepare("
-        SELECT t.*, s.id_step, s.name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course
-        FROM Tests t
-        JOIN Steps s ON t.id_step = s.id_step
-        JOIN lessons l ON s.id_lesson = l.id_lesson
-        JOIN course c ON l.id_course = c.id_course
-        JOIN create_passes cp ON c.id_course = cp.id_course
-        WHERE t.id_test = ? AND cp.id_user = ?
-    ");
-    $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+    if ($is_admin_view) {
+        // Admin in view mode can access any test
+        $stmt = $pdo->prepare("
+            SELECT t.*, s.id_step, s.number_steps as name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+            FROM Tests t
+            JOIN Steps s ON t.id_step = s.id_step
+            JOIN lessons l ON s.id_lesson = l.id_lesson
+            JOIN course c ON l.id_course = c.id_course
+            WHERE t.id_test = ?
+        ");
+        $stmt->execute([$test_id]);
+    } else {
+        // For teachers, check if they are the creator
+        if (is_teacher()) {
+            $stmt = $pdo->prepare("
+                SELECT t.*, s.id_step, s.number_steps as name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course,
+                       (SELECT COUNT(*) FROM create_passes WHERE id_course = c.id_course AND id_user = ? AND is_creator = true) as is_creator
+                FROM Tests t
+                JOIN Steps s ON t.id_step = s.id_step
+                JOIN lessons l ON s.id_lesson = l.id_lesson
+                JOIN course c ON l.id_course = c.id_course
+                JOIN create_passes cp ON c.id_course = cp.id_course
+                WHERE t.id_test = ? AND cp.id_user = ?
+            ");
+            $stmt->execute([$_SESSION['user']['id_user'], $test_id, $_SESSION['user']['id_user']]);
+        } else {
+            // For students
+            $stmt = $pdo->prepare("
+                SELECT t.*, s.id_step, s.number_steps as name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course
+                FROM Tests t
+                JOIN Steps s ON t.id_step = s.id_step
+                JOIN lessons l ON s.id_lesson = l.id_lesson
+                JOIN course c ON l.id_course = c.id_course
+                JOIN create_passes cp ON c.id_course = cp.id_course
+                WHERE t.id_test = ? AND cp.id_user = ?
+            ");
+            $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+        }
+    }
     $test = $stmt->fetch();
     
     if (!$test) {
@@ -148,6 +178,14 @@ try {
                 </div>
             </h1>
 
+            <?php if ($is_admin_view): ?>
+                <div class="ui info message">
+                    <i class="eye icon"></i>
+                    <strong>Режим администратора:</strong> Вы проходите тест как преподаватель
+                    <a href="test.php?test_id=<?= $test_id ?>" class="ui small right floated button">Выйти из режима просмотра</a>
+                </div>
+            <?php endif; ?>
+
             <?php if ($error): ?>
                 <div class="ui error message">
                     <div class="header">Ошибка</div>
@@ -206,18 +244,38 @@ try {
 
             <?php if ($success): ?>
                 <div class="ui segment">
-                    <a href="lesson.php?id=<?= $test['id_lesson'] ?>" class="ui button">
-                        Назад к уроку
-                    </a>
-                    <a href="course.php?id=<?= $test['id_course'] ?>" class="ui button">
-                        Вернуться к курсу
-                    </a>
+                    <?php if ($is_admin_view): ?>
+                        <a href="edit_test.php?test_id=<?= $test_id ?>&admin_view=1" class="ui button">
+                            Назад к редактированию теста
+                        </a>
+                    <?php elseif (is_teacher() && isset($test['is_creator']) && $test['is_creator'] > 0): ?>
+                        <a href="edit_test.php?test_id=<?= $test_id ?>" class="ui button">
+                            Назад к редактированию теста
+                        </a>
+                    <?php else: ?>
+                        <a href="lesson.php?id=<?= $test['id_lesson'] ?>" class="ui button">
+                            Назад к уроку
+                        </a>
+                        <a href="course.php?id=<?= $test['id_course'] ?>" class="ui button">
+                            Вернуться к курсу
+                        </a>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <div class="ui segment">
-                    <a href="lesson.php?id=<?= $test['id_lesson'] ?>" class="ui button">
-                        Назад к уроку
-                    </a>
+                    <?php if ($is_admin_view): ?>
+                        <a href="edit_test.php?test_id=<?= $test_id ?>&admin_view=1" class="ui button">
+                            Назад к редактированию теста
+                        </a>
+                    <?php elseif (is_teacher() && isset($test['is_creator']) && $test['is_creator'] > 0): ?>
+                        <a href="edit_test.php?test_id=<?= $test_id ?>" class="ui button">
+                            Назад к редактированию теста
+                        </a>
+                    <?php else: ?>
+                        <a href="lesson.php?id=<?= $test['id_lesson'] ?>" class="ui button">
+                            Назад к уроку
+                        </a>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
         </div>
