@@ -1,0 +1,182 @@
+=== 2025-06-03 12:27:13 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.395727 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"фыв  \nфыва  \nыфв"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"11","totalTokens":"86","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Unexpected API response format
+Response structure: Array
+(
+    [result] => Array
+        (
+            [alternatives] => Array
+                (
+                    [0] => Array
+                        (
+                            [message] => Array
+                                (
+                                    [role] => assistant
+                                    [text] => фыв  
+фыва  
+ыфв
+                                )
+
+                            [status] => ALTERNATIVE_STATUS_FINAL
+                        )
+
+                )
+
+            [usage] => Array
+                (
+                    [inputTextTokens] => 75
+                    [completionTokens] => 11
+                    [totalTokens] => 86
+                    [completionTokensDetails] => Array
+                        (
+                            [reasoningTokens] => 0
+                        )
+
+                )
+
+            [modelVersion] => 25.03.2025
+        )
+
+)
+
+=== 2025-06-03 12:27:56 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.357892 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"фыв  \nфыва  \nфывап"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"11","totalTokens":"86","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Unexpected API response format
+Response structure: Array
+(
+    [result] => Array
+        (
+            [alternatives] => Array
+                (
+                    [0] => Array
+                        (
+                            [message] => Array
+                                (
+                                    [role] => assistant
+                                    [text] => фыв  
+фыва  
+фывап
+                                )
+
+                            [status] => ALTERNATIVE_STATUS_FINAL
+                        )
+
+                )
+
+            [usage] => Array
+                (
+                    [inputTextTokens] => 75
+                    [completionTokens] => 11
+                    [totalTokens] => 86
+                    [completionTokensDetails] => Array
+                        (
+                            [reasoningTokens] => 0
+                        )
+
+                )
+
+            [modelVersion] => 25.03.2025
+        )
+
+)
+
+=== 2025-06-03 12:30:07 ===
+Raw input: {"question":"фы","correct_answer":"фы","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: фы\n\nПравильный ответ: фы\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.323586 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"фыв  \nфыва  \nфывап"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"11","totalTokens":"86","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: фыв  
+фыва  
+фывап
+Final options: Array
+(
+    [0] => фыв
+    [1] => фыва
+    [2] => фывап
+)
+
+=== END ===
+
+=== 2025-06-03 12:30:23 ===
+Raw input: {"question":"1. Как получить данные POST-запроса?\n","correct_answer":"через переменную $_POST","num_options":3}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: 1. Как получить данные POST-запроса?\n\n\nПравильный ответ: через переменную $_POST\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.566652 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Через переменную $_GET.\nЧерез переменную $_SESSION.\nЧерез переменную $_REQUEST."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"90","completionTokens":"20","totalTokens":"110","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Через переменную $_GET.
+Через переменную $_SESSION.
+Через переменную $_REQUEST.
+Final options: Array
+(
+    [0] => Через переменную $_GET.
+    [1] => Через переменную $_SESSION.
+    [2] => Через переменную $_REQUEST.
+)
+
+=== END ===
+
