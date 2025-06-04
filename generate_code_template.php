@@ -205,6 +205,25 @@ if (empty($template) || empty($solution) || empty($output)) {
     }
 }
 
+// Очищаем код от маркеров форматирования
+function cleanCodeMarkers($code) {
+    // Удаляем маркеры кода (```) и указание языка в начале
+    $code = preg_replace('/^```[a-z]*\s*/im', '', $code);
+    // Удаляем закрывающие маркеры кода в конце
+    $code = preg_replace('/```\s*$/m', '', $code);
+    // Удаляем маркеры кода внутри текста
+    $code = preg_replace('/```[a-z]*\s*/im', '', $code);
+    $code = preg_replace('/```/m', '', $code);
+    // Удаляем возможные указания языка в начале строки (например, "php")
+    $code = preg_replace('/^(php|python|cpp|javascript|js|java|c\+\+)\s*$/im', '', $code);
+    return trim($code);
+}
+
+// Применяем очистку к каждому блоку
+$template = cleanCodeMarkers($template);
+$solution = cleanCodeMarkers($solution);
+$output = cleanCodeMarkers($output);
+
 fwrite($log_file, "Extracted template: " . $template . "\n");
 fwrite($log_file, "Extracted solution: " . $solution . "\n");
 fwrite($log_file, "Extracted output: " . $output . "\n");

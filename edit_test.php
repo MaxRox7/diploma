@@ -591,7 +591,7 @@ function get_question_options($pdo, $question_id) {
                                         </div>
                                         <div class="field">
                                             <label>Шаблон кода</label>
-                                            <textarea name="code_template" id="code_template" rows="5"></textarea>
+                                            <textarea name="code_template" id="code_template" rows="10"></textarea>
                                         </div>
                                         <div class="field">
                                             <label>Входные данные (опционально)</label>
@@ -599,7 +599,7 @@ function get_question_options($pdo, $question_id) {
                                         </div>
                                         <div class="field">
                                             <label>Ожидаемый вывод</label>
-                                            <textarea name="code_output" id="code_output" rows="2" required></textarea>
+                                            <textarea name="code_output" id="code_output" rows="5" required></textarea>
                                         </div>
                                         <div class="field">
                                             <label>Таймаут выполнения (секунды)</label>
@@ -760,7 +760,7 @@ function renderOptions(type) {
             </div>
             <div class="field">
                 <label>Шаблон кода</label>
-                <textarea name="code_template" id="code_template" rows="5"></textarea>
+                <textarea name="code_template" id="code_template" rows="10"></textarea>
             </div>
             <div class="field">
                 <label>Входные данные (опционально)</label>
@@ -768,7 +768,7 @@ function renderOptions(type) {
             </div>
             <div class="field">
                 <label>Ожидаемый вывод</label>
-                <textarea name="code_output" id="code_output" rows="2" required></textarea>
+                <textarea name="code_output" id="code_output" rows="5" required></textarea>
             </div>
             <div class="field">
                 <label>Таймаут выполнения (секунды)</label>
