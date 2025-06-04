@@ -905,3 +905,35 @@ Final options: Array
 
 === END ===
 
+=== 2025-06-04 14:02:50 ===
+Raw input: {"question":"as","correct_answer":"as","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: as\n\nПравильный ответ: as\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.342572 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ase  \nass  \nacs"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"75","completionTokens":"8","totalTokens":"83","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ase  
+ass  
+acs
+Final options: Array
+(
+    [0] => ase
+    [1] => ass
+    [2] => acs
+)
+
+=== END ===
+
