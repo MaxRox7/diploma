@@ -1,20 +1,21 @@
 <?php
 /**
- * Code Executor for Programming Tasks
+ * Code Executor for Programming Tasks using Piston API
  * 
  * This file handles secure execution of code submitted by students
  * for programming tasks in PHP, Python, and C++.
+ * Using Piston API (https://github.com/engineer-man/piston)
  */
 
 require_once 'config.php';
 redirect_unauthenticated();
 
-// Set execution time limit
-ini_set('max_execution_time', 10);
-set_time_limit(10);
+// Set execution time limit for API requests
+ini_set('max_execution_time', 30);
+set_time_limit(30);
 
 /**
- * Execute code and return the result
+ * Execute code using Piston API and return the result
  * 
  * @param string $code The code to execute
  * @param string $language The programming language (php, python, cpp)
@@ -30,310 +31,128 @@ function execute_code($code, $language, $input = '', $timeout = 5) {
         'execution_time' => 0
     ];
     
-    // Create a temporary directory with a random name
-    $temp_dir = sys_get_temp_dir() . '/code_exec_' . uniqid();
-    if (!mkdir($temp_dir, 0755, true)) {
-        $result['error'] = 'Failed to create temporary directory';
-        return $result;
-    }
-    
     // Start timing
     $start_time = microtime(true);
     
     try {
-        switch ($language) {
-            case 'php':
-                $result = execute_php($code, $input, $temp_dir, $timeout);
-                break;
-                
-            case 'python':
-                $result = execute_python($code, $input, $temp_dir, $timeout);
-                break;
-                
-            case 'cpp':
-                $result = execute_cpp($code, $input, $temp_dir, $timeout);
-                break;
-                
-            default:
-                $result['error'] = 'Unsupported language';
+        // Map our language names to Piston language codes and versions
+        $language_map = [
+            'php' => ['language' => 'php', 'version' => '8.2.3'],
+            'python' => ['language' => 'python', 'version' => '3.10.0'],
+            'cpp' => ['language' => 'c++', 'version' => '10.2.0'],
+            'c++' => ['language' => 'c++', 'version' => '10.2.0']
+        ];
+        
+        // Check if language is supported
+        if (!isset($language_map[$language])) {
+            $result['error'] = 'Unsupported language: ' . $language;
+            return $result;
+        }
+        
+        $piston_language = $language_map[$language]['language'];
+        $piston_version = $language_map[$language]['version'];
+        
+        // Piston API base URL - using the public instance
+        $api_url = 'https://emkc.org/api/v2/piston/execute';
+        
+        // Prepare the request data
+        $post_data = [
+            'language' => $piston_language,
+            'version' => $piston_version,
+            'files' => [
+                [
+                    'name' => 'main.' . ($piston_language === 'c++' ? 'cpp' : $piston_language),
+                    'content' => $code
+                ]
+            ],
+            'stdin' => $input,
+            'args' => [],
+            'compile_timeout' => $timeout * 1000, // milliseconds
+            'run_timeout' => $timeout * 1000,     // milliseconds
+            'compile_memory_limit' => -1,         // no limit
+            'run_memory_limit' => -1              // no limit
+        ];
+        
+        // Initialize cURL session
+        $ch = curl_init($api_url);
+        
+        // Set cURL options
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout + 5); // Add 5 seconds for API overhead
+        
+        // Execute the API request
+        $response = curl_exec($ch);
+        
+        // Check for cURL errors
+        if (curl_errno($ch)) {
+            $result['error'] = 'API request error: ' . curl_error($ch);
+            curl_close($ch);
+            return $result;
+        }
+        
+        // Get HTTP status code
+        $http_code = curl_getinfo($ch);
+        curl_close($ch);
+        
+        // Parse the API response
+        $api_result = json_decode($response, true);
+        
+        if ($http_code['http_code'] != 200) {
+            $result['error'] = 'API error: ' . ($api_result['message'] ?? json_encode($api_result));
+            return $result;
+        }
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $result['error'] = 'Invalid API response: ' . json_last_error_msg();
+            return $result;
+        }
+        
+        // Process the API response
+        if (isset($api_result['run'])) {
+            // Set output from the run result
+            $result['output'] = $api_result['run']['stdout'] ?? '';
+            
+            // Check for errors in stderr
+            if (!empty($api_result['run']['stderr'])) {
+                $result['error'] = $api_result['run']['stderr'];
+            }
+            
+            // Check for compilation errors
+            if (isset($api_result['compile']) && !empty($api_result['compile']['stderr'])) {
+                if (!empty($result['error'])) {
+                    $result['error'] .= "\n\nCompilation errors:\n";
+                }
+                $result['error'] .= $api_result['compile']['stderr'];
+            }
+            
+            // Set execution time
+            if (isset($api_result['run']['time'])) {
+                $result['execution_time'] = floatval($api_result['run']['time']) / 1000; // Convert ms to seconds
+            }
+            
+            // Set success flag based on exit code
+            $exit_code = $api_result['run']['code'] ?? -1;
+            $result['success'] = ($exit_code === 0 && empty($result['error']));
+            
+            // If exit code is not 0 but no error message, add a generic one
+            if ($exit_code !== 0 && empty($result['error'])) {
+                $result['error'] = 'Program exited with code ' . $exit_code;
+            }
+        } else {
+            $result['error'] = 'Invalid API response format';
         }
     } catch (Exception $e) {
         $result['error'] = 'Execution error: ' . $e->getMessage();
-    } finally {
-        // Clean up temporary directory
-        array_map('unlink', glob("$temp_dir/*"));
-        rmdir($temp_dir);
     }
     
-    // Calculate execution time
-    $result['execution_time'] = microtime(true) - $start_time;
-    
-    return $result;
-}
-
-/**
- * Execute PHP code
- */
-function execute_php($code, $input, $temp_dir, $timeout) {
-    $result = [
-        'output' => '',
-        'error' => '',
-        'success' => false
-    ];
-    
-    // Create PHP file with the code
-    $file_path = $temp_dir . '/code.php';
-    
-    // Check if code already contains PHP tags
-    $has_php_tags = (stripos($code, '<?php') !== false);
-    
-    // Wrap code in a function to prevent global scope pollution
-    if ($has_php_tags) {
-        // If code already has PHP tags, use it directly
-        $wrapped_code = $code;
-    } else {
-        // Otherwise wrap it in PHP tags
-        $wrapped_code = "<?php
-// Disable dangerous functions
-ini_set('disable_functions', 'exec,passthru,shell_exec,system,proc_open,popen,curl_exec,parse_ini_file,show_source,dl,mail');
-
-// Capture output
-ob_start();
-
-// Run the code
-try {
-    // User code starts here
-$code
-    // User code ends here
-} catch (Throwable \$e) {
-    echo \"Error: \" . \$e->getMessage();
-}
-
-// Get output
-\$output = ob_get_clean();
-echo \$output;
-?>";
-    }
-    
-    file_put_contents($file_path, $wrapped_code);
-    
-    // Execute with process control
-    $cmd = "php -f " . escapeshellarg($file_path);
-    if (!empty($input)) {
-        $input_file = $temp_dir . '/input.txt';
-        file_put_contents($input_file, $input);
-        $cmd .= " < " . escapeshellarg($input_file);
-    }
-    
-    $descriptors = [
-        0 => ["pipe", "r"],  // stdin
-        1 => ["pipe", "w"],  // stdout
-        2 => ["pipe", "w"]   // stderr
-    ];
-    
-    $process = proc_open($cmd, $descriptors, $pipes);
-    if (is_resource($process)) {
-        // Set streams to non-blocking
-        stream_set_blocking($pipes[1], 0);
-        stream_set_blocking($pipes[2], 0);
-        
-        // Set timeout
-        $start = time();
-        $output = '';
-        $error = '';
-        
-        do {
-            $status = proc_get_status($process);
-            $output .= stream_get_contents($pipes[1]);
-            $error .= stream_get_contents($pipes[2]);
-            
-            // Check if process is still running
-            if (!$status['running']) {
-                break;
-            }
-            
-            // Check timeout
-            if (time() - $start > $timeout) {
-                proc_terminate($process);
-                $error .= "Execution timed out after {$timeout} seconds";
-                break;
-            }
-            
-            usleep(100000); // Sleep for 100ms to reduce CPU usage
-        } while (true);
-        
-        // Close pipes and process
-        fclose($pipes[0]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
-        
-        $result['output'] = $output;
-        $result['error'] = $error;
-        $result['success'] = empty($error);
-    } else {
-        $result['error'] = 'Failed to execute PHP code';
-    }
-    
-    return $result;
-}
-
-/**
- * Execute Python code
- */
-function execute_python($code, $input, $temp_dir, $timeout) {
-    $result = [
-        'output' => '',
-        'error' => '',
-        'success' => false
-    ];
-    
-    // Create Python file with the code
-    $file_path = $temp_dir . '/code.py';
-    file_put_contents($file_path, $code);
-    
-    // Execute with process control
-    $cmd = "python3 " . escapeshellarg($file_path);
-    if (!empty($input)) {
-        $input_file = $temp_dir . '/input.txt';
-        file_put_contents($input_file, $input);
-        $cmd .= " < " . escapeshellarg($input_file);
-    }
-    
-    $descriptors = [
-        0 => ["pipe", "r"],  // stdin
-        1 => ["pipe", "w"],  // stdout
-        2 => ["pipe", "w"]   // stderr
-    ];
-    
-    $process = proc_open($cmd, $descriptors, $pipes);
-    if (is_resource($process)) {
-        // Set streams to non-blocking
-        stream_set_blocking($pipes[1], 0);
-        stream_set_blocking($pipes[2], 0);
-        
-        // Set timeout
-        $start = time();
-        $output = '';
-        $error = '';
-        
-        do {
-            $status = proc_get_status($process);
-            $output .= stream_get_contents($pipes[1]);
-            $error .= stream_get_contents($pipes[2]);
-            
-            // Check if process is still running
-            if (!$status['running']) {
-                break;
-            }
-            
-            // Check timeout
-            if (time() - $start > $timeout) {
-                proc_terminate($process);
-                $error .= "Execution timed out after {$timeout} seconds";
-                break;
-            }
-            
-            usleep(100000); // Sleep for 100ms to reduce CPU usage
-        } while (true);
-        
-        // Close pipes and process
-        fclose($pipes[0]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
-        
-        $result['output'] = $output;
-        $result['error'] = $error;
-        $result['success'] = empty($error);
-    } else {
-        $result['error'] = 'Failed to execute Python code';
-    }
-    
-    return $result;
-}
-
-/**
- * Execute C++ code
- */
-function execute_cpp($code, $input, $temp_dir, $timeout) {
-    $result = [
-        'output' => '',
-        'error' => '',
-        'success' => false
-    ];
-    
-    // Create C++ file with the code
-    $file_path = $temp_dir . '/code.cpp';
-    file_put_contents($file_path, $code);
-    
-    // Compile the code
-    $executable = $temp_dir . '/code';
-    $compile_cmd = "g++ -std=c++11 " . escapeshellarg($file_path) . " -o " . escapeshellarg($executable);
-    
-    exec($compile_cmd . " 2>&1", $compile_output, $compile_return);
-    
-    if ($compile_return !== 0) {
-        $result['error'] = "Compilation error:\n" . implode("\n", $compile_output);
-        return $result;
-    }
-    
-    // Execute with process control
-    $cmd = $executable;
-    if (!empty($input)) {
-        $input_file = $temp_dir . '/input.txt';
-        file_put_contents($input_file, $input);
-        $cmd .= " < " . escapeshellarg($input_file);
-    }
-    
-    $descriptors = [
-        0 => ["pipe", "r"],  // stdin
-        1 => ["pipe", "w"],  // stdout
-        2 => ["pipe", "w"]   // stderr
-    ];
-    
-    $process = proc_open($cmd, $descriptors, $pipes);
-    if (is_resource($process)) {
-        // Set streams to non-blocking
-        stream_set_blocking($pipes[1], 0);
-        stream_set_blocking($pipes[2], 0);
-        
-        // Set timeout
-        $start = time();
-        $output = '';
-        $error = '';
-        
-        do {
-            $status = proc_get_status($process);
-            $output .= stream_get_contents($pipes[1]);
-            $error .= stream_get_contents($pipes[2]);
-            
-            // Check if process is still running
-            if (!$status['running']) {
-                break;
-            }
-            
-            // Check timeout
-            if (time() - $start > $timeout) {
-                proc_terminate($process);
-                $error .= "Execution timed out after {$timeout} seconds";
-                break;
-            }
-            
-            usleep(100000); // Sleep for 100ms to reduce CPU usage
-        } while (true);
-        
-        // Close pipes and process
-        fclose($pipes[0]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        proc_close($process);
-        
-        $result['output'] = $output;
-        $result['error'] = $error;
-        $result['success'] = empty($error);
-    } else {
-        $result['error'] = 'Failed to execute C++ code';
+    // If API didn't provide execution time, calculate it locally
+    if ($result['execution_time'] == 0) {
+        $result['execution_time'] = microtime(true) - $start_time;
     }
     
     return $result;
