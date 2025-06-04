@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'ai_code_review_integration.php';
 redirect_unauthenticated();
 
 // Инициализируем соединение с базой данных в начале файла
@@ -359,6 +360,20 @@ try {
                                                                     <div class="ui warning message">Код не был предоставлен</div>
                                                                 <?php endif; ?>
                                                             </div>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
+                                                <?php
+                                                // Display AI feedback if available
+                                                $ai_feedback = get_ai_feedback($answer['id_answer']);
+                                                if ($ai_feedback): ?>
+                                                    <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid #007acc;">
+                                                        <h4 style="color: #007acc;">
+                                                            <i class="comment alternate outline icon"></i> Анализ кода от ИИ:
+                                                        </h4>
+                                                        <div style="padding: 10px; background-color: #f8f8f8; border-radius: 4px; margin-top: 10px;">
+                                                            <?= nl2br(htmlspecialchars($ai_feedback)) ?>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>

@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'ai_code_review_integration.php';
 redirect_unauthenticated();
 
 /**
@@ -62,56 +63,18 @@ function execute_code_for_validation($code, $code_task) {
         $question = $stmt->fetch();
         $task_description = $question ? $question['text_question'] : '';
         
-        // Подготовка данных для AI-проверки
-        $ai_review_data = [
-            'student_code' => $code,
-            'expected_code' => $code_task['template_code'] ?? '',
-            'language' => $code_task['language'],
-            'task_description' => $task_description,
-            'expected_output' => $code_task['output_ct'],
-            'actual_output' => $result['output']
-        ];
+        // Добавляем фактический вывод в код_таск для передачи в функцию AI
+        $code_task['actual_output'] = $result['output'];
         
-        // Вызываем AI-проверку
-        $ai_ch = curl_init('http://' . $_SERVER['HTTP_HOST'] . '/ai_code_reviewer.php');
-        curl_setopt($ai_ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ai_ch, CURLOPT_POST, true);
-        curl_setopt($ai_ch, CURLOPT_POSTFIELDS, json_encode($ai_review_data));
-        curl_setopt($ai_ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json'
-        ]);
-        curl_setopt($ai_ch, CURLOPT_COOKIE, session_name() . '=' . session_id());
-        curl_setopt($ai_ch, CURLOPT_TIMEOUT, 10); // Уменьшаем таймаут до 10 секунд
+        // Получаем AI-анализ кода
+        $ai_result = get_ai_code_feedback($code, $code_task, $task_description);
         
-        $ai_response = curl_exec($ai_ch);
-        $ai_info = curl_getinfo($ai_ch);
-        curl_close($ai_ch);
-        
-        // Логируем ответ AI для отладки
-        error_log("AI response status: " . $ai_info['http_code']);
-        error_log("AI response: " . substr($ai_response, 0, 1000)); // Логируем только первую 1000 символов
-        
-        // Инициализируем переменные для отзыва
-        $ai_feedback = "Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.";
-        $ai_is_correct = $output_matches; // По умолчанию используем результат сравнения вывода
-        
-        // Пытаемся получить отзыв от API
-        if ($ai_info['http_code'] === 200) {
-            $ai_result = json_decode($ai_response, true);
-            if ($ai_result && isset($ai_result['feedback'])) {
-                $ai_feedback = $ai_result['feedback'];
-                $ai_is_correct = $ai_result['is_correct'] ?? $output_matches;
-            }
-        } else {
-            error_log("AI API error: HTTP " . $ai_info['http_code']);
-        }
-        
-        // Добавляем результат AI-проверки к результату выполнения, даже если был сбой
-        $result['ai_feedback'] = $ai_feedback;
-        $result['ai_is_correct'] = $ai_is_correct;
+        // Добавляем результат AI-проверки к результату выполнения
+        $result['ai_feedback'] = $ai_result['ai_feedback'];
+        $result['ai_is_correct'] = $ai_result['ai_is_correct'];
         
         // Если AI считает, что код неправильный, несмотря на совпадение вывода
-        if (!$ai_is_correct && $output_matches) {
+        if (!$ai_result['ai_is_correct'] && $output_matches) {
             $result['ai_warning'] = true;
         }
     }
@@ -356,54 +319,23 @@ if ($is_finish || $question_index === -1) {
             
             // Если есть результаты AI-проверки, обновляем запись
             if ($type === 'code') {
-                // Принудительно создаем колонку ai_feedback, если её нет
                 try {
-                    $pdo->exec("ALTER TABLE test_answers ADD COLUMN IF NOT EXISTS ai_feedback TEXT");
-                    error_log("Проверка/создание колонки ai_feedback выполнена");
-                } catch (PDOException $e) {
-                    error_log("Ошибка при создании колонки ai_feedback: " . $e->getMessage());
-                }
-                
-                // Определяем текст отзыва
-                $ai_feedback_text = '';
-                if (isset($details[$i]['ai_feedback'])) {
-                    $ai_feedback_text = $details[$i]['ai_feedback'];
-                } else {
-                    $ai_feedback_text = 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.';
-                }
-                
-                // Обновляем запись с отзывом ИИ
-                try {
-                    $stmt_update = $pdo->prepare("UPDATE test_answers SET ai_feedback = ? WHERE id_attempt = ? AND id_question = ?");
-                    $stmt_update->execute([$ai_feedback_text, $id_attempt, $q['id_question']]);
-                    
-                    // Проверяем, что запись обновилась
-                    $check_update = $pdo->prepare("SELECT ai_feedback FROM test_answers WHERE id_attempt = ? AND id_question = ?");
-                    $check_update->execute([$id_attempt, $q['id_question']]);
-                    $updated_row = $check_update->fetch();
-                    
-                    if (!$updated_row || empty($updated_row['ai_feedback'])) {
-                        error_log("ОШИБКА: Отзыв ИИ не был сохранен для attempt_id={$id_attempt}, question_id={$q['id_question']}");
-                        
-                        // Еще одна попытка с прямым SQL-запросом
-                        $pdo->exec("UPDATE test_answers SET ai_feedback = '" . 
-                            $pdo->quote($ai_feedback_text) . 
-                            "' WHERE id_attempt = {$id_attempt} AND id_question = {$q['id_question']}");
-                        error_log("Выполнена повторная попытка обновления через прямой SQL");
+                    // Определяем текст отзыва
+                    $ai_feedback_text = '';
+                    if (isset($details[$i]['ai_feedback'])) {
+                        $ai_feedback_text = $details[$i]['ai_feedback'];
                     } else {
-                        error_log("УСПЕХ: Отзыв ИИ успешно сохранен для attempt_id={$id_attempt}, question_id={$q['id_question']}");
+                        $ai_feedback_text = 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.';
                     }
-                } catch (PDOException $e) {
-                    error_log("КРИТИЧЕСКАЯ ОШИБКА при сохранении отзыва ИИ: " . $e->getMessage());
                     
-                    // Последняя попытка с прямым SQL
-                    try {
-                        $pdo->exec("UPDATE test_answers SET ai_feedback = 'Ошибка при сохранении анализа кода: " . 
-                            $pdo->quote($e->getMessage()) . 
-                            "' WHERE id_attempt = {$id_attempt} AND id_question = {$q['id_question']}");
-                    } catch (Exception $e2) {
-                        error_log("Невозможно сохранить отзыв ИИ: " . $e2->getMessage());
+                    // Сохраняем отзыв ИИ в базу данных
+                    if (!save_ai_feedback($id_attempt, $q['id_question'], $ai_feedback_text)) {
+                        error_log("Ошибка при сохранении отзыва ИИ для attempt_id={$id_attempt}, question_id={$q['id_question']}");
+                    } else {
+                        error_log("Отзыв ИИ успешно сохранен для attempt_id={$id_attempt}, question_id={$q['id_question']}");
                     }
+                } catch (Exception $e) {
+                    error_log("КРИТИЧЕСКАЯ ОШИБКА при сохранении отзыва ИИ: " . $e->getMessage());
                 }
             }
         }
