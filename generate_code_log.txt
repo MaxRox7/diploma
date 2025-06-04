@@ -1,0 +1,99 @@
+=== 2025-06-04 12:17:33 ===
+Raw input: {"question":"Сумма эелементов массива ","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Сумма эелементов массива \n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 3.55753 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\nfunction sum_of_array_elements($array) {\n    // Здесь напишите ваш код\n    return 0;\n}\n\n// Пример использования функции\n$example_array = [1, 2, 3, 4, 5];\n$result = sum_of_array_elements($example_array);\n\necho $result; // Должно вывести сумму элементов массива\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\nfunction sum_of_array_elements($array) {\n    $sum = 0;\n    foreach ($array as $element) {\n        $sum += $element;\n    }\n    return $sum;\n}\n\n// Пример использования функции\n$example_array = [1, 2, 3, 4, 5];\n$result = sum_of_array_elements($example_array);\n\necho $result; // Должно вывести 15\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"142","completionTokens":"234","totalTokens":"376","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+function sum_of_array_elements($array) {
+    // Здесь напишите ваш код
+    return 0;
+}
+
+// Пример использования функции
+$example_array = [1, 2, 3, 4, 5];
+$result = sum_of_array_elements($example_array);
+
+echo $result; // Должно вывести сумму элементов массива
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+function sum_of_array_elements($array) {
+    $sum = 0;
+    foreach ($array as $element) {
+        $sum += $element;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$example_array = [1, 2, 3, 4, 5];
+$result = sum_of_array_elements($example_array);
+
+echo $result; // Должно вывести 15
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: ```php
+<?php
+
+function sum_of_array_elements($array) {
+    // Здесь напишите ваш код
+    return 0;
+}
+
+// Пример использования функции
+$example_array = [1, 2, 3, 4, 5];
+$result = sum_of_array_elements($example_array);
+
+echo $result; // Должно вывести сумму элементов массива
+?>
+```
+Extracted solution: ```php
+<?php
+
+function sum_of_array_elements($array) {
+    $sum = 0;
+    foreach ($array as $element) {
+        $sum += $element;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$example_array = [1, 2, 3, 4, 5];
+$result = sum_of_array_elements($example_array);
+
+echo $result; // Должно вывести 15
+?>
+```
+Extracted output: ```
+15
+```
+=== END ===
+

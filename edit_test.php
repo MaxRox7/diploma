@@ -572,7 +572,7 @@ function get_question_options($pdo, $question_id) {
                                         $code_task = $stmt->fetch();
                                         ?>
                                         <div class="fields">
-                                            <div class="six wide field">
+                                            <div class="eight wide field">
                                                 <label>Язык программирования</label>
                                                 <select name="code_language" class="ui dropdown">
                                                     <option value="php" <?= ($code_task && $code_task['language'] === 'php') ? 'selected' : '' ?>>PHP</option>
@@ -580,23 +580,34 @@ function get_question_options($pdo, $question_id) {
                                                     <option value="cpp" <?= ($code_task && $code_task['language'] === 'cpp') ? 'selected' : '' ?>>C++</option>
                                                 </select>
                                             </div>
-                                            <div class="six wide field">
-                                                <label>Таймаут выполнения (сек)</label>
-                                                <input type="number" name="code_timeout" min="1" max="30" value="<?= $code_task ? $code_task['execution_timeout'] : 5 ?>">
+                                            <div class="eight wide field">
+                                                <label>Сложность задачи</label>
+                                                <select name="code_difficulty" class="ui dropdown">
+                                                    <option value="easy">Легкая</option>
+                                                    <option value="medium" selected>Средняя</option>
+                                                    <option value="hard">Сложная</option>
+                                                </select>
                                             </div>
                                         </div>
                                         <div class="field">
-                                            <label>Шаблон кода (предоставляется студенту)</label>
-                                            <textarea name="code_template" rows="8"><?= $code_task ? htmlspecialchars($code_task['template_code']) : '' ?></textarea>
+                                            <label>Шаблон кода</label>
+                                            <textarea name="code_template" id="code_template" rows="5"></textarea>
                                         </div>
                                         <div class="field">
-                                            <label>Входные данные (если требуются)</label>
-                                            <textarea name="code_input" rows="4"><?= $code_task ? htmlspecialchars($code_task['input_ct']) : '' ?></textarea>
+                                            <label>Входные данные (опционально)</label>
+                                            <textarea name="code_input" id="code_input" rows="2"></textarea>
                                         </div>
                                         <div class="field">
-                                            <label>Ожидаемый вывод (для проверки)</label>
-                                            <textarea name="code_output" rows="4" required><?= $code_task ? htmlspecialchars($code_task['output_ct']) : '' ?></textarea>
+                                            <label>Ожидаемый вывод</label>
+                                            <textarea name="code_output" id="code_output" rows="2" required></textarea>
                                         </div>
+                                        <div class="field">
+                                            <label>Таймаут выполнения (секунды)</label>
+                                            <input type="number" name="code_timeout" id="code_timeout" value="5" min="1" max="30">
+                                        </div>
+                                        <button type="button" class="ui primary button" onclick="generateCodeTemplate()">
+                                            <i class="magic icon"></i> Сгенерировать шаблон и вывод
+                                        </button>
                                     </div>
                                 <?php endif; ?>
                                 <div class="ui buttons">
@@ -730,32 +741,42 @@ function renderOptions(type) {
     } else if (type === 'code') {
         block.innerHTML = `
             <div class="fields">
-                <div class="six wide field">
+                <div class="eight wide field">
                     <label>Язык программирования</label>
-                    <select name="code_language" class="ui dropdown">
+                    <select name="code_language" id="code_language" class="ui dropdown">
                         <option value="php">PHP</option>
                         <option value="python">Python</option>
                         <option value="cpp">C++</option>
                     </select>
                 </div>
-                <div class="six wide field">
-                    <label>Таймаут выполнения (сек)</label>
-                    <input type="number" name="code_timeout" min="1" max="30" value="5">
+                <div class="eight wide field">
+                    <label>Сложность задачи</label>
+                    <select name="code_difficulty" id="code_difficulty" class="ui dropdown">
+                        <option value="easy">Легкая</option>
+                        <option value="medium" selected>Средняя</option>
+                        <option value="hard">Сложная</option>
+                    </select>
                 </div>
             </div>
             <div class="field">
-                <label>Шаблон кода (предоставляется студенту)</label>
-                <textarea name="code_template" rows="8" placeholder="Введите шаблон кода, с которого начнет студент"></textarea>
+                <label>Шаблон кода</label>
+                <textarea name="code_template" id="code_template" rows="5"></textarea>
             </div>
             <div class="field">
-                <label>Входные данные (если требуются)</label>
-                <textarea name="code_input" rows="4" placeholder="Введите входные данные для программы (опционально)"></textarea>
+                <label>Входные данные (опционально)</label>
+                <textarea name="code_input" id="code_input" rows="2"></textarea>
             </div>
             <div class="field">
-                <label>Ожидаемый вывод (для проверки)</label>
-                <textarea name="code_output" rows="4" placeholder="Введите ожидаемый вывод программы" required></textarea>
+                <label>Ожидаемый вывод</label>
+                <textarea name="code_output" id="code_output" rows="2" required></textarea>
             </div>
-        `;
+            <div class="field">
+                <label>Таймаут выполнения (секунды)</label>
+                <input type="number" name="code_timeout" id="code_timeout" value="5" min="1" max="30">
+            </div>
+            <button type="button" class="ui primary button" onclick="generateCodeTemplate()">
+                <i class="magic icon"></i> Сгенерировать шаблон и вывод
+            </button>`;
     }
 }
 document.addEventListener('DOMContentLoaded', function() {
@@ -1066,6 +1087,72 @@ function addMatchPairToContainer(button) {
     newFields.className = 'fields';
     newFields.innerHTML = `<div class="eight wide field"><input type="text" name="match_left[]" placeholder="Левая часть ${pairCount}" required></div><div class="eight wide field"><input type="text" name="match_right[]" placeholder="Правая часть ${pairCount}" required></div>`;
     container.appendChild(newFields);
+}
+
+// Функция для генерации шаблона и вывода кода
+function generateCodeTemplate() {
+    const questionText = document.querySelector('textarea[name="question_text"]').value;
+    const language = document.getElementById('code_language').value;
+    const difficulty = document.getElementById('code_difficulty').value;
+    const inputExample = document.getElementById('code_input').value;
+    
+    if (!questionText) {
+        alert('Пожалуйста, введите текст вопроса');
+        return;
+    }
+    
+    // Показываем индикатор загрузки
+    document.getElementById('code_template').value = 'Генерация шаблона...';
+    document.getElementById('code_output').value = 'Генерация ожидаемого вывода...';
+    
+    // Отправляем запрос к API
+    fetch('generate_code_template.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question: questionText,
+            language: language,
+            difficulty: difficulty,
+            input_example: inputExample
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Ошибка сервера (${response.status}): ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            document.getElementById('code_template').value = data.template;
+            document.getElementById('code_output').value = data.output;
+            
+            // Сохраняем решение в скрытое поле для справки
+            if (!document.getElementById('code_solution')) {
+                const solutionField = document.createElement('input');
+                solutionField.type = 'hidden';
+                solutionField.id = 'code_solution';
+                solutionField.name = 'code_solution';
+                document.getElementById('code_template').parentNode.appendChild(solutionField);
+            }
+            document.getElementById('code_solution').value = data.solution;
+            
+            // Показываем сообщение об успехе
+            alert('Шаблон кода и ожидаемый вывод успешно сгенерированы!');
+        } else {
+            alert('Ошибка при генерации кода: ' + (data.error || 'Неизвестная ошибка'));
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при генерации кода: ' + error.message);
+        document.getElementById('code_template').value = '';
+        document.getElementById('code_output').value = '';
+    });
 }
 </script>
 
