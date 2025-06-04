@@ -2,14 +2,74 @@
 require_once 'config.php';
 redirect_unauthenticated();
 
+// Инициализируем соединение с базой данных в начале файла
+try {
+    $pdo = get_db_connection();
+} catch (PDOException $e) {
+    die('Ошибка подключения к базе данных: ' . $e->getMessage());
+}
+
 $test_id = isset($_GET['test_id']) ? (int)$_GET['test_id'] : 0;
 $attempt_id = isset($_GET['attempt_id']) ? (int)$_GET['attempt_id'] : 0;
 $is_admin_view = is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1;
 $error = '';
 
+// Добавим обработку запроса на изменение статуса ответа
+$success_message = '';
+$error_message = '';
+
+// Обработка формы оценивания ответа
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'grade_answer') {
+    try {
+        $answer_id = isset($_POST['answer_id']) ? (int)$_POST['answer_id'] : 0;
+        $is_correct = isset($_POST['is_correct']) ? (int)$_POST['is_correct'] : 0;
+        $attempt_id = isset($_POST['attempt_id']) ? (int)$_POST['attempt_id'] : 0;
+        
+        if ($answer_id && $attempt_id) {
+            // Проверяем права доступа (только преподаватель или админ)
+            if (is_admin() || is_teacher()) {
+                // Обновляем статус ответа
+                $stmt = $pdo->prepare("UPDATE test_answers SET is_correct = ? WHERE id_answer = ?");
+                $stmt->execute([$is_correct, $answer_id]);
+                
+                // Пересчитываем общий балл за тест
+                $stmt = $pdo->prepare("
+                    SELECT COUNT(*) as total, SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct 
+                    FROM test_answers 
+                    WHERE id_attempt = ?
+                ");
+                $stmt->execute([$attempt_id]);
+                $result = $stmt->fetch();
+                
+                $score = $result['correct'] ?? 0;
+                $max_score = $result['total'] ?? 0;
+                
+                // Обновляем результат попытки
+                $stmt = $pdo->prepare("UPDATE test_attempts SET score = ? WHERE id_attempt = ?");
+                $stmt->execute([$score, $attempt_id]);
+                
+                $success_message = 'Оценка успешно обновлена!';
+                
+                // Перенаправляем на ту же страницу, чтобы обновить данные
+                header("Location: test_results.php?test_id={$test_id}&attempt_id={$attempt_id}&success=1");
+                exit;
+            } else {
+                $error_message = 'У вас нет прав для оценивания ответов.';
+            }
+        } else {
+            $error_message = 'Неверные параметры запроса.';
+        }
+    } catch (PDOException $e) {
+        $error_message = 'Ошибка базы данных: ' . $e->getMessage();
+    }
+}
+
+// Показываем сообщение об успехе, если есть
+if (isset($_GET['success']) && $_GET['success'] == 1) {
+    $success_message = 'Оценка успешно обновлена!';
+}
+
 try {
-    $pdo = get_db_connection();
-    
     // Get test information and check access rights
     if ($is_admin_view) {
         // Admin in view mode can access any test
@@ -132,6 +192,17 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <style>
+        .grade-buttons {
+            margin-top: 10px;
+        }
+        .grade-buttons .button {
+            margin-right: 5px;
+        }
+        .ui.success.message {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
 <?php include 'header.php'; ?>
@@ -156,10 +227,17 @@ try {
                 </div>
             <?php endif; ?>
 
-            <?php if ($error): ?>
+            <?php if ($error || $error_message): ?>
                 <div class="ui error message">
                     <div class="header">Ошибка</div>
-                    <p><?= htmlspecialchars($error) ?></p>
+                    <p><?= htmlspecialchars($error ?: $error_message) ?></p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($success_message): ?>
+                <div class="ui success message">
+                    <div class="header">Успех</div>
+                    <p><?= htmlspecialchars($success_message) ?></p>
                 </div>
             <?php endif; ?>
 
@@ -205,12 +283,15 @@ try {
                                     <p><strong>Ваш ответ:</strong>
                                         <?php
                                         if ($answer['type_question'] === 'single') {
+                                            // Одиночный выбор
                                             $opt = null;
                                             foreach ($answer['options'] as $o) {
                                                 if ($o['id_option'] == $answer['id_selected_option']) $opt = $o['text_option'];
                                             }
                                             echo $opt ? htmlspecialchars($opt) : '<span class="text-muted">Нет ответа</span>';
-                                        } elseif ($answer['type_question'] === 'multi') {
+                                        } 
+                                        elseif ($answer['type_question'] === 'multi') {
+                                            // Множественный выбор
                                             $selected = [];
                                             if (!empty($answer['answer_text'])) {
                                                 $indices = json_decode($answer['answer_text'], true);
@@ -223,7 +304,9 @@ try {
                                                 }
                                             }
                                             echo $selected ? htmlspecialchars(implode(', ', $selected)) : '<span class="text-muted">Нет ответа</span>';
-                                        } elseif ($answer['type_question'] === 'match') {
+                                        } 
+                                        elseif ($answer['type_question'] === 'match') {
+                                            // Сопоставление
                                             if (!empty($answer['answer_text'])) {
                                                 $pairs = json_decode($answer['answer_text'], true);
                                                 if (is_array($pairs)) {
@@ -237,48 +320,82 @@ try {
                                                 } else {
                                                     echo '<span class="text-muted">Нет ответа</span>';
                                                 }
-                                            } elseif ($answer['type_question'] === 'code'): ?>
-                                                <div class="field">
-                                                    <label>Код студента:</label>
-                                                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars($answer['answer_text'] ?? 'Код не предоставлен') ?></pre>
-                                                    
-                                                    <?php
-                                                    // Get code task details
-                                                    $stmt = $pdo->prepare("
-                                                        SELECT * FROM code_tasks
-                                                        WHERE id_question = ?
-                                                    ");
-                                                    $stmt->execute([$answer['id_question']]);
-                                                    $code_task = $stmt->fetch();
-                                                    
-                                                    if ($code_task): ?>
-                                                        <div class="ui segment">
-                                                            <div class="ui two column grid">
-                                                                <div class="column">
-                                                                    <h5>Ожидаемый вывод:</h5>
-                                                                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;"><?= htmlspecialchars($code_task['output_ct']) ?></pre>
-                                                                </div>
-                                                                <div class="column">
-                                                                    <h5>Фактический вывод:</h5>
-                                                                    <?php if (!empty($answer['answer_text'])): ?>
-                                                                        <button class="ui mini button run-code-btn" data-code="<?= htmlspecialchars($answer['answer_text']) ?>" data-language="<?= htmlspecialchars($code_task['language']) ?>" data-input="<?= htmlspecialchars($code_task['input_ct']) ?>" data-timeout="<?= (int)$code_task['execution_timeout'] ?>" data-target="output-<?= $answer['id_answer'] ?>">
-                                                                            <i class="play icon"></i> Запустить код
-                                                                        </button>
-                                                                        <pre id="output-<?= $answer['id_answer'] ?>" style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;">Нажмите кнопку для выполнения кода</pre>
-                                                                    <?php else: ?>
-                                                                        <div class="ui warning message">Код не был предоставлен</div>
-                                                                    <?php endif; ?>
-                                                                </div>
+                                            } else {
+                                                echo '<span class="text-muted">Нет ответа</span>';
+                                            }
+                                        }
+                                        elseif ($answer['type_question'] === 'code') {
+                                            // Программирование
+                                            echo '</p>'; // Закрываем тег <p> перед выводом кода
+                                        ?>
+                                            <div class="field">
+                                                <label>Код студента:</label>
+                                                <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars($answer['answer_text'] ?? 'Код не предоставлен') ?></pre>
+                                                
+                                                <?php
+                                                // Get code task details
+                                                $stmt = $pdo->prepare("
+                                                    SELECT * FROM code_tasks
+                                                    WHERE id_question = ?
+                                                ");
+                                                $stmt->execute([$answer['id_question']]);
+                                                $code_task = $stmt->fetch();
+                                                
+                                                if ($code_task): ?>
+                                                    <div class="ui segment">
+                                                        <div class="ui two column grid">
+                                                            <div class="column">
+                                                                <h5>Ожидаемый вывод:</h5>
+                                                                <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;"><?= htmlspecialchars($code_task['output_ct']) ?></pre>
+                                                            </div>
+                                                            <div class="column">
+                                                                <h5>Фактический вывод:</h5>
+                                                                <?php if (!empty($answer['answer_text'])): ?>
+                                                                    <button class="ui mini button run-code-btn" data-code="<?= htmlspecialchars($answer['answer_text']) ?>" data-language="<?= htmlspecialchars($code_task['language']) ?>" data-input="<?= htmlspecialchars($code_task['input_ct']) ?>" data-timeout="<?= (int)$code_task['execution_timeout'] ?>" data-target="output-<?= $answer['id_answer'] ?>">
+                                                                        <i class="play icon"></i> Запустить код
+                                                                    </button>
+                                                                    <pre id="output-<?= $answer['id_answer'] ?>" style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;">Нажмите кнопку для выполнения кода</pre>
+                                                                <?php else: ?>
+                                                                    <div class="ui warning message">Код не был предоставлен</div>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            <?php else: ?>
-                                                <span class="text-muted">Нет ответа</span>
-                                            <?php endif; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <p> <!-- Открываем новый тег <p> для продолжения -->
+                                        <?php
+                                        } else {
+                                            // Неизвестный тип вопроса
+                                            echo '<span class="text-muted">Нет ответа</span>';
+                                        }
+                                        ?>
                                     </p>
                                     <?php if (!$answer['is_correct']): ?>
                                         <p><strong>Правильный ответ:</strong> <?= $answer['correct_option'] !== null ? htmlspecialchars($answer['correct_option']) : '<span class="text-muted">Нет данных</span>' ?></p>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (is_admin() || is_teacher()): ?>
+                                        <div class="grade-buttons">
+                                            <form method="post" action="" style="display: inline-block;">
+                                                <input type="hidden" name="action" value="grade_answer">
+                                                <input type="hidden" name="answer_id" value="<?= $answer['id_answer'] ?>">
+                                                <input type="hidden" name="attempt_id" value="<?= $attempt_id ?>">
+                                                <input type="hidden" name="is_correct" value="1">
+                                                <button type="submit" class="ui tiny green button <?= $answer['is_correct'] ? 'active' : '' ?>">
+                                                    <i class="check icon"></i> Правильно
+                                                </button>
+                                            </form>
+                                            <form method="post" action="" style="display: inline-block;">
+                                                <input type="hidden" name="action" value="grade_answer">
+                                                <input type="hidden" name="answer_id" value="<?= $answer['id_answer'] ?>">
+                                                <input type="hidden" name="attempt_id" value="<?= $attempt_id ?>">
+                                                <input type="hidden" name="is_correct" value="0">
+                                                <button type="submit" class="ui tiny red button <?= !$answer['is_correct'] ? 'active' : '' ?>">
+                                                    <i class="times icon"></i> Неправильно
+                                                </button>
+                                            </form>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>

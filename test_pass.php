@@ -318,18 +318,196 @@ if ($is_finish || $question_index === -1) {
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+        <!-- Monaco Editor -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
         <style>
-            #code-editor {
-                font-family: 'Courier New', monospace;
+            .code-editor {
+                width: 100%;
+                min-height: 350px;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
                 font-size: 14px;
                 line-height: 1.5;
+                padding: 10px;
+                background-color: #282a36;
+                color: #f8f8f2;
+                border: 1px solid #44475a;
+                border-radius: 4px;
+                resize: vertical;
                 tab-size: 4;
+                -moz-tab-size: 4;
+                white-space: pre;
+                overflow-wrap: normal;
+                overflow-x: auto;
             }
+            
+            .code-editor:focus {
+                outline: none;
+                border-color: #6272a4;
+                box-shadow: 0 0 0 2px rgba(98, 114, 164, 0.3);
+            }
+            
+            .editor-toolbar {
+                margin-bottom: 10px;
+                display: flex;
+                justify-content: space-between;
+            }
+            
+            .editor-toolbar .ui.button {
+                margin-right: 5px;
+            }
+            
             pre {
                 background-color: #f5f5f5;
                 padding: 10px;
                 border-radius: 4px;
                 overflow-x: auto;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            }
+            
+            #code-output {
+                background-color: #282a36;
+                color: #f8f8f2;
+                padding: 10px;
+                border-radius: 4px;
+                white-space: pre-wrap;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            }
+            
+            .light-theme {
+                background-color: #f8f8f2;
+                color: #282a36;
+                border-color: #ddd;
+            }
+            
+            #monaco-editor-container {
+                width: 100%;
+                height: 400px;
+                border: 1px solid #444;
+                border-radius: 4px;
+                overflow: hidden;
+            }
+            
+            .editor-toolbar {
+                background-color: #252526;
+                color: #cccccc;
+                padding: 5px 10px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #444;
+            }
+            
+            .editor-toolbar .title {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            
+            .editor-toolbar .buttons {
+                display: flex;
+                gap: 5px;
+            }
+            
+            .editor-toolbar .ui.button {
+                margin: 0;
+                background-color: #0e639c;
+                color: white;
+                font-size: 12px;
+                padding: 6px 10px;
+                border-radius: 2px;
+            }
+            
+            .editor-toolbar .ui.button:hover {
+                background-color: #1177bb;
+            }
+            
+            .editor-status-bar {
+                background-color: #007acc;
+                color: white;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 12px;
+                padding: 2px 10px;
+                display: flex;
+                justify-content: space-between;
+            }
+            
+            .editor-container {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 15px;
+                border-radius: 4px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+            
+            pre {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                padding: 10px;
+                border-radius: 4px;
+                overflow-x: auto;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                margin-top: 0;
+            }
+            
+            #code-output {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                padding: 10px;
+                border-radius: 4px;
+                white-space: pre-wrap;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            }
+            
+            .output-container {
+                margin-top: 15px;
+                border-radius: 4px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            }
+            
+            .output-header {
+                background-color: #252526;
+                color: #cccccc;
+                padding: 5px 10px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 12px;
+                font-weight: 500;
+                border-bottom: 1px solid #444;
+            }
+            
+            .output-content {
+                background-color: #1e1e1e;
+                padding: 0;
+            }
+            
+            .ui.info.message {
+                background-color: #252526;
+                color: #cccccc;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                border: none;
+                border-left: 4px solid #007acc;
+            }
+            
+            .ui.info.message .header {
+                color: #ffffff;
+            }
+            
+            .ui.info.message pre {
+                background-color: #1e1e1e;
+                border: 1px solid #444;
+            }
+            
+            .ui.success.message {
+                background-color: #1e1e1e;
+                color: #89D185;
+                border: none;
+            }
+            
+            .ui.error.message {
+                background-color: #1e1e1e;
+                color: #F14C4C;
+                border: none;
             }
         </style>
     </head>
@@ -405,18 +583,196 @@ foreach ($_SESSION['test_answers'][$test_id] as $ans) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <!-- Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <style>
-        #code-editor {
-            font-family: 'Courier New', monospace;
+        .code-editor {
+            width: 100%;
+            min-height: 350px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.5;
+            padding: 10px;
+            background-color: #282a36;
+            color: #f8f8f2;
+            border: 1px solid #44475a;
+            border-radius: 4px;
+            resize: vertical;
             tab-size: 4;
+            -moz-tab-size: 4;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
         }
+        
+        .code-editor:focus {
+            outline: none;
+            border-color: #6272a4;
+            box-shadow: 0 0 0 2px rgba(98, 114, 164, 0.3);
+        }
+        
+        .editor-toolbar {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .editor-toolbar .ui.button {
+            margin-right: 5px;
+        }
+        
         pre {
             background-color: #f5f5f5;
             padding: 10px;
             border-radius: 4px;
             overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        #code-output {
+            background-color: #282a36;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .light-theme {
+            background-color: #f8f8f2;
+            color: #282a36;
+            border-color: #ddd;
+        }
+        
+        #monaco-editor-container {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .editor-toolbar {
+            background-color: #252526;
+            color: #cccccc;
+            padding: 5px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+        }
+        
+        .editor-toolbar .title {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .editor-toolbar .buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .editor-toolbar .ui.button {
+            margin: 0;
+            background-color: #0e639c;
+            color: white;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 2px;
+        }
+        
+        .editor-toolbar .ui.button:hover {
+            background-color: #1177bb;
+        }
+        
+        .editor-status-bar {
+            background-color: #007acc;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 12px;
+            padding: 2px 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        pre {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            margin-top: 0;
+        }
+        
+        #code-output {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .output-container {
+            margin-top: 15px;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .output-header {
+            background-color: #252526;
+            color: #cccccc;
+            padding: 5px 10px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            border-bottom: 1px solid #444;
+        }
+        
+        .output-content {
+            background-color: #1e1e1e;
+            padding: 0;
+        }
+        
+        .ui.info.message {
+            background-color: #252526;
+            color: #cccccc;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: none;
+            border-left: 4px solid #007acc;
+        }
+        
+        .ui.info.message .header {
+            color: #ffffff;
+        }
+        
+        .ui.info.message pre {
+            background-color: #1e1e1e;
+            border: 1px solid #444;
+        }
+        
+        .ui.success.message {
+            background-color: #1e1e1e;
+            color: #89D185;
+            border: none;
+        }
+        
+        .ui.error.message {
+            background-color: #1e1e1e;
+            color: #F14C4C;
+            border: none;
         }
     </style>
 </head>
@@ -499,31 +855,59 @@ foreach ($_SESSION['test_answers'][$test_id] as $ans) {
                     $template_code = $code_task ? $code_task['template_code'] : '';
                     $language = $code_task ? $code_task['language'] : 'php';
                     
-                    // Language-specific syntax highlighting
-                    $lang_class = '';
+                    // Определяем язык для Monaco Editor
+                    $monaco_language = '';
                     switch ($language) {
-                        case 'php': $lang_class = 'language-php'; break;
-                        case 'python': $lang_class = 'language-python'; break;
-                        case 'cpp': $lang_class = 'language-cpp'; break;
+                        case 'php': $monaco_language = 'php'; break;
+                        case 'python': $monaco_language = 'python'; break;
+                        case 'cpp': $monaco_language = 'cpp'; break;
                     }
+                    
+                    // Подготовка примера кода
+                    $sample_code = '';
+                    if ($language === 'php') {
+                        $sample_code = "<?php\nfunction sum_array(\$arr) {\n    \$sum = 0;\n    foreach (\$arr as \$value) {\n        \$sum += \$value;\n    }\n    return \$sum;\n}\n\n// Пример использования\n\$numbers = [1, 2, 3, 4, 5];\necho sum_array(\$numbers); // Выведет: 15\n?>";
+                    } else if ($language === 'python') {
+                        $sample_code = "def sum_array(arr):\n    return sum(arr)\n\n# Пример использования\nnumbers = [1, 2, 3, 4, 5]\nprint(sum_array(numbers))  # Выведет: 15";
+                    } else if ($language === 'cpp') {
+                        $sample_code = "#include <iostream>\n#include <vector>\n\nint sum_array(const std::vector<int>& arr) {\n    int sum = 0;\n    for (int value : arr) {\n        sum += value;\n    }\n    return sum;\n}\n\nint main() {\n    std::vector<int> numbers = {1, 2, 3, 4, 5};\n    std::cout << sum_array(numbers) << std::endl;  // Выведет: 15\n    return 0;\n}";
+                    }
+                    
+                    // Используем код из ответа, шаблон или пример
+                    $code_to_show = $answer_value ?: $template_code ?: $sample_code;
                     ?>
                     <div class="field">
-                        <div class="ui segment">
-                            <div class="ui top attached tabular menu">
-                                <div class="active item">Редактор кода</div>
-                                <div class="item" id="run-code-btn">
-                                    <i class="play icon"></i> Запустить код
+                        <input type="hidden" name="code_answer" id="code-answer-input" value="<?= htmlspecialchars($code_to_show) ?>">
+                        
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <div class="title">
+                                    <?= strtoupper($language) ?> • main.<?= $language === 'cpp' ? 'cpp' : ($language === 'python' ? 'py' : 'php') ?>
+                                </div>
+                                <div class="buttons">
+                                    <button type="button" id="run-code-btn" class="ui tiny button">
+                                        <i class="play icon"></i> Запустить
+                                    </button>
+                                    <button type="button" id="format-code-btn" class="ui tiny button">
+                                        <i class="align left icon"></i> Форматировать
+                                    </button>
                                 </div>
                             </div>
-                            <div class="ui bottom attached segment">
-                                <textarea name="code_answer" id="code-editor" rows="15" style="width: 100%; font-family: monospace;"><?= htmlspecialchars($answer_value ?: $template_code) ?></textarea>
+                            <div id="monaco-editor-container"></div>
+                            <div class="editor-status-bar">
+                                <div><?= strtoupper($language) ?></div>
+                                <div>UTF-8</div>
                             </div>
                         </div>
                         
-                        <div class="ui segment" id="code-output-container" style="display: none;">
-                            <h4>Результат выполнения:</h4>
-                            <div class="ui message" id="code-output-message"></div>
-                            <pre id="code-output"></pre>
+                        <div class="output-container" id="code-output-container" style="display: none;">
+                            <div class="output-header">
+                                <i class="terminal icon"></i> Терминал
+                            </div>
+                            <div class="output-content">
+                                <div class="ui message" id="code-output-message"></div>
+                                <pre id="code-output"></pre>
+                            </div>
                         </div>
                         
                         <div class="ui info message">
@@ -543,26 +927,85 @@ foreach ($_SESSION['test_answers'][$test_id] as $ans) {
                     <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         const runBtn = document.getElementById('run-code-btn');
-                        const editor = document.getElementById('code-editor');
+                        const formatBtn = document.getElementById('format-code-btn');
                         const outputContainer = document.getElementById('code-output-container');
                         const outputMessage = document.getElementById('code-output-message');
                         const output = document.getElementById('code-output');
+                        const codeAnswerInput = document.getElementById('code-answer-input');
+                        let editor;
                         
+                        // Инициализация Monaco Editor
+                        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+                        require(['vs/editor/editor.main'], function() {
+                            // Создаем редактор
+                            editor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
+                                value: <?= json_encode($code_to_show) ?>,
+                                language: '<?= $monaco_language ?>',
+                                theme: 'vs-dark',
+                                automaticLayout: true,
+                                minimap: { enabled: true },
+                                scrollBeyondLastLine: false,
+                                fontSize: 14,
+                                fontFamily: "'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace",
+                                lineNumbers: 'on',
+                                renderLineHighlight: 'all',
+                                roundedSelection: true,
+                                cursorStyle: 'line',
+                                cursorBlinking: 'blink',
+                                tabSize: 4,
+                                insertSpaces: true,
+                                formatOnType: true,
+                                formatOnPaste: true,
+                                wordWrap: 'off',
+                                rulers: [],
+                                autoIndent: 'full',
+                                renderIndentGuides: true,
+                                renderFinalNewline: true,
+                                fixedOverflowWidgets: true
+                            });
+                            
+                            // Обновляем скрытое поле при изменении кода
+                            editor.onDidChangeModelContent(function() {
+                                codeAnswerInput.value = editor.getValue();
+                            });
+                            
+                            // Форматирование кода
+                            formatBtn.addEventListener('click', function() {
+                                editor.getAction('editor.action.formatDocument').run();
+                            });
+                            
+                            // Добавляем горячие клавиши
+                            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function() {
+                                // Ctrl+S - сохранить (ничего не делаем, просто для удобства)
+                            });
+                            
+                            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, function() {
+                                // Ctrl+F - поиск
+                                editor.getAction('actions.find').run();
+                            });
+                            
+                            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, function() {
+                                // Ctrl+Enter - запустить код
+                                runBtn.click();
+                            });
+                        });
+                        
+                        // Запуск кода
                         runBtn.addEventListener('click', function() {
-                            // Show loading
+                            // Показываем загрузку
                             outputContainer.style.display = 'block';
                             outputMessage.className = 'ui message loading';
                             outputMessage.textContent = 'Выполнение кода...';
                             output.textContent = '';
                             
-                            // Send code to server
+                            // Отправляем код на сервер
                             fetch('code_executor.php', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
                                 body: JSON.stringify({
-                                    code: editor.value,
+                                    code: codeAnswerInput.value,
                                     language: '<?= $language ?>',
                                     input: <?= json_encode($code_task['input_ct'] ?? '') ?>,
                                     timeout: <?= (int)($code_task['execution_timeout'] ?? 5) ?>
