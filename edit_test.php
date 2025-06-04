@@ -142,7 +142,31 @@ try {
                         }
                         // CODE
                         elseif ($type_question === 'code') {
-                            // Заглушка: только вопрос, без вариантов
+                            // Получаем данные для задания с кодом
+                            $code_language = $_POST['code_language'] ?? 'php';
+                            $code_template = $_POST['code_template'] ?? '';
+                            $code_input = $_POST['code_input'] ?? '';
+                            $code_output = $_POST['code_output'] ?? '';
+                            $code_timeout = (int)($_POST['code_timeout'] ?? 5);
+                            
+                            // Проверяем обязательные поля
+                            if (empty($code_output)) {
+                                throw new Exception('Необходимо указать ожидаемый вывод для задания с кодом');
+                            }
+                            
+                            // Сохраняем в таблицу code_tasks
+                            $stmt = $pdo->prepare("
+                                INSERT INTO code_tasks (id_question, template_code, input_ct, output_ct, language, execution_timeout)
+                                VALUES (?, ?, ?, ?, ?, ?)
+                            ");
+                            $stmt->execute([
+                                $question_id,
+                                $code_template,
+                                $code_input,
+                                $code_output,
+                                $code_language,
+                                $code_timeout
+                            ]);
                         }
                         $pdo->commit();
                         $success = 'Вопрос успешно добавлен';
@@ -272,7 +296,53 @@ try {
                         }
                         // CODE
                         elseif ($type_question === 'code') {
-                            // Только текст вопроса, без вариантов
+                            // Получаем данные для задания с кодом
+                            $code_language = $_POST['code_language'] ?? 'php';
+                            $code_template = $_POST['code_template'] ?? '';
+                            $code_input = $_POST['code_input'] ?? '';
+                            $code_output = $_POST['code_output'] ?? '';
+                            $code_timeout = (int)($_POST['code_timeout'] ?? 5);
+                            
+                            // Проверяем обязательные поля
+                            if (empty($code_output)) {
+                                throw new Exception('Необходимо указать ожидаемый вывод для задания с кодом');
+                            }
+                            
+                            // Проверяем, существует ли уже запись для этого вопроса
+                            $stmt = $pdo->prepare("SELECT id_ct FROM code_tasks WHERE id_question = ?");
+                            $stmt->execute([$question_id]);
+                            $code_task_id = $stmt->fetchColumn();
+                            
+                            if ($code_task_id) {
+                                // Обновляем существующую запись
+                                $stmt = $pdo->prepare("
+                                    UPDATE code_tasks 
+                                    SET template_code = ?, input_ct = ?, output_ct = ?, language = ?, execution_timeout = ?
+                                    WHERE id_question = ?
+                                ");
+                                $stmt->execute([
+                                    $code_template,
+                                    $code_input,
+                                    $code_output,
+                                    $code_language,
+                                    $code_timeout,
+                                    $question_id
+                                ]);
+                            } else {
+                                // Создаем новую запись
+                                $stmt = $pdo->prepare("
+                                    INSERT INTO code_tasks (id_question, template_code, input_ct, output_ct, language, execution_timeout)
+                                    VALUES (?, ?, ?, ?, ?, ?)
+                                ");
+                                $stmt->execute([
+                                    $question_id,
+                                    $code_template,
+                                    $code_input,
+                                    $code_output,
+                                    $code_language,
+                                    $code_timeout
+                                ]);
+                            }
                         }
                         $pdo->commit();
                         $success = 'Вопрос успешно обновлен';
@@ -490,7 +560,44 @@ function get_question_options($pdo, $question_id) {
                                         <button type="button" class="ui basic button" onclick="addMatchPairToContainer(this)"><i class="plus icon"></i> Добавить пару</button>
                                     </div>
                                 <?php elseif ($question['type_question'] === 'code'): ?>
-                                    <div class="ui message">Редактирование вариантов для задания с кодом не требуется.</div>
+                                    <div class="field">
+                                        <label>Настройки задания с кодом</label>
+                                        <?php
+                                        // Get code task details
+                                        $stmt = $pdo->prepare("
+                                            SELECT * FROM code_tasks
+                                            WHERE id_question = ?
+                                        ");
+                                        $stmt->execute([$question['id_question']]);
+                                        $code_task = $stmt->fetch();
+                                        ?>
+                                        <div class="fields">
+                                            <div class="six wide field">
+                                                <label>Язык программирования</label>
+                                                <select name="code_language" class="ui dropdown">
+                                                    <option value="php" <?= ($code_task && $code_task['language'] === 'php') ? 'selected' : '' ?>>PHP</option>
+                                                    <option value="python" <?= ($code_task && $code_task['language'] === 'python') ? 'selected' : '' ?>>Python</option>
+                                                    <option value="cpp" <?= ($code_task && $code_task['language'] === 'cpp') ? 'selected' : '' ?>>C++</option>
+                                                </select>
+                                            </div>
+                                            <div class="six wide field">
+                                                <label>Таймаут выполнения (сек)</label>
+                                                <input type="number" name="code_timeout" min="1" max="30" value="<?= $code_task ? $code_task['execution_timeout'] : 5 ?>">
+                                            </div>
+                                        </div>
+                                        <div class="field">
+                                            <label>Шаблон кода (предоставляется студенту)</label>
+                                            <textarea name="code_template" rows="8"><?= $code_task ? htmlspecialchars($code_task['template_code']) : '' ?></textarea>
+                                        </div>
+                                        <div class="field">
+                                            <label>Входные данные (если требуются)</label>
+                                            <textarea name="code_input" rows="4"><?= $code_task ? htmlspecialchars($code_task['input_ct']) : '' ?></textarea>
+                                        </div>
+                                        <div class="field">
+                                            <label>Ожидаемый вывод (для проверки)</label>
+                                            <textarea name="code_output" rows="4" required><?= $code_task ? htmlspecialchars($code_task['output_ct']) : '' ?></textarea>
+                                        </div>
+                                    </div>
                                 <?php endif; ?>
                                 <div class="ui buttons">
                                     <button type="submit" class="ui primary button">Сохранить изменения</button>
@@ -621,7 +728,34 @@ function renderOptions(type) {
             </div>
         `;
     } else if (type === 'code') {
-        block.innerHTML = `<div class="ui message">Поля для кода появятся позже. Сейчас только текст вопроса.</div>`;
+        block.innerHTML = `
+            <div class="fields">
+                <div class="six wide field">
+                    <label>Язык программирования</label>
+                    <select name="code_language" class="ui dropdown">
+                        <option value="php">PHP</option>
+                        <option value="python">Python</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+                <div class="six wide field">
+                    <label>Таймаут выполнения (сек)</label>
+                    <input type="number" name="code_timeout" min="1" max="30" value="5">
+                </div>
+            </div>
+            <div class="field">
+                <label>Шаблон кода (предоставляется студенту)</label>
+                <textarea name="code_template" rows="8" placeholder="Введите шаблон кода, с которого начнет студент"></textarea>
+            </div>
+            <div class="field">
+                <label>Входные данные (если требуются)</label>
+                <textarea name="code_input" rows="4" placeholder="Введите входные данные для программы (опционально)"></textarea>
+            </div>
+            <div class="field">
+                <label>Ожидаемый вывод (для проверки)</label>
+                <textarea name="code_output" rows="4" placeholder="Введите ожидаемый вывод программы" required></textarea>
+            </div>
+        `;
     }
 }
 document.addEventListener('DOMContentLoaded', function() {

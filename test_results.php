@@ -237,19 +237,45 @@ try {
                                                 } else {
                                                     echo '<span class="text-muted">Нет ответа</span>';
                                                 }
-                                            } else {
-                                                echo '<span class="text-muted">Нет ответа</span>';
-                                            }
-                                        } elseif ($answer['type_question'] === 'code') {
-                                            if (!empty($answer['answer_text'])) {
-                                                echo '<pre>' . htmlspecialchars($answer['answer_text']) . '</pre>';
-                                            } else {
-                                                echo '<span class="text-muted">Ответ не сохранён</span>';
-                                            }
-                                        } else {
-                                            echo '<span class="text-muted">Нет ответа</span>';
-                                        }
-                                        ?>
+                                            } elseif ($answer['type_question'] === 'code'): ?>
+                                                <div class="field">
+                                                    <label>Код студента:</label>
+                                                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars($answer['answer_text'] ?? 'Код не предоставлен') ?></pre>
+                                                    
+                                                    <?php
+                                                    // Get code task details
+                                                    $stmt = $pdo->prepare("
+                                                        SELECT * FROM code_tasks
+                                                        WHERE id_question = ?
+                                                    ");
+                                                    $stmt->execute([$answer['id_question']]);
+                                                    $code_task = $stmt->fetch();
+                                                    
+                                                    if ($code_task): ?>
+                                                        <div class="ui segment">
+                                                            <div class="ui two column grid">
+                                                                <div class="column">
+                                                                    <h5>Ожидаемый вывод:</h5>
+                                                                    <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;"><?= htmlspecialchars($code_task['output_ct']) ?></pre>
+                                                                </div>
+                                                                <div class="column">
+                                                                    <h5>Фактический вывод:</h5>
+                                                                    <?php if (!empty($answer['answer_text'])): ?>
+                                                                        <button class="ui mini button run-code-btn" data-code="<?= htmlspecialchars($answer['answer_text']) ?>" data-language="<?= htmlspecialchars($code_task['language']) ?>" data-input="<?= htmlspecialchars($code_task['input_ct']) ?>" data-timeout="<?= (int)$code_task['execution_timeout'] ?>" data-target="output-<?= $answer['id_answer'] ?>">
+                                                                            <i class="play icon"></i> Запустить код
+                                                                        </button>
+                                                                        <pre id="output-<?= $answer['id_answer'] ?>" style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;">Нажмите кнопку для выполнения кода</pre>
+                                                                    <?php else: ?>
+                                                                        <div class="ui warning message">Код не был предоставлен</div>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-muted">Нет ответа</span>
+                                            <?php endif; ?>
                                     </p>
                                     <?php if (!$answer['is_correct']): ?>
                                         <p><strong>Правильный ответ:</strong> <?= $answer['correct_option'] !== null ? htmlspecialchars($answer['correct_option']) : '<span class="text-muted">Нет данных</span>' ?></p>
@@ -310,6 +336,51 @@ try {
 <script>
 $(document).ready(function() {
     $('.ui.accordion').accordion();
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners to run code buttons
+    document.querySelectorAll('.run-code-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const code = this.getAttribute('data-code');
+            const language = this.getAttribute('data-language');
+            const input = this.getAttribute('data-input');
+            const timeout = parseInt(this.getAttribute('data-timeout')) || 5;
+            const targetId = this.getAttribute('data-target');
+            const outputElement = document.getElementById(targetId);
+            
+            // Show loading
+            this.classList.add('loading');
+            outputElement.textContent = 'Выполнение кода...';
+            
+            // Send code to server
+            fetch('code_executor.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    code: code,
+                    language: language,
+                    input: input,
+                    timeout: timeout
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                this.classList.remove('loading');
+                if (data.error) {
+                    outputElement.textContent = 'Ошибка: ' + data.error;
+                } else {
+                    outputElement.textContent = data.output;
+                }
+            })
+            .catch(error => {
+                this.classList.remove('loading');
+                outputElement.textContent = 'Ошибка: ' + error.message;
+            });
+        });
+    });
 });
 </script>
 

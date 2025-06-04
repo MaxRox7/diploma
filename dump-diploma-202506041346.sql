@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.0
 
--- Started on 2025-06-02 18:51:53
+-- Started on 2025-06-04 13:47:16
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -844,6 +844,101 @@ COPY public.answer_options (id_option, id_question, text_option) FROM stdin;
 43	27	2||2
 44	28	1111
 45	28	11111
+48	30	ctrl+d
+49	30	ctrl+f
+50	31	я
+51	31	ты
+52	31	он
+53	32	я
+54	32	ты
+55	33	1||1
+56	33	2||2
+57	35	через переменную $_POST
+58	35	Через переменную $_GET.
+59	35	Через переменную $_SESSION.
+60	35	Через переменную $_REQUEST.
+61	36	через переменную $_POST
+62	36	Через переменную $_GET.
+63	36	Через переменную $_SESSION.
+64	36	Через переменную $_REQUEST.
+65	37	через переменную $_POST
+66	37	Через переменную $_GET.
+67	37	Через переменную $_SESSION.
+68	37	Через переменную $_REQUEST.
+69	38	через переменную $_POST
+70	38	Через переменную $_GET.
+71	38	Через переменную $_SESSION.
+72	38	Через переменную $_REQUEST.
+73	39	через переменную $_POST
+74	39	Через переменную $_GET.
+75	39	Через переменную $_SESSION.
+76	39	Через переменную $_REQUEST.
+77	40	через переменную $_POST
+78	40	Через переменную $_GET.
+79	40	Через переменную $_SESSION.
+80	40	Через переменную $_REQUEST.
+81	41	через переменную $_POST
+82	41	Через переменную $_GET.
+83	41	Через переменную $_SESSION.
+84	41	Через переменную $_REQUEST.
+85	42	через переменную $_POST
+86	42	Через переменную $_GET.
+87	42	Через переменную $_SESSION.
+88	42	Через переменную $_REQUEST.
+89	43	через переменную $_POST
+90	43	Через переменную $_GET.
+91	43	Через переменную $_SESSION.
+92	43	Через переменную $_REQUEST.
+93	44	через переменную $_POST
+94	44	Через переменную $_GET.
+95	44	Через переменную $_SESSION.
+96	44	Через переменную $_REQUEST.
+97	45	через переменную $_POST
+98	45	Через переменную $_GET.
+99	45	Через переменную $_SESSION.
+100	45	Через переменную $_REQUEST.
+101	46	через переменную $_POST
+102	46	Через переменную $_GET.
+103	46	Через переменную $_SESSION.
+104	46	Через переменную $_REQUEST.
+105	47	через переменную $_POST
+106	47	Через переменную $_GET.
+107	47	Через переменную $_SESSION.
+108	47	Через переменную $_REQUEST.
+109	48	через переменную $_POST
+110	48	Через переменную $_GET.
+111	48	Через переменную $_SESSION.
+112	48	Через переменную $_REQUEST.
+113	49	через переменную $_POST
+114	49	Через переменную $_GET.
+115	49	Через переменную $_SESSION.
+116	49	Через переменную $_REQUEST.
+117	50	через переменную $_POST
+118	50	Через переменную $_GET.
+119	50	Через переменную $_SESSION.
+120	50	Через переменную $_REQUEST.
+121	51	через переменную $_POST
+122	51	Через переменную $_GET.
+123	51	Через переменную $_SESSION.
+124	51	Через переменную $_REQUEST.
+125	52	через переменную $_POST
+126	52	Через переменную $_GET.
+127	52	Через переменную $_SESSION.
+128	52	Через переменную $_REQUEST.
+129	53	через переменную $_POST
+130	53	Через переменную $_GET.
+131	53	Через переменную $_SESSION.
+132	53	Через переменную $_REQUEST.
+133	54	через переменную $_POST
+134	54	Через переменную $_GET.
+135	54	Через переменную $_SESSION.
+136	54	Через переменную $_REQUEST.
+137	55	через переменную $_POST
+138	55	Через переменную $_GET.
+139	55	Через переменную $_SESSION.
+140	55	Через переменную $_REQUEST.
+141	56	1||1
+142	56	2||2
 \.
 
 
@@ -885,14 +980,17 @@ COPY public.code_tasks (id_ct, id_question, input_ct, output_ct) FROM stdin;
 --
 
 COPY public.course (id_course, name_course, desc_course, with_certificate, hourse_course, requred_year, required_spec, required_uni, level_course, tags_course, status_course, moderation_comment) FROM stdin;
-16	fxg	dfg	f	1	\N	\N	\N	\N	dfg	draft	\N
-17	курс	курс	f	1	\N	\N	\N	\N	12	draft	\N
-18	asd	asd	t	1	\N	\N	\N	\N	asd	draft	\N
-19	Курс для крутой проверки	Этот курс я щас сделаю круто и полноценно	f	5	\N	\N	\N	\N	php, web. krutyak	draft	\N
-20	asd	asd	f	12	\N	\N	\N	\N	12	draft	\N
-21	ytuytu	tyutyu	t	12	1	Информатика	\N	beginner	dfg	draft	\N
-22	фыфыфы	12	f	12	\N	\N	\N	\N	12	draft	\N
-8	jjjjjjjjj	jjjjjjjjjjj	t	1	\N	\N	\N	\N	php, web	approved	\N
+24	Фигма с нуля	Будем учиться на баннерах с ватой	t	36	\N	\N	\N	\N	дизайн, сайты, фигма	pending	Я тебя люблю
+16	fxg	dfg	f	1	\N	\N	\N	\N	dfg	pending	\N
+17	курс	курс	f	1	\N	\N	\N	\N	12	pending	\N
+18	asd	asd	t	1	\N	\N	\N	\N	asd	pending	\N
+20	asd	asd	f	12	\N	\N	\N	\N	12	pending	\N
+21	ytuytu	tyutyu	t	12	1	Информатика	\N	beginner	dfg	pending	\N
+8	jjjjjjjjj	jjjjjjjjjjj	t	1	\N	\N	\N	\N	php, web	pending	\N
+22	фыфыфы	12	f	12	\N	\N	\N	\N	12	pending	asasas
+19	Курс для крутой проверки	Этот курс я щас сделаю круто и полноценно	f	5	\N	\N	\N	\N	php, web. krutyak	pending	фыфыфы
+23	курс макс рокс	авп	f	1	\N	\N	\N	\N	2	approved	фы
+25	asasas	12	f	12	\N	\N	\N	\N	1	approved	фыфы
 \.
 
 
@@ -942,13 +1040,20 @@ COPY public.create_passes (id_course, id_user, is_creator, date_complete) FROM s
 21	1	t	\N
 21	21	f	\N
 22	26	t	\N
+23	26	t	\N
 18	1	t	\N
+23	28	f	2025-06-03 10:01:17.354284
+24	28	t	\N
+23	2	f	\N
 18	15	f	\N
 17	9	f	\N
 17	3	f	\N
 16	3	f	\N
 8	3	f	\N
 17	15	f	\N
+23	9	f	2025-06-03 10:36:33.785426
+25	28	t	\N
+25	17	f	2025-06-03 10:38:37.078964
 8	1	t	\N
 8	8	f	\N
 8	10	f	\N
@@ -966,6 +1071,8 @@ COPY public.feedback (id_feedback, id_course, text_feedback, date_feedback, rate
 9	18	sdfdsf	2025-05-30	5	2
 10	19	Классный курс	2025-06-02	5	2
 11	19	asas	2025-06-02	5	3
+12	23	оформила кредит с кайфом, спасибо!	2025-06-03	5	28
+13	25	asas	2025-06-03	5	17
 \.
 
 
@@ -987,6 +1094,9 @@ COPY public.lessons (id_lesson, id_course, id_stat, name_lesson, status_lesson) 
 26	19	\N	Что такое жизнь?	new
 27	20	\N	Переменные	new
 28	22	\N	фыв	new
+29	23	\N	Переменные	new
+30	24	\N	Что такое FIGMA?	new
+31	25	\N	Переменные	new
 \.
 
 
@@ -1006,6 +1116,9 @@ MAT6051717                                                                      
 683d987c87004                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	59	materials/garshina/Переменные/as_59.pdf	\N
 683d9b50db7f6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	60	materials/garshina/asd/asas_60.pdf	\N
 683dc525195cb                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	62	materials/maxrox1904@gmail.com/фыв/ми_62.pdf	\N
+683dca3327f5f                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	63	materials/maxrox1904@gmail.com/Переменные/ывывыв_63.pdf	\N
+683ec8ca6cc07                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	65	materials/quixotesoul@gmail.com/Что такое FIGMA?/Как начать работу в програмее?_65.pdf	\N
+683ed04a95a0c                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	66	materials/quixotesoul@gmail.com/Переменные/asasas_66.pdf	\N
 \.
 
 
@@ -1016,6 +1129,9 @@ MAT6051717                                                                      
 --
 
 COPY public.questions (id_question, id_test, text_question, answer_question, type_question, image_question) FROM stdin;
+54	25	1. Как получить данные POST-запроса?	0	single	\N
+55	25	1. Как получить данные POST-запроса?	0	single	\N
+56	25	фы		match	\N
 21	20	why did the chicken crossed the road?	0,1,2	multi	\N
 22	20	Какая лучшая кафедра?	0	single	\N
 23	20	Деятельность актива ЛГТУ		match	\N
@@ -1025,6 +1141,30 @@ COPY public.questions (id_question, id_test, text_question, answer_question, typ
 27	22	asdsad		match	\N
 28	22	111	0,1	multi	\N
 29	22	sdfsdfsdfsdf		code	\N
+30	23	Какой комбинацией можно найти нужный фрейм?	1	single	\N
+31	24	кто?	2	single	\N
+32	24	не	0,1	multi	\N
+33	24	фывфыв		match	\N
+34	24	почему?		code	\N
+35	25	1. Как получить данные POST-запроса?	0	single	\N
+36	25	1. Как получить данные POST-запроса?	0	single	\N
+37	25	1. Как получить данные POST-запроса?	0	single	\N
+38	25	1. Как получить данные POST-запроса?	0	single	\N
+39	25	1. Как получить данные POST-запроса?	0	single	\N
+40	25	1. Как получить данные POST-запроса?	0	single	\N
+41	25	1. Как получить данные POST-запроса?	0	single	\N
+42	25	1. Как получить данные POST-запроса?	0	single	\N
+43	25	1. Как получить данные POST-запроса?	0	single	\N
+44	25	1. Как получить данные POST-запроса?	0	single	\N
+45	25	1. Как получить данные POST-запроса?	0	single	\N
+46	25	1. Как получить данные POST-запроса?	0	single	\N
+47	25	1. Как получить данные POST-запроса?	0	single	\N
+48	25	1. Как получить данные POST-запроса?	0	single	\N
+49	25	1. Как получить данные POST-запроса?	0	single	\N
+50	25	1. Как получить данные POST-запроса?	0	single	\N
+51	25	1. Как получить данные POST-запроса?	0	single	\N
+52	25	1. Как получить данные POST-запроса?	0	single	\N
+53	25	1. Как получить данные POST-запроса?	0	single	\N
 \.
 
 
@@ -1065,6 +1205,12 @@ COPY public.steps (id_step, id_lesson, number_steps, status_step, type_step) FRO
 60	23	asas	not_started	material
 61	24	test	not_started	test
 62	28	ми	not_started	material
+63	29	ывывыв	not_started	material
+64	30	контрольный срез	not_started	test
+65	30	Как начать работу в програмее?	not_started	material
+66	31	asasas	not_started	material
+67	31	тест1	not_started	test
+68	31	asas	not_started	test
 21	10	Читайте	completed	material
 27	19	asd	completed	material
 \.
@@ -1102,6 +1248,14 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 45	21	27	\N	t	2025-06-02 12:55:07.325412	["0","1"]
 46	21	28	44	t	2025-06-02 12:55:07.328549	["0","1"]
 47	21	29	\N	t	2025-06-02 12:55:07.330248	123123
+48	23	21	30	t	2025-06-02 16:18:42.467919	["0","1","2"]
+49	23	22	33	t	2025-06-02 16:18:42.471237	\N
+50	23	23	\N	t	2025-06-02 16:18:42.473247	["0","1"]
+51	23	24	\N	t	2025-06-02 16:18:42.474688	фыфы
+52	25	31	52	t	2025-06-03 10:38:33.382938	\N
+53	25	32	53	t	2025-06-03 10:38:33.386419	["0","1"]
+54	25	33	\N	t	2025-06-03 10:38:33.388064	["0","1"]
+55	25	34	\N	t	2025-06-03 10:38:33.389084	asas
 \.
 
 
@@ -1120,6 +1274,10 @@ COPY public.test_attempts (id_attempt, id_test, id_user, start_time, end_time, s
 19	22	9	2025-06-02 12:39:51.291529	2025-06-02 12:39:51.291529	3	3	completed
 20	22	3	2025-06-02 12:49:55.768919	2025-06-02 12:49:55.768919	2	3	completed
 21	22	10	2025-06-02 12:55:07.283706	2025-06-02 12:55:07.283706	3	3	completed
+22	20	9	2025-06-02 16:17:18.475066	\N	\N	4	in_progress
+23	20	9	2025-06-02 16:18:42.428812	2025-06-02 16:18:42.428812	4	4	completed
+24	24	28	2025-06-03 10:37:44.584512	\N	\N	4	in_progress
+25	24	17	2025-06-03 10:38:33.378714	2025-06-03 10:38:33.378714	4	4	completed
 \.
 
 
@@ -1133,6 +1291,9 @@ COPY public.tests (id_test, id_step, name_test, desc_test) FROM stdin;
 20	56	Новый тест	
 21	58	Новый тест	
 22	61	Новый тест	
+23	64	Новый тест	
+24	67	Новый тест	
+25	68	Новый тест	
 \.
 
 
@@ -1162,6 +1323,10 @@ COPY public.user_material_progress (id_user, id_step, completed_at) FROM stdin;
 3	59	2025-06-02 12:49:36.5386
 3	50	2025-06-02 12:49:42.794859
 3	60	2025-06-02 12:49:46.648917
+9	55	2025-06-02 16:17:16.669472
+28	63	2025-06-03 10:01:16.281781
+9	63	2025-06-03 10:36:33.188469
+17	66	2025-06-03 10:38:23.072659
 \.
 
 
@@ -1172,32 +1337,33 @@ COPY public.user_material_progress (id_user, id_step, completed_at) FROM stdin;
 --
 
 COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user, year_user, login_user, password_user, criminal_record_file, status, moderation_comment, student_card, passport_file, diploma_file) FROM stdin;
-2	Болдырев Максим Романович	2003-03-19	ЛГТУ	student	Инфа	2	maxim	$2y$12$tyO9ZJdqQHaFiyMY3eLYyehNtDKKgthQD.ErdkouOg9eqSu8Y299i	\N	pending	\N	\N	\N	\N
-3	Пупкин Кирилл Васильевич	2003-03-19	ФЫВ	student	ФЫВ	1	worker	$2y$12$Vi9IlObR0cP9O86E3gyIK.06lwsRV4MpXhaB9YpLvff.5gpSa4nxa	\N	pending	\N	\N	\N	\N
-4	ФЫВФЫВФЫВ	123123-03-12	ФЫВФЫВ	student	ФЫВФЫВ	3	asd	$2y$12$0noOBih5NYmUNVJk08HQlOLfPcjDMwnzntxUg06gwmqnv2Wev1Wmi	\N	pending	\N	\N	\N	\N
-6	Болдырев Максим Романович	2003-03-19	фыв	student	фыв	1	manager	$2y$12$3JDXebUCeJHsbPEF0/uM7.O6UYRup4zhSC4AvP3cF14xddULeyNQm	\N	pending	\N	\N	\N	\N
-7	Мария Егоровна	2003-03-19	фыв	student	фыв	3	mashka	$2y$12$pvBNY22tc/rV1QE4chBP5.AL8wNE.VEdxQNcd3.gf7wBbrLdDGWfi	\N	pending	\N	\N	\N	\N
-8	Пупкин Кирилл Васильевич	2003-03-19	фыв	student	фыв	1	dog	$2y$12$41pVBQvZpN2zD6JNkdURrOlYgRpRqapJyO.MEbtgwLjzs2l0ev9mq	\N	pending	\N	\N	\N	\N
-9	asdasdasdasd	2003-03-19	asd	student	asd`	1	cat	$2y$12$hw0LPH3ILsiY/Qtak8MW0Oa.rfC3JCrgLYV8IVR9HRlctlN/B6Ztu	\N	pending	\N	\N	\N	\N
-10	Max Rox	2003-03-19	123	student	123	2	rox1	$2y$12$K7Qi8alfy9gYanCwv9ZvWeUVI8wiTr7XnWrEZGHcZHJVnPQdYuuT2	\N	pending	\N	\N	\N	\N
-11	Maxim Boldyrev	2003-03-19	фыв	student	фыв	4	max_rox7	$2y$12$sEvDhwQcjxeO8sXke3ivUed1A2z5qIeT5JNFJ3wU49NqTmDnFzjcu	\N	pending	\N	\N	\N	\N
-12	Болдырев Максим Романович	2003-03-19	asd	student	asd	1	maxrox	$2y$12$oyPCevriVynO7YmyLXHUUOaE7Wk83iZq6K.iAfZke1DPihGi7HfRq	\N	pending	\N	\N	\N	\N
-13	Гаршина Юлия	2003-03-19	фяыва	student	щортвыа	3	gart	$2y$12$6hHdMcB9TTAqvotEQJCqJ.H9zeC1e.UbrhrIvgUCo3xg3aGHyn8ce	\N	pending	\N	\N	\N	\N
-14	Болдырев Максим Романович	2003-03-19	asd	student	asd	1	maxaaa	$2y$12$1bjYwQK39JrB60R2G8ulrODe8AAoQEiGVW0H.r9st0x6dvozqScuG	\N	pending	\N	\N	\N	\N
-15	Болдырев Максим Романович	2003-03-19	ысвм	student	длоит	5	cat1	$2y$12$vLBn1cyuIjtT2/obwCxkZu0SbvFN.oUs/wCbwhvoGvm1F2KIlVOJW	\N	pending	\N	\N	\N	\N
-16	asdsadas	0203-03-19	kjb	student	kjb	2	maxi	$2y$12$.QZy.iCVW5OXcrJG1G1jyuIXiP3eTSoX4bVcdIPxO5wWdPsyRw1.O	\N	pending	\N	\N	\N	\N
-17	Гаршина Юлия	2003-03-19	asd	student	sad	3	max	$2y$12$jiZgCcQVQCS/0cZoz/9xkOddBOEo7rF/n/QmYGhYJfhWdKcpXbD1C	\N	pending	\N	\N	\N	\N
-18	Гаршина Юлия	2003-03-19	фыа	student	фыва	2	rox2	$2y$12$.dAcyngBQg7FtyWNKLg8fe2Ba4NFx14M6CuRsMQFJajRr..gJYN6O	\N	pending	\N	\N	\N	\N
-19	asdasdasd	2003-03-19	asd	student	asd	2	okak	$2y$12$Y3XpprFz4xhnXxGFcxyrmuv0/4fH.corayejUPn5bjmGXRWXAKL6W	\N	pending	\N	\N	\N	\N
-20	Болдырев Максим Романович	2003-03-19	asd	student	asd	3	max1	$2y$12$DesbJupvhqEH7hsFhMXo3uOTvrrelfSA.rIrXQD4m0vsgx5KnZoGa	\N	pending	\N	\N	\N	\N
-21	Maxim Boldyrev	2003-03-19	ЛГТУ	student	Информатика	1	oops	$2y$12$O4xRZxgvK/WJPH0JKq9XV.YtyN7eGZjqDNu3ZwBh5wHDnLNYbknlu	\N	pending	\N	\N	\N	\N
-22	фывфывфыв	2003-03-19	ыва	student	выа	1	ooooo	$2y$12$UCh6tvfpNQJoS78o0Xaj8uOaXBb/.KBSHTPBXyS96vQp0YUR60Jf2	\N	pending	\N	\N	\N	\N
+4	ФЫВФЫВФЫВ	123123-03-12	ФЫВФЫВ	student	ФЫВФЫВ	3	asd	$2y$12$0noOBih5NYmUNVJk08HQlOLfPcjDMwnzntxUg06gwmqnv2Wev1Wmi	\N	approved	\N	\N	\N	\N
+6	Болдырев Максим Романович	2003-03-19	фыв	student	фыв	1	manager	$2y$12$3JDXebUCeJHsbPEF0/uM7.O6UYRup4zhSC4AvP3cF14xddULeyNQm	\N	approved	\N	\N	\N	\N
 1	Гаршина Юлия	2003-03-19	ЛГТУ	admin	Инфа	3	garshina	$2y$12$XhKZi1qqaOMi7UFQgTsCluemygyw3INk6V/k9y9XuNEgshqnJYHG6	\N	approved	\N	\N	\N	\N
 23	Гаршина Юлия	2003-03-19	dsf	student	dsf	1	garshina@mail.ru	$2y$12$cSKjisnLBIeloMpDWHwJJeTQMIC/Uas5.0Ufpzkin0LGhr2FL65iO	\N	approved		uploads/students/student_card_683dbca51878e_default.jpg	\N	\N
+7	Мария Егоровна	2003-03-19	фыв	student	фыв	3	mashka	$2y$12$pvBNY22tc/rV1QE4chBP5.AL8wNE.VEdxQNcd3.gf7wBbrLdDGWfi	\N	approved	\N	\N	\N	\N
 24	Гаршина Юлия	2003-03-19	ыфва	student	фыва	1	maxboltik@mail.ru	$2y$12$faxrVU94tln97uCpaz4tP.9RsyCkrnjHkm1lFJq8VixJKA5tPeW5u	\N	approved	Все круто	uploads/students/student_card_683dc1763deda_default.jpg	\N	\N
-25	Болдырев Максим Романович	2003-03-19	asfd	student	sdf	3	yaz678@bk.ru	$2y$12$RgaPVqclsFdSKX6RvPKaoe/whNqAV.SpN6SvgO2MsfFV5oFt6hyQW	\N	rejected	Все некруто	uploads/students/student_card_683dc20addef0_Приказ КС.pdf	\N	\N
+25	Болдырев Максим Романович	2003-03-19	asfd	student	sdf	3	yaz678@bk.ru	$2y$12$RgaPVqclsFdSKX6RvPKaoe/whNqAV.SpN6SvgO2MsfFV5oFt6hyQW	\N	approved	Все некруто	uploads/students/student_card_683dc20addef0_Приказ КС.pdf	\N	\N
 26	фыфыфы	2003-03-19	вап	teacher	вап	2	maxrox1904@gmail.com	$2y$12$Qm1TDSSRSkH38LA9jK5Ne.Zn.T6pDx02f6PRnU5VHxmqv3W8KxR76	uploads/teachers/criminal/criminal_683dc32d567f7_rNo_c2bRwys.jpg	approved		\N	uploads/teachers/passport/passport_683dc32d567f0_diplom.sql	uploads/teachers/diploma/diploma_683dc32d567f6_Приказ КС.pdf
 27	Пупкин Кирилл Васильевич	2003-03-19	ыфва	teacher	ваып	2	asdsadasD@mail.ru	$2y$12$2T9g.ZfYsYaewsakcw20NO.ioKXZBJ2yC9SKTBffgc17cjZJFkCI6	uploads/teachers/criminal/criminal_683dc7568fa22_default.jpg	pending	\N	\N	uploads/teachers/passport/passport_683dc7568fa1b_default.jpg	uploads/teachers/diploma/diploma_683dc7568fa20_0QwgmBt4IN8.jpg
+2	Болдырев Максим Романович	2003-03-19	ЛГТУ	student	Инфа	2	maxim	$2y$12$tyO9ZJdqQHaFiyMY3eLYyehNtDKKgthQD.ErdkouOg9eqSu8Y299i	\N	approved	\N	\N	\N	\N
+3	Пупкин Кирилл Васильевич	2003-03-19	ФЫВ	student	ФЫВ	1	worker	$2y$12$Vi9IlObR0cP9O86E3gyIK.06lwsRV4MpXhaB9YpLvff.5gpSa4nxa	\N	approved	\N	\N	\N	\N
+8	Пупкин Кирилл Васильевич	2003-03-19	фыв	student	фыв	1	dog	$2y$12$41pVBQvZpN2zD6JNkdURrOlYgRpRqapJyO.MEbtgwLjzs2l0ev9mq	\N	approved	\N	\N	\N	\N
+9	asdasdasdasd	2003-03-19	asd	student	asd`	1	cat	$2y$12$hw0LPH3ILsiY/Qtak8MW0Oa.rfC3JCrgLYV8IVR9HRlctlN/B6Ztu	\N	approved	\N	\N	\N	\N
+10	Max Rox	2003-03-19	123	student	123	2	rox1	$2y$12$K7Qi8alfy9gYanCwv9ZvWeUVI8wiTr7XnWrEZGHcZHJVnPQdYuuT2	\N	approved	\N	\N	\N	\N
+11	Maxim Boldyrev	2003-03-19	фыв	student	фыв	4	max_rox7	$2y$12$sEvDhwQcjxeO8sXke3ivUed1A2z5qIeT5JNFJ3wU49NqTmDnFzjcu	\N	approved	\N	\N	\N	\N
+12	Болдырев Максим Романович	2003-03-19	asd	student	asd	1	maxrox	$2y$12$oyPCevriVynO7YmyLXHUUOaE7Wk83iZq6K.iAfZke1DPihGi7HfRq	\N	approved	\N	\N	\N	\N
+13	Гаршина Юлия	2003-03-19	фяыва	student	щортвыа	3	gart	$2y$12$6hHdMcB9TTAqvotEQJCqJ.H9zeC1e.UbrhrIvgUCo3xg3aGHyn8ce	\N	approved	\N	\N	\N	\N
+14	Болдырев Максим Романович	2003-03-19	asd	student	asd	1	maxaaa	$2y$12$1bjYwQK39JrB60R2G8ulrODe8AAoQEiGVW0H.r9st0x6dvozqScuG	\N	approved	\N	\N	\N	\N
+15	Болдырев Максим Романович	2003-03-19	ысвм	student	длоит	5	cat1	$2y$12$vLBn1cyuIjtT2/obwCxkZu0SbvFN.oUs/wCbwhvoGvm1F2KIlVOJW	\N	approved	\N	\N	\N	\N
+16	asdsadas	0203-03-19	kjb	student	kjb	2	maxi	$2y$12$.QZy.iCVW5OXcrJG1G1jyuIXiP3eTSoX4bVcdIPxO5wWdPsyRw1.O	\N	approved	\N	\N	\N	\N
+17	Гаршина Юлия	2003-03-19	asd	student	sad	3	max	$2y$12$jiZgCcQVQCS/0cZoz/9xkOddBOEo7rF/n/QmYGhYJfhWdKcpXbD1C	\N	approved	\N	\N	\N	\N
+18	Гаршина Юлия	2003-03-19	фыа	student	фыва	2	rox2	$2y$12$.dAcyngBQg7FtyWNKLg8fe2Ba4NFx14M6CuRsMQFJajRr..gJYN6O	\N	approved	\N	\N	\N	\N
+19	asdasdasd	2003-03-19	asd	student	asd	2	okak	$2y$12$Y3XpprFz4xhnXxGFcxyrmuv0/4fH.corayejUPn5bjmGXRWXAKL6W	\N	approved	\N	\N	\N	\N
+20	Болдырев Максим Романович	2003-03-19	asd	student	asd	3	max1	$2y$12$DesbJupvhqEH7hsFhMXo3uOTvrrelfSA.rIrXQD4m0vsgx5KnZoGa	\N	approved	\N	\N	\N	\N
+22	фывфывфыв	2003-03-19	ыва	student	выа	1	ooooo	$2y$12$UCh6tvfpNQJoS78o0Xaj8uOaXBb/.KBSHTPBXyS96vQp0YUR60Jf2	\N	approved	\N	\N	\N	\N
+28	Золотарева Мария Егоровна	1999-07-20	ЛГТУ	teacher	Туризм	4	quixotesoul@gmail.com	$2y$12$v8DyFv1arPtPubx8fMP4MOdy8zm1R6AkAq5wOFGQJm8.JOV.dc/uO	\N	approved	секси	uploads/students/student_card_683ec79d06858_default.jpg	\N	\N
+21	Maxim Boldyrev	2003-03-19	ЛГТУ	teacher	Информатика	1	oops	$2y$12$O4xRZxgvK/WJPH0JKq9XV.YtyN7eGZjqDNu3ZwBh5wHDnLNYbknlu	\N	approved	\N	\N	\N	\N
 \.
 
 
@@ -1207,7 +1373,7 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 -- Name: answer_options_id_option_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.answer_options_id_option_seq', 45, true);
+SELECT pg_catalog.setval('public.answer_options_id_option_seq', 142, true);
 
 
 --
@@ -1243,7 +1409,7 @@ SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 1, false);
 -- Name: course_id_course_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.course_id_course_seq', 22, true);
+SELECT pg_catalog.setval('public.course_id_course_seq', 25, true);
 
 
 --
@@ -1252,7 +1418,7 @@ SELECT pg_catalog.setval('public.course_id_course_seq', 22, true);
 -- Name: feedback_id_feedback_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 11, true);
+SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 13, true);
 
 
 --
@@ -1261,7 +1427,7 @@ SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 11, true);
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 28, true);
+SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 31, true);
 
 
 --
@@ -1270,7 +1436,7 @@ SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 28, true);
 -- Name: questions_id_question_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.questions_id_question_seq', 29, true);
+SELECT pg_catalog.setval('public.questions_id_question_seq', 56, true);
 
 
 --
@@ -1297,7 +1463,7 @@ SELECT pg_catalog.setval('public.stat_id_stat_seq', 1, false);
 -- Name: steps_id_step_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.steps_id_step_seq', 62, true);
+SELECT pg_catalog.setval('public.steps_id_step_seq', 69, true);
 
 
 --
@@ -1306,7 +1472,7 @@ SELECT pg_catalog.setval('public.steps_id_step_seq', 62, true);
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 47, true);
+SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 55, true);
 
 
 --
@@ -1315,7 +1481,7 @@ SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 47, true);
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 21, true);
+SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 25, true);
 
 
 --
@@ -1324,7 +1490,7 @@ SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 21, true);
 -- Name: tests_id_test_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.tests_id_test_seq', 22, true);
+SELECT pg_catalog.setval('public.tests_id_test_seq', 26, true);
 
 
 --
@@ -1333,7 +1499,7 @@ SELECT pg_catalog.setval('public.tests_id_test_seq', 22, true);
 -- Name: users_id_user_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.users_id_user_seq', 27, true);
+SELECT pg_catalog.setval('public.users_id_user_seq', 28, true);
 
 
 --
@@ -2040,7 +2206,7 @@ ALTER TABLE ONLY public.user_material_progress
     ADD CONSTRAINT user_material_progress_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.users(id_user);
 
 
--- Completed on 2025-06-02 18:51:55
+-- Completed on 2025-06-04 13:47:19
 
 --
 -- PostgreSQL database dump complete

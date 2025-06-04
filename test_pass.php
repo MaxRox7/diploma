@@ -2,6 +2,56 @@
 require_once 'config.php';
 redirect_unauthenticated();
 
+/**
+ * Execute code and validate against expected output
+ * 
+ * @param string $code The code to execute
+ * @param array $code_task The code task details
+ * @return array Result with output, error, and success status
+ */
+function execute_code_for_validation($code, $code_task) {
+    // Prepare data for code execution
+    $data = [
+        'code' => $code,
+        'language' => $code_task['language'],
+        'input' => $code_task['input_ct'],
+        'timeout' => $code_task['execution_timeout'] ?? 5
+    ];
+    
+    // Call code_executor.php using cURL
+    $ch = curl_init('http://' . $_SERVER['HTTP_HOST'] . '/code_executor.php');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json'
+    ]);
+    curl_setopt($ch, CURLOPT_COOKIE, session_name() . '=' . session_id());
+    
+    $response = curl_exec($ch);
+    $info = curl_getinfo($ch);
+    curl_close($ch);
+    
+    if ($info['http_code'] !== 200) {
+        return [
+            'output' => '',
+            'error' => 'Error executing code: HTTP ' . $info['http_code'],
+            'success' => false
+        ];
+    }
+    
+    $result = json_decode($response, true);
+    if (!$result) {
+        return [
+            'output' => '',
+            'error' => 'Error parsing response from code executor',
+            'success' => false
+        ];
+    }
+    
+    return $result;
+}
+
 $test_id = isset($_GET['test_id']) ? (int)$_GET['test_id'] : 0;
 $q_param = $_POST['q'] ?? $_GET['q'] ?? 0;
 $is_finish = ($q_param === 'finish');
@@ -181,7 +231,21 @@ if ($is_finish || $question_index === -1) {
                 }
                 $is_right = (is_array($user_answer) && $user_answer == $right);
             } elseif ($type === 'code') {
-                $is_right = true;
+                // Get code task details
+                $stmt = $pdo->prepare("
+                    SELECT * FROM code_tasks
+                    WHERE id_question = ?
+                ");
+                $stmt->execute([$q['id_question']]);
+                $code_task = $stmt->fetch();
+                
+                if ($code_task && !empty($user_answer)) {
+                    // Execute the code to check if it produces the expected output
+                    $result = execute_code_for_validation($user_answer, $code_task);
+                    $is_right = $result['success'] && trim($result['output']) === trim($code_task['output_ct']);
+                } else {
+                    $is_right = false;
+                }
             }
         }
         $details[] = [
@@ -254,6 +318,20 @@ if ($is_finish || $question_index === -1) {
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+        <style>
+            #code-editor {
+                font-family: 'Courier New', monospace;
+                font-size: 14px;
+                line-height: 1.5;
+                tab-size: 4;
+            }
+            pre {
+                background-color: #f5f5f5;
+                padding: 10px;
+                border-radius: 4px;
+                overflow-x: auto;
+            }
+        </style>
     </head>
     <body>
     <div class="ui container" style="margin-top: 50px; max-width: 700px;">
@@ -327,6 +405,20 @@ foreach ($_SESSION['test_answers'][$test_id] as $ans) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+    <style>
+        #code-editor {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            tab-size: 4;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
 <body>
 <div class="ui container" style="margin-top: 50px; max-width: 700px;">
@@ -395,7 +487,107 @@ foreach ($_SESSION['test_answers'][$test_id] as $ans) {
                         <?php endforeach; ?>
                     </div>
                 <?php elseif ($type === 'code'): ?>
-                    <textarea name="code_answer" rows="8" placeholder="Введите ваш код..."><?= htmlspecialchars($answer_value ?? '') ?></textarea>
+                    <?php
+                    // Get code task details
+                    $stmt = $pdo->prepare("
+                        SELECT * FROM code_tasks
+                        WHERE id_question = ?
+                    ");
+                    $stmt->execute([$question['id_question']]);
+                    $code_task = $stmt->fetch();
+                    
+                    $template_code = $code_task ? $code_task['template_code'] : '';
+                    $language = $code_task ? $code_task['language'] : 'php';
+                    
+                    // Language-specific syntax highlighting
+                    $lang_class = '';
+                    switch ($language) {
+                        case 'php': $lang_class = 'language-php'; break;
+                        case 'python': $lang_class = 'language-python'; break;
+                        case 'cpp': $lang_class = 'language-cpp'; break;
+                    }
+                    ?>
+                    <div class="field">
+                        <div class="ui segment">
+                            <div class="ui top attached tabular menu">
+                                <div class="active item">Редактор кода</div>
+                                <div class="item" id="run-code-btn">
+                                    <i class="play icon"></i> Запустить код
+                                </div>
+                            </div>
+                            <div class="ui bottom attached segment">
+                                <textarea name="code_answer" id="code-editor" rows="15" style="width: 100%; font-family: monospace;"><?= htmlspecialchars($answer_value ?: $template_code) ?></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="ui segment" id="code-output-container" style="display: none;">
+                            <h4>Результат выполнения:</h4>
+                            <div class="ui message" id="code-output-message"></div>
+                            <pre id="code-output"></pre>
+                        </div>
+                        
+                        <div class="ui info message">
+                            <div class="header">Информация о задании</div>
+                            <p>Язык программирования: <strong><?= htmlspecialchars(strtoupper($language)) ?></strong></p>
+                            <?php if (!empty($code_task['input_ct'])): ?>
+                                <p>Входные данные:</p>
+                                <pre><?= htmlspecialchars($code_task['input_ct']) ?></pre>
+                            <?php endif; ?>
+                            <?php if (!empty($code_task['output_ct'])): ?>
+                                <p>Ожидаемый вывод:</p>
+                                <pre><?= htmlspecialchars($code_task['output_ct']) ?></pre>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const runBtn = document.getElementById('run-code-btn');
+                        const editor = document.getElementById('code-editor');
+                        const outputContainer = document.getElementById('code-output-container');
+                        const outputMessage = document.getElementById('code-output-message');
+                        const output = document.getElementById('code-output');
+                        
+                        runBtn.addEventListener('click', function() {
+                            // Show loading
+                            outputContainer.style.display = 'block';
+                            outputMessage.className = 'ui message loading';
+                            outputMessage.textContent = 'Выполнение кода...';
+                            output.textContent = '';
+                            
+                            // Send code to server
+                            fetch('code_executor.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    code: editor.value,
+                                    language: '<?= $language ?>',
+                                    input: <?= json_encode($code_task['input_ct'] ?? '') ?>,
+                                    timeout: <?= (int)($code_task['execution_timeout'] ?? 5) ?>
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) {
+                                    outputMessage.className = 'ui error message';
+                                    outputMessage.textContent = 'Ошибка выполнения:';
+                                    output.textContent = data.error;
+                                } else {
+                                    outputMessage.className = 'ui success message';
+                                    outputMessage.textContent = `Код выполнен успешно (${data.execution_time.toFixed(3)} сек)`;
+                                    output.textContent = data.output;
+                                }
+                            })
+                            .catch(error => {
+                                outputMessage.className = 'ui error message';
+                                outputMessage.textContent = 'Ошибка выполнения:';
+                                output.textContent = error.message;
+                            });
+                        });
+                    });
+                    </script>
                 <?php endif; ?>
             </div>
             <div class="ui divider"></div>
