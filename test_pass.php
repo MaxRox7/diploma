@@ -221,18 +221,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'finish') {
         header('Location: test_pass.php?test_id=' . $test_id . '&q=finish');
         exit;
+    } elseif ($action === 'reset_attempt') {
+        // Сбросить ответы пользователя для этого теста
+        unset($_SESSION['test_answers'][$test_id]);
+        // Установить флаг разрешения перепрохождения
+        $_SESSION['test_retake'][$test_id] = true;
+        // Перенаправить на первый вопрос
+        header('Location: test_pass.php?test_id=' . $test_id . '&q=0');
+        exit;
     }
 }
 
 // Завершение теста
 if ($is_finish || $question_index === -1) {
     // Проверяем, не проходил ли пользователь этот тест ранее
+    $already_completed = false;
     $stmt = $pdo->prepare("SELECT * FROM test_attempts WHERE id_test = ? AND id_user = ? AND status = 'completed'");
     $stmt->execute([$test_id, $user_id]);
     $existing_attempt = $stmt->fetch();
-    if ($existing_attempt) {
+    if ($existing_attempt && empty($_SESSION['test_retake'][$test_id])) {
         echo '<div class="ui warning message">Вы уже проходили этот тест. Ваш результат: ' . $existing_attempt['score'] . ' из ' . $existing_attempt['max_score'] . '</div>';
         exit;
+    }
+    // Если был флаг перепрохождения — сбрасываем его после успешного завершения
+    if (!empty($_SESSION['test_retake'][$test_id])) {
+        unset($_SESSION['test_retake'][$test_id]);
     }
     // Считаем результат
     $correct = 0;
@@ -660,6 +673,10 @@ if ($is_finish || $question_index === -1) {
             </div>
             <div class="ui divider"></div>
             <a href="lesson.php?id=<?= htmlspecialchars($_GET['lesson_id'] ?? '') ?>" class="ui big button"><i class="arrow left icon"></i>Назад к уроку</a>
+            <form method="post" style="display:inline; margin-left: 10px;">
+                <input type="hidden" name="action" value="reset_attempt">
+                <button type="submit" class="ui big orange button"><i class="redo icon"></i>Пройти тест заново (не засчитывать результат)</button>
+            </form>
         </div>
     </div>
     <script>
