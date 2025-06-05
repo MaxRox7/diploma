@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.0
 
--- Started on 2025-06-04 13:47:16
+-- Started on 2025-06-05 13:08:45
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -54,7 +54,7 @@ CREATE SEQUENCE public.answer_options_id_option_seq
 ALTER SEQUENCE public.answer_options_id_option_seq OWNER TO pguser;
 
 --
--- TOC entry 3644 (class 0 OID 0)
+-- TOC entry 3648 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: answer_options_id_option_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -94,7 +94,7 @@ CREATE SEQUENCE public.answers_id_answer_seq
 ALTER SEQUENCE public.answers_id_answer_seq OWNER TO pguser;
 
 --
--- TOC entry 3645 (class 0 OID 0)
+-- TOC entry 3649 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: answers_id_answer_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -135,7 +135,7 @@ CREATE SEQUENCE public.certificates_id_certificate_seq
 ALTER SEQUENCE public.certificates_id_certificate_seq OWNER TO pguser;
 
 --
--- TOC entry 3646 (class 0 OID 0)
+-- TOC entry 3650 (class 0 OID 0)
 -- Dependencies: 243
 -- Name: certificates_id_certificate_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -152,11 +152,69 @@ CREATE TABLE public.code_tasks (
     id_ct integer NOT NULL,
     id_question integer,
     input_ct text NOT NULL,
-    output_ct character varying(1024) NOT NULL
+    output_ct character varying(1024) NOT NULL,
+    execution_timeout integer DEFAULT 5,
+    template_code text,
+    language character varying(20) DEFAULT 'php'::character varying,
+    CONSTRAINT code_tasks_language_check CHECK (((language)::text = ANY ((ARRAY['php'::character varying, 'python'::character varying, 'cpp'::character varying])::text[])))
 );
 
 
 ALTER TABLE public.code_tasks OWNER TO pguser;
+
+--
+-- TOC entry 3651 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: TABLE code_tasks; Type: COMMENT; Schema: public; Owner: pguser
+--
+
+COMMENT ON TABLE public.code_tasks IS 'Stores code tasks for programming questions with input template and expected output';
+
+
+--
+-- TOC entry 3652 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: COLUMN code_tasks.input_ct; Type: COMMENT; Schema: public; Owner: pguser
+--
+
+COMMENT ON COLUMN public.code_tasks.input_ct IS 'Input data or description for the code task';
+
+
+--
+-- TOC entry 3653 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: COLUMN code_tasks.output_ct; Type: COMMENT; Schema: public; Owner: pguser
+--
+
+COMMENT ON COLUMN public.code_tasks.output_ct IS 'Expected output that the code should produce';
+
+
+--
+-- TOC entry 3654 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: COLUMN code_tasks.execution_timeout; Type: COMMENT; Schema: public; Owner: pguser
+--
+
+COMMENT ON COLUMN public.code_tasks.execution_timeout IS 'Maximum execution time in seconds';
+
+
+--
+-- TOC entry 3655 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: COLUMN code_tasks.template_code; Type: COMMENT; Schema: public; Owner: pguser
+--
+
+COMMENT ON COLUMN public.code_tasks.template_code IS 'Starting template code provided to the student';
+
+
+--
+-- TOC entry 3656 (class 0 OID 0)
+-- Dependencies: 233
+-- Name: COLUMN code_tasks.language; Type: COMMENT; Schema: public; Owner: pguser
+--
+
+COMMENT ON COLUMN public.code_tasks.language IS 'Programming language for the task (php, python, cpp)';
+
 
 --
 -- TOC entry 232 (class 1259 OID 24660)
@@ -175,7 +233,7 @@ CREATE SEQUENCE public.code_tasks_id_ct_seq
 ALTER SEQUENCE public.code_tasks_id_ct_seq OWNER TO pguser;
 
 --
--- TOC entry 3647 (class 0 OID 0)
+-- TOC entry 3657 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: code_tasks_id_ct_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -223,7 +281,7 @@ CREATE SEQUENCE public.course_id_course_seq
 ALTER SEQUENCE public.course_id_course_seq OWNER TO pguser;
 
 --
--- TOC entry 3648 (class 0 OID 0)
+-- TOC entry 3658 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: course_id_course_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -280,7 +338,7 @@ CREATE SEQUENCE public.feedback_id_feedback_seq
 ALTER SEQUENCE public.feedback_id_feedback_seq OWNER TO pguser;
 
 --
--- TOC entry 3649 (class 0 OID 0)
+-- TOC entry 3659 (class 0 OID 0)
 -- Dependencies: 237
 -- Name: feedback_id_feedback_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -321,7 +379,7 @@ CREATE SEQUENCE public.lessons_id_lesson_seq
 ALTER SEQUENCE public.lessons_id_lesson_seq OWNER TO pguser;
 
 --
--- TOC entry 3650 (class 0 OID 0)
+-- TOC entry 3660 (class 0 OID 0)
 -- Dependencies: 239
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -378,7 +436,7 @@ CREATE SEQUENCE public.questions_id_question_seq
 ALTER SEQUENCE public.questions_id_question_seq OWNER TO pguser;
 
 --
--- TOC entry 3651 (class 0 OID 0)
+-- TOC entry 3661 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: questions_id_question_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -418,7 +476,7 @@ CREATE SEQUENCE public.results_id_result_seq
 ALTER SEQUENCE public.results_id_result_seq OWNER TO pguser;
 
 --
--- TOC entry 3652 (class 0 OID 0)
+-- TOC entry 3662 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: results_id_result_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -459,7 +517,7 @@ CREATE SEQUENCE public.stat_id_stat_seq
 ALTER SEQUENCE public.stat_id_stat_seq OWNER TO pguser;
 
 --
--- TOC entry 3653 (class 0 OID 0)
+-- TOC entry 3663 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: stat_id_stat_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -500,7 +558,7 @@ CREATE SEQUENCE public.steps_id_step_seq
 ALTER SEQUENCE public.steps_id_step_seq OWNER TO pguser;
 
 --
--- TOC entry 3654 (class 0 OID 0)
+-- TOC entry 3664 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: steps_id_step_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -520,11 +578,21 @@ CREATE TABLE public.test_answers (
     id_selected_option integer,
     is_correct boolean,
     answer_time timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    answer_text text
+    answer_text text,
+    ai_feedback text
 );
 
 
 ALTER TABLE public.test_answers OWNER TO pguser;
+
+--
+-- TOC entry 3665 (class 0 OID 0)
+-- Dependencies: 249
+-- Name: COLUMN test_answers.ai_feedback; Type: COMMENT; Schema: public; Owner: pguser
+--
+
+COMMENT ON COLUMN public.test_answers.ai_feedback IS 'Отзыв ИИ о коде студента';
+
 
 --
 -- TOC entry 248 (class 1259 OID 24883)
@@ -543,7 +611,7 @@ CREATE SEQUENCE public.test_answers_id_answer_seq
 ALTER SEQUENCE public.test_answers_id_answer_seq OWNER TO pguser;
 
 --
--- TOC entry 3655 (class 0 OID 0)
+-- TOC entry 3666 (class 0 OID 0)
 -- Dependencies: 248
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -588,7 +656,7 @@ CREATE SEQUENCE public.test_attempts_id_attempt_seq
 ALTER SEQUENCE public.test_attempts_id_attempt_seq OWNER TO pguser;
 
 --
--- TOC entry 3656 (class 0 OID 0)
+-- TOC entry 3667 (class 0 OID 0)
 -- Dependencies: 246
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -628,7 +696,7 @@ CREATE SEQUENCE public.tests_id_test_seq
 ALTER SEQUENCE public.tests_id_test_seq OWNER TO pguser;
 
 --
--- TOC entry 3657 (class 0 OID 0)
+-- TOC entry 3668 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: tests_id_test_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -693,7 +761,7 @@ CREATE SEQUENCE public.users_id_user_seq
 ALTER SEQUENCE public.users_id_user_seq OWNER TO pguser;
 
 --
--- TOC entry 3658 (class 0 OID 0)
+-- TOC entry 3669 (class 0 OID 0)
 -- Dependencies: 241
 -- Name: users_id_user_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -718,7 +786,7 @@ ALTER TABLE ONLY public.answers ALTER COLUMN id_answer SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3352 (class 2604 OID 24824)
+-- TOC entry 3354 (class 2604 OID 24824)
 -- Name: certificates id_certificate; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -734,7 +802,7 @@ ALTER TABLE ONLY public.code_tasks ALTER COLUMN id_ct SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3345 (class 2604 OID 24675)
+-- TOC entry 3347 (class 2604 OID 24675)
 -- Name: course id_course; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -742,7 +810,7 @@ ALTER TABLE ONLY public.course ALTER COLUMN id_course SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3348 (class 2604 OID 24693)
+-- TOC entry 3350 (class 2604 OID 24693)
 -- Name: feedback id_feedback; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -750,7 +818,7 @@ ALTER TABLE ONLY public.feedback ALTER COLUMN id_feedback SET DEFAULT nextval('p
 
 
 --
--- TOC entry 3349 (class 2604 OID 24704)
+-- TOC entry 3351 (class 2604 OID 24704)
 -- Name: lessons id_lesson; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -790,7 +858,7 @@ ALTER TABLE ONLY public.steps ALTER COLUMN id_step SET DEFAULT nextval('public.s
 
 
 --
--- TOC entry 3357 (class 2604 OID 24887)
+-- TOC entry 3359 (class 2604 OID 24887)
 -- Name: test_answers id_answer; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -798,7 +866,7 @@ ALTER TABLE ONLY public.test_answers ALTER COLUMN id_answer SET DEFAULT nextval(
 
 
 --
--- TOC entry 3355 (class 2604 OID 24866)
+-- TOC entry 3357 (class 2604 OID 24866)
 -- Name: test_attempts id_attempt; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -814,7 +882,7 @@ ALTER TABLE ONLY public.tests ALTER COLUMN id_test SET DEFAULT nextval('public.t
 
 
 --
--- TOC entry 3350 (class 2604 OID 24716)
+-- TOC entry 3352 (class 2604 OID 24716)
 -- Name: users id_user; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -822,7 +890,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id_user SET DEFAULT nextval('public.u
 
 
 --
--- TOC entry 3607 (class 0 OID 24579)
+-- TOC entry 3611 (class 0 OID 24579)
 -- Dependencies: 218
 -- Data for Name: answer_options; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -943,7 +1011,7 @@ COPY public.answer_options (id_option, id_question, text_option) FROM stdin;
 
 
 --
--- TOC entry 3609 (class 0 OID 24588)
+-- TOC entry 3613 (class 0 OID 24588)
 -- Dependencies: 220
 -- Data for Name: answers; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -953,7 +1021,7 @@ COPY public.answers (id_answer, id_question, id_user, text_answer) FROM stdin;
 
 
 --
--- TOC entry 3633 (class 0 OID 24821)
+-- TOC entry 3637 (class 0 OID 24821)
 -- Dependencies: 244
 -- Data for Name: certificates; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -964,23 +1032,28 @@ COPY public.certificates (id_certificate, id_user, id_course, date_issued, certi
 
 
 --
--- TOC entry 3622 (class 0 OID 24661)
+-- TOC entry 3626 (class 0 OID 24661)
 -- Dependencies: 233
 -- Data for Name: code_tasks; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
-COPY public.code_tasks (id_ct, id_question, input_ct, output_ct) FROM stdin;
+COPY public.code_tasks (id_ct, id_question, input_ct, output_ct, execution_timeout, template_code, language) FROM stdin;
+1	57		'Сумма массива: 15',	5	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array);\r\n?>',	php
+2	58		# Ожидаемый вывод: 15	5	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Ожидаемый вывод: 15	python
+3	59		 Ожидаемый вывод: 15	5	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	cpp
+4	60		15	5	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	php
+5	61		Сумма элементов массива: 15	5	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	cpp
+6	62		15	5	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	python
 \.
 
 
 --
--- TOC entry 3624 (class 0 OID 24672)
+-- TOC entry 3628 (class 0 OID 24672)
 -- Dependencies: 235
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
 COPY public.course (id_course, name_course, desc_course, with_certificate, hourse_course, requred_year, required_spec, required_uni, level_course, tags_course, status_course, moderation_comment) FROM stdin;
-24	Фигма с нуля	Будем учиться на баннерах с ватой	t	36	\N	\N	\N	\N	дизайн, сайты, фигма	pending	Я тебя люблю
 16	fxg	dfg	f	1	\N	\N	\N	\N	dfg	pending	\N
 17	курс	курс	f	1	\N	\N	\N	\N	12	pending	\N
 18	asd	asd	t	1	\N	\N	\N	\N	asd	pending	\N
@@ -991,11 +1064,13 @@ COPY public.course (id_course, name_course, desc_course, with_certificate, hours
 19	Курс для крутой проверки	Этот курс я щас сделаю круто и полноценно	f	5	\N	\N	\N	\N	php, web. krutyak	pending	фыфыфы
 23	курс макс рокс	авп	f	1	\N	\N	\N	\N	2	approved	фы
 25	asasas	12	f	12	\N	\N	\N	\N	1	approved	фыфы
+24	Фигма с нуля	Будем учиться на баннерах с ватой	t	36	\N	\N	\N	\N	дизайн, сайты, фигма	approved	Я тебя люблю
+26	тест курс	выаыва	f	12	\N	\N	\N	\N	php	approved	Я люблю тебя
 \.
 
 
 --
--- TOC entry 3625 (class 0 OID 24681)
+-- TOC entry 3629 (class 0 OID 24681)
 -- Dependencies: 236
 -- Data for Name: create_passes; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1054,15 +1129,42 @@ COPY public.create_passes (id_course, id_user, is_creator, date_complete) FROM s
 23	9	f	2025-06-03 10:36:33.785426
 25	28	t	\N
 25	17	f	2025-06-03 10:38:37.078964
+25	2	f	\N
+24	2	f	\N
+24	9	f	\N
+24	3	f	\N
+24	10	f	\N
+24	6	f	\N
+24	8	f	\N
+24	7	f	\N
+24	12	f	\N
 8	1	t	\N
+24	15	f	\N
 8	8	f	\N
+24	19	f	\N
+24	25	f	\N
+24	20	f	\N
 8	10	f	\N
+24	22	f	\N
+24	18	f	\N
+24	13	f	\N
+24	16	f	\N
 8	11	f	\N
+24	29	f	2025-06-04 15:04:59.181412
+24	24	f	\N
+24	30	f	\N
+24	31	f	\N
+26	28	t	\N
+26	2	f	2025-06-05 09:57:07.87469
+26	9	f	2025-06-05 09:58:28.380094
+26	10	f	\N
+26	3	f	2025-06-05 10:05:28.047959
+26	18	f	\N
 \.
 
 
 --
--- TOC entry 3627 (class 0 OID 24690)
+-- TOC entry 3631 (class 0 OID 24690)
 -- Dependencies: 238
 -- Data for Name: feedback; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1077,7 +1179,7 @@ COPY public.feedback (id_feedback, id_course, text_feedback, date_feedback, rate
 
 
 --
--- TOC entry 3629 (class 0 OID 24701)
+-- TOC entry 3633 (class 0 OID 24701)
 -- Dependencies: 240
 -- Data for Name: lessons; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1097,11 +1199,12 @@ COPY public.lessons (id_lesson, id_course, id_stat, name_lesson, status_lesson) 
 29	23	\N	Переменные	new
 30	24	\N	Что такое FIGMA?	new
 31	25	\N	Переменные	new
+32	26	\N	Переменные	new
 \.
 
 
 --
--- TOC entry 3610 (class 0 OID 24597)
+-- TOC entry 3614 (class 0 OID 24597)
 -- Dependencies: 221
 -- Data for Name: material; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1123,7 +1226,7 @@ MAT6051717                                                                      
 
 
 --
--- TOC entry 3612 (class 0 OID 24607)
+-- TOC entry 3616 (class 0 OID 24607)
 -- Dependencies: 223
 -- Data for Name: questions; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1132,6 +1235,11 @@ COPY public.questions (id_question, id_test, text_question, answer_question, typ
 54	25	1. Как получить данные POST-запроса?	0	single	\N
 55	25	1. Как получить данные POST-запроса?	0	single	\N
 56	25	фы		match	\N
+57	23	Напишите функцию sum_array, которая принимает массив чисел и возвращает их сумму.		code	\N
+58	23	Сумма массива		code	\N
+59	23	Сумма массива		code	\N
+60	27	Сумма элементов массива из функции		code	\N
+61	27	Сумма элементов массива из функции		code	\N
 21	20	why did the chicken crossed the road?	0,1,2	multi	\N
 22	20	Какая лучшая кафедра?	0	single	\N
 23	20	Деятельность актива ЛГТУ		match	\N
@@ -1141,6 +1249,7 @@ COPY public.questions (id_question, id_test, text_question, answer_question, typ
 27	22	asdsad		match	\N
 28	22	111	0,1	multi	\N
 29	22	sdfsdfsdfsdf		code	\N
+62	27	Сумма элементов массива из функции		code	\N
 30	23	Какой комбинацией можно найти нужный фрейм?	1	single	\N
 31	24	кто?	2	single	\N
 32	24	не	0,1	multi	\N
@@ -1169,7 +1278,7 @@ COPY public.questions (id_question, id_test, text_question, answer_question, typ
 
 
 --
--- TOC entry 3614 (class 0 OID 24618)
+-- TOC entry 3618 (class 0 OID 24618)
 -- Dependencies: 225
 -- Data for Name: results; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1179,7 +1288,7 @@ COPY public.results (id_result, id_answer, id_test, score_result) FROM stdin;
 
 
 --
--- TOC entry 3616 (class 0 OID 24628)
+-- TOC entry 3620 (class 0 OID 24628)
 -- Dependencies: 227
 -- Data for Name: stat; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1189,7 +1298,7 @@ COPY public.stat (id_stat, id_user, id_course, id_result, prec_through) FROM std
 
 
 --
--- TOC entry 3618 (class 0 OID 24639)
+-- TOC entry 3622 (class 0 OID 24639)
 -- Dependencies: 229
 -- Data for Name: steps; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1211,56 +1320,146 @@ COPY public.steps (id_step, id_lesson, number_steps, status_step, type_step) FRO
 66	31	asasas	not_started	material
 67	31	тест1	not_started	test
 68	31	asas	not_started	test
+70	32	код тест	not_started	test
 21	10	Читайте	completed	material
 27	19	asd	completed	material
 \.
 
 
 --
--- TOC entry 3638 (class 0 OID 24884)
+-- TOC entry 3642 (class 0 OID 24884)
 -- Dependencies: 249
 -- Data for Name: test_answers; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
-COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option, is_correct, answer_time, answer_text) FROM stdin;
-23	14	21	30	t	2025-06-02 12:16:43.789087	\N
-24	14	22	33	t	2025-06-02 12:16:43.792159	\N
-25	14	23	\N	t	2025-06-02 12:16:43.794578	\N
-26	14	24	\N	t	2025-06-02 12:16:43.796107	\N
-27	15	25	38	t	2025-06-02 12:16:52.801221	\N
-28	15	26	40	t	2025-06-02 12:16:52.804085	\N
-29	16	21	30	t	2025-06-02 12:18:37.024189	\N
-30	16	22	33	t	2025-06-02 12:18:37.026426	\N
-31	16	23	\N	t	2025-06-02 12:18:37.028279	\N
-32	16	24	\N	t	2025-06-02 12:18:37.029565	\N
-33	17	21	30	t	2025-06-02 12:23:51.53388	\N
-34	17	22	33	t	2025-06-02 12:23:51.536793	\N
-35	17	23	\N	t	2025-06-02 12:23:51.539218	\N
-36	17	24	\N	t	2025-06-02 12:23:51.540791	\N
-37	18	25	38	t	2025-06-02 12:24:02.097131	\N
-38	18	26	40	t	2025-06-02 12:24:02.100062	\N
-39	19	27	\N	t	2025-06-02 12:39:51.331882	\N
-40	19	28	44	t	2025-06-02 12:39:51.334951	\N
-41	19	29	\N	t	2025-06-02 12:39:51.336564	\N
-42	20	27	\N	f	2025-06-02 12:49:55.77388	\N
-43	20	28	44	t	2025-06-02 12:49:55.779871	\N
-44	20	29	\N	t	2025-06-02 12:49:55.782486	\N
-45	21	27	\N	t	2025-06-02 12:55:07.325412	["0","1"]
-46	21	28	44	t	2025-06-02 12:55:07.328549	["0","1"]
-47	21	29	\N	t	2025-06-02 12:55:07.330248	123123
-48	23	21	30	t	2025-06-02 16:18:42.467919	["0","1","2"]
-49	23	22	33	t	2025-06-02 16:18:42.471237	\N
-50	23	23	\N	t	2025-06-02 16:18:42.473247	["0","1"]
-51	23	24	\N	t	2025-06-02 16:18:42.474688	фыфы
-52	25	31	52	t	2025-06-03 10:38:33.382938	\N
-53	25	32	53	t	2025-06-03 10:38:33.386419	["0","1"]
-54	25	33	\N	t	2025-06-03 10:38:33.388064	["0","1"]
-55	25	34	\N	t	2025-06-03 10:38:33.389084	asas
+COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option, is_correct, answer_time, answer_text, ai_feedback) FROM stdin;
+23	14	21	30	t	2025-06-02 12:16:43.789087	\N	\N
+24	14	22	33	t	2025-06-02 12:16:43.792159	\N	\N
+25	14	23	\N	t	2025-06-02 12:16:43.794578	\N	\N
+26	14	24	\N	t	2025-06-02 12:16:43.796107	\N	\N
+27	15	25	38	t	2025-06-02 12:16:52.801221	\N	\N
+28	15	26	40	t	2025-06-02 12:16:52.804085	\N	\N
+29	16	21	30	t	2025-06-02 12:18:37.024189	\N	\N
+30	16	22	33	t	2025-06-02 12:18:37.026426	\N	\N
+31	16	23	\N	t	2025-06-02 12:18:37.028279	\N	\N
+32	16	24	\N	t	2025-06-02 12:18:37.029565	\N	\N
+33	17	21	30	t	2025-06-02 12:23:51.53388	\N	\N
+34	17	22	33	t	2025-06-02 12:23:51.536793	\N	\N
+35	17	23	\N	t	2025-06-02 12:23:51.539218	\N	\N
+36	17	24	\N	t	2025-06-02 12:23:51.540791	\N	\N
+37	18	25	38	t	2025-06-02 12:24:02.097131	\N	\N
+38	18	26	40	t	2025-06-02 12:24:02.100062	\N	\N
+39	19	27	\N	t	2025-06-02 12:39:51.331882	\N	\N
+40	19	28	44	t	2025-06-02 12:39:51.334951	\N	\N
+41	19	29	\N	t	2025-06-02 12:39:51.336564	\N	\N
+42	20	27	\N	f	2025-06-02 12:49:55.77388	\N	\N
+43	20	28	44	t	2025-06-02 12:49:55.779871	\N	\N
+44	20	29	\N	t	2025-06-02 12:49:55.782486	\N	\N
+45	21	27	\N	t	2025-06-02 12:55:07.325412	["0","1"]	\N
+46	21	28	44	t	2025-06-02 12:55:07.328549	["0","1"]	\N
+47	21	29	\N	t	2025-06-02 12:55:07.330248	123123	\N
+48	23	21	30	t	2025-06-02 16:18:42.467919	["0","1","2"]	\N
+49	23	22	33	t	2025-06-02 16:18:42.471237	\N	\N
+50	23	23	\N	t	2025-06-02 16:18:42.473247	["0","1"]	\N
+51	23	24	\N	t	2025-06-02 16:18:42.474688	фыфы	\N
+52	25	31	52	t	2025-06-03 10:38:33.382938	\N	\N
+53	25	32	53	t	2025-06-03 10:38:33.386419	["0","1"]	\N
+54	25	33	\N	t	2025-06-03 10:38:33.388064	["0","1"]	\N
+55	25	34	\N	t	2025-06-03 10:38:33.389084	asas	\N
+56	26	30	48	f	2025-06-04 11:22:39.295033	\N	\N
+57	26	57	\N	t	2025-06-04 11:22:39.299226	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+58	27	30	49	t	2025-06-04 12:44:54.824064	\N	\N
+59	27	57	\N	f	2025-06-04 12:44:54.827742	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+60	27	58	\N	f	2025-06-04 12:44:54.829431	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    total = 0\r\n    for num in arr:\r\n        total += num\r\n    return total\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Вывод: Сумма массива: 15	\N
+61	27	59	\N	f	2025-06-04 12:44:54.830967	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    int sum = 0;\r\n    for (int num : arr) {\r\n        sum += num;\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Вывод: Сумма массива: 15\r\n    return 0;\r\n}	\N
+62	28	30	48	f	2025-06-04 12:53:38.318151	\N	\N
+63	28	57	\N	f	2025-06-04 12:53:38.321578	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 4];\r\necho "Сумма массива: " . sum_array($test_array);\r\n?>',	\N
+64	28	58	\N	f	2025-06-04 12:53:38.323206	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Ожидаемый вывод: 15	\N
+65	28	59	\N	f	2025-06-04 12:53:38.324908	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+66	29	30	49	t	2025-06-04 13:03:16.500736	\N	\N
+67	29	57	\N	f	2025-06-04 13:03:16.503481	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 " . sum_array($test_array);\r\n?>',	\N
+68	29	58	\N	f	2025-06-04 13:03:16.504744	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+130	45	60	\N	f	2025-06-05 09:56:04.364035	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	\N
+131	45	61	\N	f	2025-06-05 09:56:04.368093	\r\n#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+69	29	59	\N	f	2025-06-04 13:03:16.506869	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+70	30	30	49	t	2025-06-04 13:10:58.010504	\N	\N
+71	30	57	\N	f	2025-06-04 13:10:58.013414	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 " . sum_array($test_array);\r\n?>',	\N
+72	30	58	\N	f	2025-06-04 13:10:58.014832	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+73	30	59	\N	f	2025-06-04 13:10:58.016321	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+74	31	30	49	t	2025-06-04 13:12:56.476394	\N	\N
+75	31	57	\N	f	2025-06-04 13:12:56.479653	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+76	31	58	\N	f	2025-06-04 13:12:56.480997	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    total = 0\r\n    for num in arr:\r\n        total += num\r\n    return total\r\n\r\n# Тестирование функции\r\nif __name__ == "__main__":\r\n    test_array = [1, 2, 3, 4, 5]\r\n    print(f"Сумма массива: {sum_array(test_array)}")  # Вывод: Сумма массива: 15	\N
+77	31	59	\N	f	2025-06-04 13:12:56.482283	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    int sum = 0;\r\n    for (int num : arr) {\r\n        sum += num;\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Вывод: Сумма массива: 15\r\n    return 0;\r\n}	\N
+78	32	30	48	f	2025-06-04 13:25:40.901056	\N	\N
+79	32	57	\N	f	2025-06-04 13:25:40.905196	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array);\r\n?>',	\N
+80	32	58	\N	f	2025-06-04 13:25:40.906712	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Ожидаемый вывод: 15	\N
+81	32	59	\N	f	2025-06-04 13:25:40.908141	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    int sum = 0;\r\n    for (int num : arr) {\r\n        sum += num;\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Вывод: Сумма массива: 15\r\n    return 0;\r\n}	\N
+82	33	30	48	f	2025-06-04 13:26:30.363553	\N	\N
+83	33	57	\N	f	2025-06-04 13:26:30.365869	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 ";\r\n?>',	\N
+84	33	58	\N	f	2025-06-04 13:26:30.367412	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+103	38	57	\N	f	2025-06-04 13:51:24.737702	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 " . sum_array($test_array);\r\n?>',	\N
+104	38	58	\N	f	2025-06-04 13:51:24.742482	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    total = 0\r\n    for num in arr:\r\n        total += num\r\n    return total\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Вывод: Сумма массива: 15	\N
+85	33	59	\N	t	2025-06-04 13:26:30.369044	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+86	34	30	49	t	2025-06-04 13:29:02.91345	\N	\N
+87	34	57	\N	f	2025-06-04 13:29:02.916498	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+88	34	58	\N	f	2025-06-04 13:29:02.918033	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    total = 0\r\n    for num in arr:\r\n        total += num\r\n    return total\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Вывод: Сумма массива: 15	\N
+89	34	59	\N	f	2025-06-04 13:29:02.919552	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+90	35	30	49	t	2025-06-04 13:35:29.025751	\N	\N
+91	35	57	\N	f	2025-06-04 13:35:29.02895	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+92	35	58	\N	f	2025-06-04 13:35:29.030618	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+93	35	59	\N	f	2025-06-04 13:35:29.032196	#include <iostream>\r\n#include <vector>\r\n\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    int sum = 0;\r\n    for (int num : arr) {\r\n        sum += num;\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Вывод: Сумма массива: 15\r\n    return 0;\r\n}	\N
+94	36	30	49	t	2025-06-04 13:40:25.978934	\N	\N
+95	36	57	\N	f	2025-06-04 13:40:25.982144	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array);\r\n?>',	\N
+96	36	58	\N	f	2025-06-04 13:40:25.983583	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Ожидаемый вывод: 15	\N
+97	36	59	\N	f	2025-06-04 13:40:25.985049	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+98	37	30	48	f	2025-06-04 13:45:18.289586	\N	\N
+99	37	57	\N	f	2025-06-04 13:45:18.302722	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+100	37	58	\N	f	2025-06-04 13:45:18.306607	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Ожидаемый вывод: 15	\N
+101	37	59	\N	f	2025-06-04 13:45:18.310598	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+102	38	30	49	t	2025-06-04 13:51:24.731242	\N	\N
+132	45	62	\N	f	2025-06-05 09:56:04.370372	def sum_of_elements(arr):\r\n    return sum(arr)\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)  # Выведет 15	\N
+105	38	59	\N	f	2025-06-04 13:51:24.746587	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    int sum = 0;\r\n    for (int num : arr) {\r\n        sum += num;\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Вывод: Сумма массива: 15\r\n    return 0;\r\n}\r\n	\N
+106	39	30	49	t	2025-06-04 13:54:28.016391	\N	\N
+107	39	57	\N	f	2025-06-04 13:54:28.022683	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+108	39	58	\N	f	2025-06-04 13:54:28.026859	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+109	39	59	\N	f	2025-06-04 13:54:28.031191	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+110	40	30	48	f	2025-06-04 13:59:34.836044	\N	\N
+112	40	58	\N	f	2025-06-04 13:59:34.846863	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Ожидаемый вывод: 15	\N
+113	40	59	\N	f	2025-06-04 13:59:34.850889	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+111	40	57	\N	f	2025-06-04 13:59:34.842862	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array);\r\n?>',	ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.
+114	41	30	49	t	2025-06-04 15:03:49.899758	\N	\N
+116	41	58	\N	f	2025-06-04 15:03:49.909533	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+117	41	59	\N	f	2025-06-04 15:03:49.912548	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+129	44	59	\N	f	2025-06-04 15:25:23.580287	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+133	46	60	\N	f	2025-06-05 09:57:42.132832	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+134	46	61	\N	f	2025-06-05 09:57:42.13592	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+135	46	62	\N	f	2025-06-05 09:57:42.13845	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+115	41	57	\N	f	2025-06-04 15:03:49.90653	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.
+118	42	30	49	t	2025-06-04 15:10:43.846051	\N	\N
+120	42	58	\N	f	2025-06-04 15:10:43.85559	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    total = 0\r\n    for num in arr:\r\n        total += num\r\n    return total\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Вывод: Сумма массива: 15	\N
+121	42	59	\N	f	2025-06-04 15:10:43.858564	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+119	42	57	\N	f	2025-06-04 15:10:43.852567	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 " . sum_array($test_array);\r\n?>',	ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.
+122	43	30	49	t	2025-06-04 15:18:48.622636	\N	\N
+124	43	58	\N	f	2025-06-04 15:18:48.641837	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+125	43	59	\N	f	2025-06-04 15:18:48.646829	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+123	43	57	\N	f	2025-06-04 15:18:48.634574	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.
+126	44	30	49	t	2025-06-04 15:25:23.571819	\N	\N
+127	44	57	\N	f	2025-06-04 15:25:23.5765	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
+128	44	58	\N	f	2025-06-04 15:25:23.57842	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+136	47	60	\N	f	2025-06-05 09:58:42.463277	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+137	47	61	\N	f	2025-06-05 09:58:42.466875	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+138	47	62	\N	f	2025-06-05 09:58:42.469263	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+139	48	60	\N	f	2025-06-05 09:59:42.628104	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>\r\n	\N
+140	48	61	\N	f	2025-06-05 09:59:42.630433	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+141	48	62	\N	f	2025-06-05 09:59:42.632568	def sum_of_elements(arr):\r\n    return sum(arr)\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)  # Выведет 15	\N
+142	49	60	\N	f	2025-06-05 10:07:03.70786	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	\N
+143	49	61	\N	f	2025-06-05 10:07:03.715361	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+144	49	62	\N	f	2025-06-05 10:07:03.721454	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
 \.
 
 
 --
--- TOC entry 3636 (class 0 OID 24863)
+-- TOC entry 3640 (class 0 OID 24863)
 -- Dependencies: 247
 -- Data for Name: test_attempts; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1278,11 +1477,35 @@ COPY public.test_attempts (id_attempt, id_test, id_user, start_time, end_time, s
 23	20	9	2025-06-02 16:18:42.428812	2025-06-02 16:18:42.428812	4	4	completed
 24	24	28	2025-06-03 10:37:44.584512	\N	\N	4	in_progress
 25	24	17	2025-06-03 10:38:33.378714	2025-06-03 10:38:33.378714	4	4	completed
+26	23	2	2025-06-04 11:22:39.290023	2025-06-04 11:22:39.290023	1	2	completed
+27	23	9	2025-06-04 12:44:54.778764	2025-06-04 12:44:54.778764	1	4	completed
+28	23	3	2025-06-04 12:53:38.274658	2025-06-04 12:53:38.274658	0	4	completed
+29	23	10	2025-06-04 13:03:16.459706	2025-06-04 13:03:16.459706	1	4	completed
+30	23	6	2025-06-04 13:10:57.996536	2025-06-04 13:10:57.996536	1	4	completed
+31	23	8	2025-06-04 13:12:56.434082	2025-06-04 13:12:56.434082	1	4	completed
+32	23	7	2025-06-04 13:25:40.858768	2025-06-04 13:25:40.858768	0	4	completed
+33	23	12	2025-06-04 13:26:30.359259	2025-06-04 13:26:30.359259	1	4	completed
+34	23	15	2025-06-04 13:29:02.872759	2025-06-04 13:29:02.872759	1	4	completed
+35	23	19	2025-06-04 13:35:28.984837	2025-06-04 13:35:28.984837	1	4	completed
+36	23	25	2025-06-04 13:40:25.938697	2025-06-04 13:40:25.938697	1	4	completed
+37	23	20	2025-06-04 13:45:18.248876	2025-06-04 13:45:18.248876	0	4	completed
+38	23	22	2025-06-04 13:51:24.689525	2025-06-04 13:51:24.689525	1	4	completed
+39	23	18	2025-06-04 13:54:27.975558	2025-06-04 13:54:27.975558	1	4	completed
+40	23	13	2025-06-04 13:59:34.794949	2025-06-04 13:59:34.794949	0	4	completed
+41	23	29	2025-06-04 15:03:49.893471	2025-06-04 15:03:49.893471	1	4	completed
+42	23	24	2025-06-04 15:10:43.805876	2025-06-04 15:10:43.805876	1	4	completed
+43	23	30	2025-06-04 15:18:48.617297	2025-06-04 15:18:48.617297	1	4	completed
+44	23	31	2025-06-04 15:25:23.531451	2025-06-04 15:25:23.531451	1	4	completed
+45	27	2	2025-06-05 09:56:04.351968	2025-06-05 09:56:04.351968	0	3	completed
+46	27	9	2025-06-05 09:57:42.12776	2025-06-05 09:57:42.12776	0	3	completed
+47	27	10	2025-06-05 09:58:42.45804	2025-06-05 09:58:42.45804	0	3	completed
+48	27	3	2025-06-05 09:59:42.623881	2025-06-05 09:59:42.623881	0	3	completed
+49	27	18	2025-06-05 10:07:03.678088	2025-06-05 10:07:03.678088	0	3	completed
 \.
 
 
 --
--- TOC entry 3620 (class 0 OID 24650)
+-- TOC entry 3624 (class 0 OID 24650)
 -- Dependencies: 231
 -- Data for Name: tests; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1294,11 +1517,12 @@ COPY public.tests (id_test, id_step, name_test, desc_test) FROM stdin;
 23	64	Новый тест	
 24	67	Новый тест	
 25	68	Новый тест	
+27	70	Новый тест	
 \.
 
 
 --
--- TOC entry 3634 (class 0 OID 24846)
+-- TOC entry 3638 (class 0 OID 24846)
 -- Dependencies: 245
 -- Data for Name: user_material_progress; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1327,11 +1551,14 @@ COPY public.user_material_progress (id_user, id_step, completed_at) FROM stdin;
 28	63	2025-06-03 10:01:16.281781
 9	63	2025-06-03 10:36:33.188469
 17	66	2025-06-03 10:38:23.072659
+2	66	2025-06-04 10:58:24.643045
+7	65	2025-06-04 13:53:38.264113
+29	65	2025-06-04 15:04:58.106382
 \.
 
 
 --
--- TOC entry 3631 (class 0 OID 24713)
+-- TOC entry 3635 (class 0 OID 24713)
 -- Dependencies: 242
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1345,7 +1572,6 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 24	Гаршина Юлия	2003-03-19	ыфва	student	фыва	1	maxboltik@mail.ru	$2y$12$faxrVU94tln97uCpaz4tP.9RsyCkrnjHkm1lFJq8VixJKA5tPeW5u	\N	approved	Все круто	uploads/students/student_card_683dc1763deda_default.jpg	\N	\N
 25	Болдырев Максим Романович	2003-03-19	asfd	student	sdf	3	yaz678@bk.ru	$2y$12$RgaPVqclsFdSKX6RvPKaoe/whNqAV.SpN6SvgO2MsfFV5oFt6hyQW	\N	approved	Все некруто	uploads/students/student_card_683dc20addef0_Приказ КС.pdf	\N	\N
 26	фыфыфы	2003-03-19	вап	teacher	вап	2	maxrox1904@gmail.com	$2y$12$Qm1TDSSRSkH38LA9jK5Ne.Zn.T6pDx02f6PRnU5VHxmqv3W8KxR76	uploads/teachers/criminal/criminal_683dc32d567f7_rNo_c2bRwys.jpg	approved		\N	uploads/teachers/passport/passport_683dc32d567f0_diplom.sql	uploads/teachers/diploma/diploma_683dc32d567f6_Приказ КС.pdf
-27	Пупкин Кирилл Васильевич	2003-03-19	ыфва	teacher	ваып	2	asdsadasD@mail.ru	$2y$12$2T9g.ZfYsYaewsakcw20NO.ioKXZBJ2yC9SKTBffgc17cjZJFkCI6	uploads/teachers/criminal/criminal_683dc7568fa22_default.jpg	pending	\N	\N	uploads/teachers/passport/passport_683dc7568fa1b_default.jpg	uploads/teachers/diploma/diploma_683dc7568fa20_0QwgmBt4IN8.jpg
 2	Болдырев Максим Романович	2003-03-19	ЛГТУ	student	Инфа	2	maxim	$2y$12$tyO9ZJdqQHaFiyMY3eLYyehNtDKKgthQD.ErdkouOg9eqSu8Y299i	\N	approved	\N	\N	\N	\N
 3	Пупкин Кирилл Васильевич	2003-03-19	ФЫВ	student	ФЫВ	1	worker	$2y$12$Vi9IlObR0cP9O86E3gyIK.06lwsRV4MpXhaB9YpLvff.5gpSa4nxa	\N	approved	\N	\N	\N	\N
 8	Пупкин Кирилл Васильевич	2003-03-19	фыв	student	фыв	1	dog	$2y$12$41pVBQvZpN2zD6JNkdURrOlYgRpRqapJyO.MEbtgwLjzs2l0ev9mq	\N	approved	\N	\N	\N	\N
@@ -1361,14 +1587,18 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 18	Гаршина Юлия	2003-03-19	фыа	student	фыва	2	rox2	$2y$12$.dAcyngBQg7FtyWNKLg8fe2Ba4NFx14M6CuRsMQFJajRr..gJYN6O	\N	approved	\N	\N	\N	\N
 19	asdasdasd	2003-03-19	asd	student	asd	2	okak	$2y$12$Y3XpprFz4xhnXxGFcxyrmuv0/4fH.corayejUPn5bjmGXRWXAKL6W	\N	approved	\N	\N	\N	\N
 20	Болдырев Максим Романович	2003-03-19	asd	student	asd	3	max1	$2y$12$DesbJupvhqEH7hsFhMXo3uOTvrrelfSA.rIrXQD4m0vsgx5KnZoGa	\N	approved	\N	\N	\N	\N
+29	фыфыфыфы	2003-03-19	вап	student	вапр	2	asdasdasdbn@mail.ru	$2y$12$Mrw4FkYaP10HzGcwAxOmRePRvDwQtOpbn5Qog55mBncn0i/pwmHOu	\N	approved	\N	uploads/students/student_card_68405fab0f76a_diplom_dump.sql	\N	\N
 22	фывфывфыв	2003-03-19	ыва	student	выа	1	ooooo	$2y$12$UCh6tvfpNQJoS78o0Xaj8uOaXBb/.KBSHTPBXyS96vQp0YUR60Jf2	\N	approved	\N	\N	\N	\N
 28	Золотарева Мария Егоровна	1999-07-20	ЛГТУ	teacher	Туризм	4	quixotesoul@gmail.com	$2y$12$v8DyFv1arPtPubx8fMP4MOdy8zm1R6AkAq5wOFGQJm8.JOV.dc/uO	\N	approved	секси	uploads/students/student_card_683ec79d06858_default.jpg	\N	\N
+30	asasasas	20003-03-19	asd	student	asd	2	a8a9a8@bk.ru	$2y$12$Az/CpJQPtG.B77g6NlIpFO2UViYKZK3T5wOTMm8R6OI8Ty0cZcaB6	\N	approved	\N	uploads/students/student_card_6840639974cbb_diplom_dump.sql	\N	\N
 21	Maxim Boldyrev	2003-03-19	ЛГТУ	teacher	Информатика	1	oops	$2y$12$O4xRZxgvK/WJPH0JKq9XV.YtyN7eGZjqDNu3ZwBh5wHDnLNYbknlu	\N	approved	\N	\N	\N	\N
+27	Пупкин Кирилл Васильевич	2003-03-19	ыфва	teacher	ваып	2	asdsadasD@mail.ru	$2y$12$2T9g.ZfYsYaewsakcw20NO.ioKXZBJ2yC9SKTBffgc17cjZJFkCI6	uploads/teachers/criminal/criminal_683dc7568fa22_default.jpg	approved	\N	\N	uploads/teachers/passport/passport_683dc7568fa1b_default.jpg	uploads/teachers/diploma/diploma_683dc7568fa20_0QwgmBt4IN8.jpg
+31	ЫФЫФЫФЫ	2003-03-19	ФЫ	student	ФЫ	2	russia@bkb.ru	$2y$12$rJJXMmL.KpS1yjK3o1CsReJA9dhP.hwKK15aJahPA/xECPXdjPRbS	\N	approved	\N	uploads/students/student_card_6840648c25f7f_curl_test.php	\N	\N
 \.
 
 
 --
--- TOC entry 3659 (class 0 OID 0)
+-- TOC entry 3670 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: answer_options_id_option_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
@@ -1377,7 +1607,7 @@ SELECT pg_catalog.setval('public.answer_options_id_option_seq', 142, true);
 
 
 --
--- TOC entry 3660 (class 0 OID 0)
+-- TOC entry 3671 (class 0 OID 0)
 -- Dependencies: 219
 -- Name: answers_id_answer_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
@@ -1386,7 +1616,7 @@ SELECT pg_catalog.setval('public.answers_id_answer_seq', 1, false);
 
 
 --
--- TOC entry 3661 (class 0 OID 0)
+-- TOC entry 3672 (class 0 OID 0)
 -- Dependencies: 243
 -- Name: certificates_id_certificate_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
@@ -1395,25 +1625,25 @@ SELECT pg_catalog.setval('public.certificates_id_certificate_seq', 1, true);
 
 
 --
--- TOC entry 3662 (class 0 OID 0)
+-- TOC entry 3673 (class 0 OID 0)
 -- Dependencies: 232
 -- Name: code_tasks_id_ct_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 1, false);
+SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 6, true);
 
 
 --
--- TOC entry 3663 (class 0 OID 0)
+-- TOC entry 3674 (class 0 OID 0)
 -- Dependencies: 234
 -- Name: course_id_course_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.course_id_course_seq', 25, true);
+SELECT pg_catalog.setval('public.course_id_course_seq', 26, true);
 
 
 --
--- TOC entry 3664 (class 0 OID 0)
+-- TOC entry 3675 (class 0 OID 0)
 -- Dependencies: 237
 -- Name: feedback_id_feedback_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
@@ -1422,25 +1652,25 @@ SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 13, true);
 
 
 --
--- TOC entry 3665 (class 0 OID 0)
+-- TOC entry 3676 (class 0 OID 0)
 -- Dependencies: 239
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 31, true);
+SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 32, true);
 
 
 --
--- TOC entry 3666 (class 0 OID 0)
+-- TOC entry 3677 (class 0 OID 0)
 -- Dependencies: 222
 -- Name: questions_id_question_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.questions_id_question_seq', 56, true);
+SELECT pg_catalog.setval('public.questions_id_question_seq', 62, true);
 
 
 --
--- TOC entry 3667 (class 0 OID 0)
+-- TOC entry 3678 (class 0 OID 0)
 -- Dependencies: 224
 -- Name: results_id_result_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
@@ -1449,7 +1679,7 @@ SELECT pg_catalog.setval('public.results_id_result_seq', 31, true);
 
 
 --
--- TOC entry 3668 (class 0 OID 0)
+-- TOC entry 3679 (class 0 OID 0)
 -- Dependencies: 226
 -- Name: stat_id_stat_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
@@ -1458,52 +1688,52 @@ SELECT pg_catalog.setval('public.stat_id_stat_seq', 1, false);
 
 
 --
--- TOC entry 3669 (class 0 OID 0)
+-- TOC entry 3680 (class 0 OID 0)
 -- Dependencies: 228
 -- Name: steps_id_step_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.steps_id_step_seq', 69, true);
+SELECT pg_catalog.setval('public.steps_id_step_seq', 70, true);
 
 
 --
--- TOC entry 3670 (class 0 OID 0)
+-- TOC entry 3681 (class 0 OID 0)
 -- Dependencies: 248
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 55, true);
+SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 144, true);
 
 
 --
--- TOC entry 3671 (class 0 OID 0)
+-- TOC entry 3682 (class 0 OID 0)
 -- Dependencies: 246
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 25, true);
+SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 49, true);
 
 
 --
--- TOC entry 3672 (class 0 OID 0)
+-- TOC entry 3683 (class 0 OID 0)
 -- Dependencies: 230
 -- Name: tests_id_test_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.tests_id_test_seq', 26, true);
+SELECT pg_catalog.setval('public.tests_id_test_seq', 27, true);
 
 
 --
--- TOC entry 3673 (class 0 OID 0)
+-- TOC entry 3684 (class 0 OID 0)
 -- Dependencies: 241
 -- Name: users_id_user_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.users_id_user_seq', 28, true);
+SELECT pg_catalog.setval('public.users_id_user_seq', 31, true);
 
 
 --
--- TOC entry 3422 (class 2606 OID 24827)
+-- TOC entry 3426 (class 2606 OID 24827)
 -- Name: certificates certificates_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1512,7 +1742,7 @@ ALTER TABLE ONLY public.certificates
 
 
 --
--- TOC entry 3363 (class 2606 OID 24584)
+-- TOC entry 3366 (class 2606 OID 24584)
 -- Name: answer_options pk_answer_options; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1521,7 +1751,7 @@ ALTER TABLE ONLY public.answer_options
 
 
 --
--- TOC entry 3368 (class 2606 OID 24593)
+-- TOC entry 3371 (class 2606 OID 24593)
 -- Name: answers pk_answers; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1530,7 +1760,7 @@ ALTER TABLE ONLY public.answers
 
 
 --
--- TOC entry 3399 (class 2606 OID 24668)
+-- TOC entry 3403 (class 2606 OID 24668)
 -- Name: code_tasks pk_code_tasks; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1539,7 +1769,7 @@ ALTER TABLE ONLY public.code_tasks
 
 
 --
--- TOC entry 3402 (class 2606 OID 24679)
+-- TOC entry 3406 (class 2606 OID 24679)
 -- Name: course pk_course; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1548,7 +1778,7 @@ ALTER TABLE ONLY public.course
 
 
 --
--- TOC entry 3408 (class 2606 OID 24685)
+-- TOC entry 3412 (class 2606 OID 24685)
 -- Name: create_passes pk_create_passes; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1557,7 +1787,7 @@ ALTER TABLE ONLY public.create_passes
 
 
 --
--- TOC entry 3412 (class 2606 OID 24697)
+-- TOC entry 3416 (class 2606 OID 24697)
 -- Name: feedback pk_feedback; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1566,7 +1796,7 @@ ALTER TABLE ONLY public.feedback
 
 
 --
--- TOC entry 3416 (class 2606 OID 24708)
+-- TOC entry 3420 (class 2606 OID 24708)
 -- Name: lessons pk_lessons; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1575,7 +1805,7 @@ ALTER TABLE ONLY public.lessons
 
 
 --
--- TOC entry 3372 (class 2606 OID 24908)
+-- TOC entry 3375 (class 2606 OID 24908)
 -- Name: material pk_material; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1584,7 +1814,7 @@ ALTER TABLE ONLY public.material
 
 
 --
--- TOC entry 3375 (class 2606 OID 24614)
+-- TOC entry 3378 (class 2606 OID 24614)
 -- Name: questions pk_questions; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1593,7 +1823,7 @@ ALTER TABLE ONLY public.questions
 
 
 --
--- TOC entry 3379 (class 2606 OID 24623)
+-- TOC entry 3382 (class 2606 OID 24623)
 -- Name: results pk_results; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1602,7 +1832,7 @@ ALTER TABLE ONLY public.results
 
 
 --
--- TOC entry 3386 (class 2606 OID 24633)
+-- TOC entry 3389 (class 2606 OID 24633)
 -- Name: stat pk_stat; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1611,7 +1841,7 @@ ALTER TABLE ONLY public.stat
 
 
 --
--- TOC entry 3390 (class 2606 OID 24646)
+-- TOC entry 3393 (class 2606 OID 24646)
 -- Name: steps pk_steps; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1620,7 +1850,7 @@ ALTER TABLE ONLY public.steps
 
 
 --
--- TOC entry 3394 (class 2606 OID 24657)
+-- TOC entry 3397 (class 2606 OID 24657)
 -- Name: tests pk_tests; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1629,7 +1859,7 @@ ALTER TABLE ONLY public.tests
 
 
 --
--- TOC entry 3419 (class 2606 OID 24720)
+-- TOC entry 3423 (class 2606 OID 24720)
 -- Name: users pk_users; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1638,7 +1868,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3431 (class 2606 OID 24890)
+-- TOC entry 3435 (class 2606 OID 24890)
 -- Name: test_answers test_answers_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1647,7 +1877,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3426 (class 2606 OID 24872)
+-- TOC entry 3430 (class 2606 OID 24872)
 -- Name: test_attempts test_attempts_id_test_id_user_start_time_key; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1656,7 +1886,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3428 (class 2606 OID 24870)
+-- TOC entry 3432 (class 2606 OID 24870)
 -- Name: test_attempts test_attempts_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1665,7 +1895,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3424 (class 2606 OID 24851)
+-- TOC entry 3428 (class 2606 OID 24851)
 -- Name: user_material_progress user_material_progress_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1674,7 +1904,7 @@ ALTER TABLE ONLY public.user_material_progress
 
 
 --
--- TOC entry 3388 (class 1259 OID 24648)
+-- TOC entry 3391 (class 1259 OID 24648)
 -- Name: also_include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1682,7 +1912,7 @@ CREATE INDEX also_include_fk ON public.steps USING btree (id_lesson);
 
 
 --
--- TOC entry 3360 (class 1259 OID 24585)
+-- TOC entry 3363 (class 1259 OID 24585)
 -- Name: answer_options_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1690,7 +1920,7 @@ CREATE UNIQUE INDEX answer_options_pk ON public.answer_options USING btree (id_o
 
 
 --
--- TOC entry 3364 (class 1259 OID 24594)
+-- TOC entry 3367 (class 1259 OID 24594)
 -- Name: answers_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1698,7 +1928,7 @@ CREATE UNIQUE INDEX answers_pk ON public.answers USING btree (id_answer);
 
 
 --
--- TOC entry 3365 (class 1259 OID 24596)
+-- TOC entry 3368 (class 1259 OID 24596)
 -- Name: asnwers_to_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1706,7 +1936,7 @@ CREATE INDEX asnwers_to_fk ON public.answers USING btree (id_user);
 
 
 --
--- TOC entry 3366 (class 1259 OID 24595)
+-- TOC entry 3369 (class 1259 OID 24595)
 -- Name: assume_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1714,7 +1944,7 @@ CREATE INDEX assume_fk ON public.answers USING btree (id_question);
 
 
 --
--- TOC entry 3396 (class 1259 OID 24669)
+-- TOC entry 3399 (class 1259 OID 24669)
 -- Name: code_tasks_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1722,7 +1952,7 @@ CREATE UNIQUE INDEX code_tasks_pk ON public.code_tasks USING btree (id_ct);
 
 
 --
--- TOC entry 3382 (class 1259 OID 24637)
+-- TOC entry 3385 (class 1259 OID 24637)
 -- Name: counts_from_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1730,7 +1960,7 @@ CREATE INDEX counts_from_fk ON public.stat USING btree (id_result);
 
 
 --
--- TOC entry 3400 (class 1259 OID 24680)
+-- TOC entry 3404 (class 1259 OID 24680)
 -- Name: course_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1738,7 +1968,7 @@ CREATE UNIQUE INDEX course_pk ON public.course USING btree (id_course);
 
 
 --
--- TOC entry 3403 (class 1259 OID 24687)
+-- TOC entry 3407 (class 1259 OID 24687)
 -- Name: create_passes2_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1746,7 +1976,7 @@ CREATE INDEX create_passes2_fk ON public.create_passes USING btree (id_user);
 
 
 --
--- TOC entry 3404 (class 1259 OID 24688)
+-- TOC entry 3408 (class 1259 OID 24688)
 -- Name: create_passes_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1754,7 +1984,7 @@ CREATE INDEX create_passes_fk ON public.create_passes USING btree (id_course);
 
 
 --
--- TOC entry 3405 (class 1259 OID 24686)
+-- TOC entry 3409 (class 1259 OID 24686)
 -- Name: create_passes_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1762,7 +1992,7 @@ CREATE UNIQUE INDEX create_passes_pk ON public.create_passes USING btree (id_cou
 
 
 --
--- TOC entry 3409 (class 1259 OID 24698)
+-- TOC entry 3413 (class 1259 OID 24698)
 -- Name: feedback_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1770,7 +2000,7 @@ CREATE UNIQUE INDEX feedback_pk ON public.feedback USING btree (id_feedback);
 
 
 --
--- TOC entry 3383 (class 1259 OID 24636)
+-- TOC entry 3386 (class 1259 OID 24636)
 -- Name: goes_into_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1778,7 +2008,7 @@ CREATE INDEX goes_into_fk ON public.stat USING btree (id_course);
 
 
 --
--- TOC entry 3377 (class 1259 OID 24625)
+-- TOC entry 3380 (class 1259 OID 24625)
 -- Name: goes_to_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1786,7 +2016,7 @@ CREATE INDEX goes_to_fk ON public.results USING btree (id_answer);
 
 
 --
--- TOC entry 3410 (class 1259 OID 24699)
+-- TOC entry 3414 (class 1259 OID 24699)
 -- Name: has_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1794,7 +2024,7 @@ CREATE INDEX has_fk ON public.feedback USING btree (id_course);
 
 
 --
--- TOC entry 3384 (class 1259 OID 24635)
+-- TOC entry 3387 (class 1259 OID 24635)
 -- Name: has_in_courses_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1802,7 +2032,15 @@ CREATE INDEX has_in_courses_fk ON public.stat USING btree (id_user);
 
 
 --
--- TOC entry 3406 (class 1259 OID 24845)
+-- TOC entry 3400 (class 1259 OID 33057)
+-- Name: idx_code_tasks_language; Type: INDEX; Schema: public; Owner: pguser
+--
+
+CREATE INDEX idx_code_tasks_language ON public.code_tasks USING btree (language);
+
+
+--
+-- TOC entry 3410 (class 1259 OID 24845)
 -- Name: idx_create_passes_date_complete; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1810,7 +2048,7 @@ CREATE INDEX idx_create_passes_date_complete ON public.create_passes USING btree
 
 
 --
--- TOC entry 3429 (class 1259 OID 24906)
+-- TOC entry 3433 (class 1259 OID 24906)
 -- Name: idx_test_answers_attempt; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1818,7 +2056,7 @@ CREATE INDEX idx_test_answers_attempt ON public.test_answers USING btree (id_att
 
 
 --
--- TOC entry 3413 (class 1259 OID 24710)
+-- TOC entry 3417 (class 1259 OID 24710)
 -- Name: include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1826,7 +2064,7 @@ CREATE INDEX include_fk ON public.lessons USING btree (id_course);
 
 
 --
--- TOC entry 3414 (class 1259 OID 24709)
+-- TOC entry 3418 (class 1259 OID 24709)
 -- Name: lessons_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1834,7 +2072,7 @@ CREATE UNIQUE INDEX lessons_pk ON public.lessons USING btree (id_lesson);
 
 
 --
--- TOC entry 3369 (class 1259 OID 24909)
+-- TOC entry 3372 (class 1259 OID 24909)
 -- Name: material_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1842,7 +2080,7 @@ CREATE UNIQUE INDEX material_pk ON public.material USING btree (id_material);
 
 
 --
--- TOC entry 3392 (class 1259 OID 24659)
+-- TOC entry 3395 (class 1259 OID 24659)
 -- Name: may_also_include2_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1850,7 +2088,7 @@ CREATE INDEX may_also_include2_fk ON public.tests USING btree (id_step);
 
 
 --
--- TOC entry 3370 (class 1259 OID 24605)
+-- TOC entry 3373 (class 1259 OID 24605)
 -- Name: may_include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1858,7 +2096,7 @@ CREATE INDEX may_include_fk ON public.material USING btree (id_step);
 
 
 --
--- TOC entry 3373 (class 1259 OID 24616)
+-- TOC entry 3376 (class 1259 OID 24616)
 -- Name: mean_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1866,7 +2104,7 @@ CREATE INDEX mean_fk ON public.questions USING btree (id_test);
 
 
 --
--- TOC entry 3397 (class 1259 OID 24670)
+-- TOC entry 3401 (class 1259 OID 24670)
 -- Name: might_include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1874,7 +2112,7 @@ CREATE INDEX might_include_fk ON public.code_tasks USING btree (id_question);
 
 
 --
--- TOC entry 3361 (class 1259 OID 24586)
+-- TOC entry 3364 (class 1259 OID 24586)
 -- Name: must_have_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1882,7 +2120,7 @@ CREATE INDEX must_have_fk ON public.answer_options USING btree (id_question);
 
 
 --
--- TOC entry 3417 (class 1259 OID 24711)
+-- TOC entry 3421 (class 1259 OID 24711)
 -- Name: procent_pass_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1890,7 +2128,7 @@ CREATE INDEX procent_pass_fk ON public.lessons USING btree (id_stat);
 
 
 --
--- TOC entry 3376 (class 1259 OID 24615)
+-- TOC entry 3379 (class 1259 OID 24615)
 -- Name: questions_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1898,7 +2136,7 @@ CREATE UNIQUE INDEX questions_pk ON public.questions USING btree (id_question);
 
 
 --
--- TOC entry 3380 (class 1259 OID 24624)
+-- TOC entry 3383 (class 1259 OID 24624)
 -- Name: results_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1906,7 +2144,7 @@ CREATE UNIQUE INDEX results_pk ON public.results USING btree (id_result);
 
 
 --
--- TOC entry 3387 (class 1259 OID 24634)
+-- TOC entry 3390 (class 1259 OID 24634)
 -- Name: stat_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1914,7 +2152,7 @@ CREATE UNIQUE INDEX stat_pk ON public.stat USING btree (id_stat);
 
 
 --
--- TOC entry 3381 (class 1259 OID 24626)
+-- TOC entry 3384 (class 1259 OID 24626)
 -- Name: stats_in_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1922,7 +2160,7 @@ CREATE INDEX stats_in_fk ON public.results USING btree (id_test);
 
 
 --
--- TOC entry 3391 (class 1259 OID 24647)
+-- TOC entry 3394 (class 1259 OID 24647)
 -- Name: steps_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1930,7 +2168,7 @@ CREATE UNIQUE INDEX steps_pk ON public.steps USING btree (id_step);
 
 
 --
--- TOC entry 3395 (class 1259 OID 24658)
+-- TOC entry 3398 (class 1259 OID 24658)
 -- Name: tests_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1938,7 +2176,7 @@ CREATE UNIQUE INDEX tests_pk ON public.tests USING btree (id_test);
 
 
 --
--- TOC entry 3420 (class 1259 OID 24721)
+-- TOC entry 3424 (class 1259 OID 24721)
 -- Name: users_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -1946,7 +2184,7 @@ CREATE UNIQUE INDEX users_pk ON public.users USING btree (id_user);
 
 
 --
--- TOC entry 3452 (class 2606 OID 24833)
+-- TOC entry 3456 (class 2606 OID 24833)
 -- Name: certificates certificates_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1955,7 +2193,7 @@ ALTER TABLE ONLY public.certificates
 
 
 --
--- TOC entry 3453 (class 2606 OID 24828)
+-- TOC entry 3457 (class 2606 OID 24828)
 -- Name: certificates certificates_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1964,7 +2202,7 @@ ALTER TABLE ONLY public.certificates
 
 
 --
--- TOC entry 3432 (class 2606 OID 24722)
+-- TOC entry 3436 (class 2606 OID 24722)
 -- Name: answer_options fk_answer_o_must_have_question; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1973,7 +2211,7 @@ ALTER TABLE ONLY public.answer_options
 
 
 --
--- TOC entry 3433 (class 2606 OID 24727)
+-- TOC entry 3437 (class 2606 OID 24727)
 -- Name: answers fk_answers_asnwers_t_users; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1982,7 +2220,7 @@ ALTER TABLE ONLY public.answers
 
 
 --
--- TOC entry 3434 (class 2606 OID 24732)
+-- TOC entry 3438 (class 2606 OID 24732)
 -- Name: answers fk_answers_assume_question; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -1991,7 +2229,7 @@ ALTER TABLE ONLY public.answers
 
 
 --
--- TOC entry 3445 (class 2606 OID 24782)
+-- TOC entry 3449 (class 2606 OID 24782)
 -- Name: code_tasks fk_code_tas_might_inc_question; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2000,7 +2238,7 @@ ALTER TABLE ONLY public.code_tasks
 
 
 --
--- TOC entry 3446 (class 2606 OID 24787)
+-- TOC entry 3450 (class 2606 OID 24787)
 -- Name: create_passes fk_create_p_create_pa_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2009,7 +2247,7 @@ ALTER TABLE ONLY public.create_passes
 
 
 --
--- TOC entry 3447 (class 2606 OID 24792)
+-- TOC entry 3451 (class 2606 OID 24792)
 -- Name: create_passes fk_create_p_create_pa_users; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2018,7 +2256,7 @@ ALTER TABLE ONLY public.create_passes
 
 
 --
--- TOC entry 3448 (class 2606 OID 24797)
+-- TOC entry 3452 (class 2606 OID 24797)
 -- Name: feedback fk_feedback_has_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2027,7 +2265,7 @@ ALTER TABLE ONLY public.feedback
 
 
 --
--- TOC entry 3449 (class 2606 OID 24815)
+-- TOC entry 3453 (class 2606 OID 24815)
 -- Name: feedback fk_feedback_user; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2036,7 +2274,7 @@ ALTER TABLE ONLY public.feedback
 
 
 --
--- TOC entry 3450 (class 2606 OID 24802)
+-- TOC entry 3454 (class 2606 OID 24802)
 -- Name: lessons fk_lessons_include_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2045,7 +2283,7 @@ ALTER TABLE ONLY public.lessons
 
 
 --
--- TOC entry 3451 (class 2606 OID 24807)
+-- TOC entry 3455 (class 2606 OID 24807)
 -- Name: lessons fk_lessons_procent_p_stat; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2054,7 +2292,7 @@ ALTER TABLE ONLY public.lessons
 
 
 --
--- TOC entry 3435 (class 2606 OID 24737)
+-- TOC entry 3439 (class 2606 OID 24737)
 -- Name: material fk_material_may_inclu_steps; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2063,7 +2301,7 @@ ALTER TABLE ONLY public.material
 
 
 --
--- TOC entry 3436 (class 2606 OID 24742)
+-- TOC entry 3440 (class 2606 OID 24742)
 -- Name: questions fk_question_mean_tests; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2072,7 +2310,7 @@ ALTER TABLE ONLY public.questions
 
 
 --
--- TOC entry 3437 (class 2606 OID 24747)
+-- TOC entry 3441 (class 2606 OID 24747)
 -- Name: results fk_results_goes_to_answers; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2081,7 +2319,7 @@ ALTER TABLE ONLY public.results
 
 
 --
--- TOC entry 3438 (class 2606 OID 24752)
+-- TOC entry 3442 (class 2606 OID 24752)
 -- Name: results fk_results_stats_in_tests; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2090,7 +2328,7 @@ ALTER TABLE ONLY public.results
 
 
 --
--- TOC entry 3440 (class 2606 OID 24757)
+-- TOC entry 3444 (class 2606 OID 24757)
 -- Name: stat fk_stat_counts_fr_results; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2099,7 +2337,7 @@ ALTER TABLE ONLY public.stat
 
 
 --
--- TOC entry 3441 (class 2606 OID 24762)
+-- TOC entry 3445 (class 2606 OID 24762)
 -- Name: stat fk_stat_goes_into_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2108,7 +2346,7 @@ ALTER TABLE ONLY public.stat
 
 
 --
--- TOC entry 3442 (class 2606 OID 24767)
+-- TOC entry 3446 (class 2606 OID 24767)
 -- Name: stat fk_stat_has_in_co_users; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2117,7 +2355,7 @@ ALTER TABLE ONLY public.stat
 
 
 --
--- TOC entry 3443 (class 2606 OID 24772)
+-- TOC entry 3447 (class 2606 OID 24772)
 -- Name: steps fk_steps_also_incl_lessons; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2126,7 +2364,7 @@ ALTER TABLE ONLY public.steps
 
 
 --
--- TOC entry 3444 (class 2606 OID 24777)
+-- TOC entry 3448 (class 2606 OID 24777)
 -- Name: tests fk_tests_may_also__steps; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2135,7 +2373,7 @@ ALTER TABLE ONLY public.tests
 
 
 --
--- TOC entry 3439 (class 2606 OID 24840)
+-- TOC entry 3443 (class 2606 OID 24840)
 -- Name: results results_answer_fk; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2144,7 +2382,7 @@ ALTER TABLE ONLY public.results
 
 
 --
--- TOC entry 3458 (class 2606 OID 24891)
+-- TOC entry 3462 (class 2606 OID 24891)
 -- Name: test_answers test_answers_id_attempt_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2153,7 +2391,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3459 (class 2606 OID 24896)
+-- TOC entry 3463 (class 2606 OID 24896)
 -- Name: test_answers test_answers_id_question_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2162,7 +2400,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3460 (class 2606 OID 24901)
+-- TOC entry 3464 (class 2606 OID 24901)
 -- Name: test_answers test_answers_id_selected_option_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2171,7 +2409,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3456 (class 2606 OID 24873)
+-- TOC entry 3460 (class 2606 OID 24873)
 -- Name: test_attempts test_attempts_id_test_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2180,7 +2418,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3457 (class 2606 OID 24878)
+-- TOC entry 3461 (class 2606 OID 24878)
 -- Name: test_attempts test_attempts_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2189,7 +2427,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3454 (class 2606 OID 24857)
+-- TOC entry 3458 (class 2606 OID 24857)
 -- Name: user_material_progress user_material_progress_id_step_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2198,7 +2436,7 @@ ALTER TABLE ONLY public.user_material_progress
 
 
 --
--- TOC entry 3455 (class 2606 OID 24852)
+-- TOC entry 3459 (class 2606 OID 24852)
 -- Name: user_material_progress user_material_progress_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2206,7 +2444,7 @@ ALTER TABLE ONLY public.user_material_progress
     ADD CONSTRAINT user_material_progress_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.users(id_user);
 
 
--- Completed on 2025-06-04 13:47:19
+-- Completed on 2025-06-05 13:08:47
 
 --
 -- PostgreSQL database dump complete

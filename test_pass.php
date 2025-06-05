@@ -1,4 +1,7 @@
 <?php
+require 'vendor/autoload.php';
+Dotenv\Dotenv::createUnsafeImmutable(__DIR__)->load();
+
 require_once 'config.php';
 redirect_unauthenticated();
 
@@ -10,113 +13,142 @@ redirect_unauthenticated();
  * @return array Result with output, error, and success status
  */
 function execute_code_for_validation($code, $code_task) {
-    // Prepare data for code execution
-    $data = [
-        'code' => $code,
-        'language' => $code_task['language'],
-        'input' => $code_task['input_ct'],
-        'timeout' => $code_task['execution_timeout'] ?? 5
+    $pdo = get_db_connection();
+    $stmt = $pdo->prepare("SELECT text_question FROM Questions WHERE id_question = ?");
+    $stmt->execute([$code_task['id_question']]);
+    $question = $stmt->fetch();
+    $task_description = $question ? $question['text_question'] : '';
+    
+    // Логируем начало проверки
+    error_log("Начало проверки кода для задания ID: " . $code_task['id_question']);
+
+    // Выполняем код (если нужно) и получаем вывод
+    $actual_output = '';
+    
+    // Формируем промпт для YandexGPT
+    $prompt = "Задание: $task_description\n" .
+              "Код студента:\n$code\n" .
+              ($code_task['template_code'] ? "Ожидаемый шаблон кода:\n{$code_task['template_code']}\n" : "") .
+              ($code_task['output_ct'] ? "Ожидаемый вывод: {$code_task['output_ct']}\n" : "") .
+              ($actual_output ? "Фактический вывод: $actual_output\n" : "") .
+              "\nПроверь, правильно ли решена задача. Ответ должен начинаться со слова ПРАВИЛЬНО или НЕПРАВИЛЬНО (с большой буквы), затем дай краткое объяснение. Ответь строго в формате JSON: {\"is_correct\": true/false, \"feedback\": \"ПРАВИЛЬНО/НЕПРАВИЛЬНО: объяснение\"}.";
+    
+    error_log("Сформирован промпт для YandexGPT: " . substr($prompt, 0, 100) . "...");
+    
+    // Отправляем запрос к YandexGPT
+    $api_key = getenv('API_KEY');
+    
+    if (!$api_key) {
+        error_log("API_KEY не найден в переменных окружения");
+        return [
+            'output' => $actual_output,
+            'ai_feedback' => "Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.",
+            'ai_feedback_error' => "API_KEY не найден в переменных окружения",
+            'ai_is_correct' => false,
+            'output_matches' => (trim($actual_output) === trim($code_task['output_ct'])),
+            'success' => (trim($actual_output) === trim($code_task['output_ct']))
+        ];
+    }
+    
+    $api_data = [
+        "modelUri" => "gpt://b1gr2hqj20frbeet0cet/yandexgpt-lite",
+        "completionOptions" => [
+            "stream" => false,
+            "temperature" => 0.1,
+            "maxTokens" => 512
+        ],
+        "messages" => [
+            [
+                "role" => "user",
+                "text" => $prompt
+            ]
+        ]
     ];
     
-    // Call code_executor.php using cURL
-    $ch = curl_init('http://' . $_SERVER['HTTP_HOST'] . '/code_executor.php');
+    error_log("Отправляем запрос к YandexGPT API");
+    
+    $url = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion';
+    $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($api_data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json'
+        'Content-Type: application/json',
+        'Authorization: Api-Key ' . $api_key
     ]);
-    curl_setopt($ch, CURLOPT_COOKIE, session_name() . '=' . session_id());
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     
     $response = curl_exec($ch);
     $info = curl_getinfo($ch);
+    $curl_error = curl_error($ch);
     curl_close($ch);
     
-    if ($info['http_code'] !== 200) {
-        return [
-            'output' => '',
-            'error' => 'Error executing code: HTTP ' . $info['http_code'],
-            'success' => false
-        ];
-    }
+    error_log("Получен ответ от YandexGPT API: HTTP " . $info['http_code']);
     
-    $result = json_decode($response, true);
-    if (!$result) {
-        return [
-            'output' => '',
-            'error' => 'Error parsing response from code executor',
-            'success' => false
-        ];
-    }
+    // Значения по умолчанию
+    $ai_feedback = "Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.";
+    $ai_is_correct = false;
+    $ai_feedback_error = null;
     
-    // Базовая проверка на соответствие ожидаемому выводу
-    $output_matches = trim($result['output']) === trim($code_task['output_ct']);
-    $result['success'] = $output_matches;
-    
-    // Если вывод соответствует ожидаемому, запускаем AI-проверку
-    if ($output_matches) {
-        // Получаем описание задачи из вопроса
-        $pdo = get_db_connection();
-        $stmt = $pdo->prepare("SELECT text_question FROM Questions WHERE id_question = ?");
-        $stmt->execute([$code_task['id_question']]);
-        $question = $stmt->fetch();
-        $task_description = $question ? $question['text_question'] : '';
+    // Обрабатываем ответ YandexGPT
+    if ($info['http_code'] === 200) {
+        $result = json_decode($response, true);
         
-        // Подготовка данных для AI-проверки
-        $ai_review_data = [
-            'student_code' => $code,
-            'expected_code' => $code_task['template_code'] ?? '',
-            'language' => $code_task['language'],
-            'task_description' => $task_description,
-            'expected_output' => $code_task['output_ct'],
-            'actual_output' => $result['output']
-        ];
-        
-        // Вызываем AI-проверку
-        $ai_ch = curl_init('http://' . $_SERVER['HTTP_HOST'] . '/ai_code_reviewer.php');
-        curl_setopt($ai_ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ai_ch, CURLOPT_POST, true);
-        curl_setopt($ai_ch, CURLOPT_POSTFIELDS, json_encode($ai_review_data));
-        curl_setopt($ai_ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json'
-        ]);
-        curl_setopt($ai_ch, CURLOPT_COOKIE, session_name() . '=' . session_id());
-        curl_setopt($ai_ch, CURLOPT_TIMEOUT, 10); // Уменьшаем таймаут до 10 секунд
-        
-        $ai_response = curl_exec($ai_ch);
-        $ai_info = curl_getinfo($ai_ch);
-        curl_close($ai_ch);
-        
-        // Логируем ответ AI для отладки
-        error_log("AI response status: " . $ai_info['http_code']);
-        error_log("AI response: " . substr($ai_response, 0, 1000)); // Логируем только первую 1000 символов
-        
-        // Инициализируем переменные для отзыва
-        $ai_feedback = "Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.";
-        $ai_is_correct = $output_matches; // По умолчанию используем результат сравнения вывода
-        
-        // Пытаемся получить отзыв от API
-        if ($ai_info['http_code'] === 200) {
-            $ai_result = json_decode($ai_response, true);
-            if ($ai_result && isset($ai_result['feedback'])) {
+        if (isset($result['result']['alternatives'][0]['message']['text'])) {
+            $gpt_text = $result['result']['alternatives'][0]['message']['text'];
+            error_log("Текст ответа YandexGPT: " . $gpt_text);
+            
+            // Очищаем текст от обратных кавычек и маркеров форматирования
+            $cleaned_text = preg_replace('/```(?:json)?\s*(.*?)\s*```/s', '$1', $gpt_text);
+            
+            // Пытаемся распарсить JSON из очищенного ответа
+            $ai_result = json_decode($cleaned_text, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // Если не удалось распарсить, попробуем найти JSON в тексте
+                if (preg_match('/\{.*"is_correct".*"feedback".*\}/s', $gpt_text, $matches)) {
+                    $json_text = $matches[0];
+                    $ai_result = json_decode($json_text, true);
+                }
+            }
+            
+            if (is_array($ai_result) && isset($ai_result['is_correct']) && isset($ai_result['feedback'])) {
                 $ai_feedback = $ai_result['feedback'];
-                $ai_is_correct = $ai_result['is_correct'] ?? $output_matches;
+                $ai_is_correct = $ai_result['is_correct'] ? true : false;
+                error_log("Анализ кода: is_correct=" . ($ai_is_correct ? "true" : "false"));
+            } else {
+                $ai_feedback_error = "Ошибка парсинга ответа YandexGPT";
+                error_log($ai_feedback_error . ": " . $gpt_text);
             }
         } else {
-            error_log("AI API error: HTTP " . $ai_info['http_code']);
+            $ai_feedback_error = "Неожиданный формат ответа YandexGPT";
+            error_log($ai_feedback_error . ": " . $response);
         }
-        
-        // Добавляем результат AI-проверки к результату выполнения, даже если был сбой
-        $result['ai_feedback'] = $ai_feedback;
-        $result['ai_is_correct'] = $ai_is_correct;
-        
-        // Если AI считает, что код неправильный, несмотря на совпадение вывода
-        if (!$ai_is_correct && $output_matches) {
-            $result['ai_warning'] = true;
-        }
+    } else {
+        $ai_feedback_error = "Ошибка YandexGPT: HTTP " . $info['http_code'];
+        if ($curl_error) $ai_feedback_error .= " (" . $curl_error . ")";
+        error_log($ai_feedback_error . ": " . $response);
     }
     
-    return $result;
+    // Проверяем соответствие выходных данных как запасной вариант
+    $output_matches = (trim($actual_output) === trim($code_task['output_ct']));
+    
+    // Если AI не смог дать оценку, используем соответствие выходных данных
+    if ($ai_feedback === "Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.") {
+        $ai_is_correct = $output_matches;
+        error_log("AI анализ недоступен, используем сравнение выходных данных: " . ($output_matches ? "совпадает" : "не совпадает"));
+    }
+    
+    return [
+        'output' => $actual_output,
+        'ai_feedback' => $ai_feedback,
+        'ai_feedback_error' => $ai_feedback_error,
+        'ai_is_correct' => $ai_is_correct,
+        'output_matches' => $output_matches,
+        'success' => $ai_is_correct || $output_matches
+    ];
 }
 
 $test_id = isset($_GET['test_id']) ? (int)$_GET['test_id'] : 0;
@@ -262,7 +294,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Завершение теста
-if ($is_finish || $question_index === -1) {
+if (
+    $is_finish || $question_index === -1
+) {
     // Проверяем, не проходил ли пользователь этот тест ранее
     $stmt = $pdo->prepare("SELECT * FROM test_attempts WHERE id_test = ? AND id_user = ? AND status = 'completed'");
     $stmt->execute([$test_id, $user_id]);
@@ -274,10 +308,13 @@ if ($is_finish || $question_index === -1) {
     // Считаем результат
     $correct = 0;
     $details = [];
+    $ai_pending = false;
+    $ai_errors = [];
     foreach ($questions as $i => $q) {
         $type = $q['type_question'];
         $user_answer = $_SESSION['test_answers'][$test_id][$i];
-        $is_right = false;
+        $is_right = isset($details[$i]['is_right']) ? $details[$i]['is_right'] : false;
+        $is_right_bool = $is_right ? true : false;
         if ($user_answer === null || $user_answer === '' || $user_answer === []) {
             $is_right = false;
         } else {
@@ -305,21 +342,32 @@ if ($is_finish || $question_index === -1) {
                 ");
                 $stmt->execute([$q['id_question']]);
                 $code_task = $stmt->fetch();
-                
                 if ($code_task && !empty($user_answer)) {
                     // Execute the code to check if it produces the expected output
                     $result = execute_code_for_validation($user_answer, $code_task);
                     
+                    // Сохраняем все детали результата проверки
+                    $details[$i]['ai_feedback'] = $result['ai_feedback'] ?? 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.';
+                    $details[$i]['ai_feedback_error'] = $result['ai_feedback_error'] ?? null;
+                    $details[$i]['output_matches'] = $result['output_matches'] ?? false;
+                    
                     // Проверяем результат выполнения
                     if (isset($result['ai_feedback'])) {
-                        // Используем результат AI-проверки
                         $is_right = $result['success'] && $result['ai_is_correct'];
                         
-                        // Сохраняем отзыв AI для отображения в результатах
-                        $details[$i]['ai_feedback'] = $result['ai_feedback'];
+                        // Если не получили нормальный ответ от AI — помечаем как pending
+                        if ($result['ai_feedback'] === 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.' || 
+                            strpos($result['ai_feedback'], 'Ошибка AI:') !== false) {
+                            $ai_pending = true;
+                            $ai_errors[] = $i;
+                            error_log("Помечаем вопрос #$i как pending из-за ошибки AI: " . ($result['ai_feedback_error'] ?? 'неизвестная ошибка'));
+                        }
                     } else {
-                        // Используем стандартную проверку по выводу
-                        $is_right = $result['success'] && trim($result['output']) === trim($code_task['output_ct']);
+                        // Если не получили ответ от AI — помечаем как pending
+                        $ai_pending = true;
+                        $ai_errors[] = $i;
+                        error_log("Помечаем вопрос #$i как pending из-за отсутствия ответа AI");
+                        $is_right = $result['output_matches'] ?? (trim($result['output']) === trim($code_task['output_ct']));
                     }
                 } else {
                     $is_right = false;
@@ -327,13 +375,107 @@ if ($is_finish || $question_index === -1) {
             }
         }
         $details[] = [
-            'question' => $q['text_question'],
+            'question' => $q['text_question'] ?? '',
             'type' => $type,
             'user_answer' => $user_answer,
             'is_right' => $is_right,
-            'right' => $q['answer_question'],
+            'right' => $q['answer_question'] ?? '',
+            'ai_feedback' => $details[$i]['ai_feedback'] ?? ($ai_feedback ?? ''),
+            'ai_feedback_error' => $details[$i]['ai_feedback_error'] ?? null,
+            'output_matches' => $details[$i]['output_matches'] ?? false,
         ];
         if ($is_right) $correct++;
+    }
+    // Если есть хотя бы один незавершённый/ошибочный AI-запрос — не показываем результат
+    if ($ai_pending) {
+        $total_code = 0;
+        $checked_code = 0;
+        $error_msgs = [];
+        $pending_questions = [];
+        
+        foreach ($questions as $i => $q) {
+            if ($q['type_question'] === 'code') {
+                $total_code++;
+                if (isset($details[$i]['ai_feedback']) && 
+                    $details[$i]['ai_feedback'] !== 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.' && 
+                    strpos($details[$i]['ai_feedback'], 'Ошибка AI:') === false && 
+                    $details[$i]['ai_feedback'] !== '') {
+                    $checked_code++;
+                } else {
+                    $pending_questions[] = $i + 1; // Номера вопросов для пользователя начинаются с 1
+                    if (isset($details[$i]['ai_feedback_error']) && $details[$i]['ai_feedback_error']) {
+                        $error_msgs[] = 'Ошибка проверки задания #' . ($i+1) . ': ' . htmlspecialchars($details[$i]['ai_feedback_error']);
+                    }
+                }
+            }
+        }
+        
+        echo '<div class="ui info message" style="max-width:600px;margin:auto;margin-top:40px;">'
+            .'<b>Пожалуйста, подождите, идёт проверка всех заданий с кодом...</b><br>'
+            .'Не закрывайте вкладку. Проверка может занять до 30 секунд.<br><br>'
+            .'<div id="progress-bar-container" style="margin-top:20px;">'
+            .'<div class="ui indicating progress" id="ai-progress" data-total="' . $total_code . '" data-value="' . $checked_code . '" style="height:30px;">'
+            .'<div class="bar" style="transition-duration: 300ms; width: ' . ($total_code > 0 ? round($checked_code/$total_code*100) : 0) . '%;"></div>'
+            .'<div class="label" id="progress-label">Проверено ' . $checked_code . ' из ' . $total_code . '</div>'
+            .'</div>'
+            .'</div>';
+            
+        if (!empty($pending_questions)) {
+            echo '<div class="ui warning message" style="margin-top:20px;">';
+            echo '<b>Ожидают проверки задания:</b> #' . implode(', #', $pending_questions);
+            echo '</div>';
+        }
+        
+        if (!empty($error_msgs)) {
+            echo '<div class="ui error message" style="margin-top:20px;">';
+            echo '<b>Обнаружены ошибки при проверке:</b><ul>';
+            foreach ($error_msgs as $msg) echo '<li>' . $msg . '</li>';
+            echo '</ul></div>';
+        }
+        
+        echo '</div>';
+        echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>';
+        echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>';
+        echo '<script>';
+        echo 'function checkProgress() {';
+        echo '  $.get(window.location.href, {progress_check: 1}, function(data) {';
+        echo '    if (data && data.status === "done") {';
+        echo '      location.reload();';
+        echo '    } else if (data && data.status === "progress") {';
+        echo '      var checked = data.checked_code, total = data.total_code;';
+        echo '      var percent = total > 0 ? Math.round(checked/total*100) : 0;';
+        echo '      $("#ai-progress .bar").css("width", percent+"%");';
+        echo '      $("#progress-label").text("Проверено "+checked+" из "+total);';
+        
+        echo '      // Обновляем список ожидающих проверки заданий';
+        echo '      if (data.pending && data.pending.length > 0) {';
+        echo '        var pendingHtml = "<b>Ожидают проверки задания:</b> #" + data.pending.join(", #");';
+        echo '        if ($("#pending-tasks").length) { $("#pending-tasks").html(pendingHtml); } else { $("#progress-bar-container").after("<div class=\"ui warning message\" id=\"pending-tasks\" style=\"margin-top:20px;\">"+pendingHtml+"</div>"); }';
+        echo '      } else {';
+        echo '        $("#pending-tasks").remove();';
+        echo '      }';
+        
+        echo '      // Обновляем список ошибок';
+        echo '      if (data.errors && data.errors.length > 0) {';
+        echo '        var html = "<b>Обнаружены ошибки при проверке:</b><ul>";';
+        echo '        for (var i=0; i<data.errors.length; i++) html += "<li>"+data.errors[i]+"</li>";';
+        echo '        html += "</ul>";';
+        echo '        if ($("#ai-errors").length) { $("#ai-errors").html(html); } else { $("#progress-bar-container").after("<div class=\"ui error message\" id=\"ai-errors\" style=\"margin-top:20px;\">"+html+"</div>"); }';
+        echo '      } else {';
+        echo '        $("#ai-errors").remove();';
+        echo '      }';
+        
+        echo '      setTimeout(checkProgress, 3000);';
+        echo '    } else {';
+        echo '      setTimeout(checkProgress, 5000);';
+        echo '    }';
+        echo '  }, "json").fail(function() {';
+        echo '    setTimeout(checkProgress, 5000);'; // В случае ошибки запроса пробуем снова через 5 секунд
+        echo '  });';
+        echo '}';
+        echo 'checkProgress();';
+        echo '</script>';
+        exit;
     }
     $score = $correct;
     $max_score = $total_questions;
@@ -345,7 +487,7 @@ if ($is_finish || $question_index === -1) {
     foreach ($questions as $i => $q) {
         $type = $q['type_question'];
         $user_answer = $_SESSION['test_answers'][$test_id][$i];
-        $is_right = $details[$i]['is_right'];
+        $is_right = isset($details[$i]['is_right']) ? $details[$i]['is_right'] : false;
         $is_right_bool = $is_right ? true : false;
         // answer_text для сложных типов
         $answer_text = null;
@@ -440,131 +582,43 @@ if ($is_finish || $question_index === -1) {
     // Очищаем сессию
     unset($_SESSION['test_answers'][$test_id]);
     
-    // Принудительно добавляем отзыв ИИ для вопроса с ID 57 в тесте 23
-    if ($test_id == 23) {
-        try {
-            // Проверяем наличие отзыва ИИ для вопроса 57
-            $check_stmt = $pdo->prepare("
-                SELECT ta.id_answer, ta.ai_feedback 
-                FROM test_answers ta
-                JOIN test_attempts att ON ta.id_attempt = att.id_attempt
-                JOIN questions q ON ta.id_question = q.id_question
-                WHERE att.id_attempt = ? AND q.id_question = 57
-            ");
-            $check_stmt->execute([$id_attempt]);
-            $answer_row = $check_stmt->fetch();
-            
-            if ($answer_row) {
-                $feedback_text = "ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.";
-                
-                // Обновляем запись с отзывом ИИ
-                $update_stmt = $pdo->prepare("UPDATE test_answers SET ai_feedback = ? WHERE id_answer = ?");
-                $update_stmt->execute([$feedback_text, $answer_row['id_answer']]);
-                
-                error_log("Принудительно добавлен отзыв ИИ для вопроса 57 в тесте 23, id_attempt={$id_attempt}");
-            }
-        } catch (Exception $e) {
-            error_log("Ошибка при принудительном добавлении отзыва ИИ: " . $e->getMessage());
-        }
-    }
-    
-    // Показываем красивую страницу результата
+    // Показываем результаты теста
     ?><!DOCTYPE html>
     <html lang="ru">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Результат теста</title>
+        <title>Результаты теста</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
-        <!-- Monaco Editor -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
         <style>
-            .code-editor {
-                width: 100%;
-                min-height: 350px;
-                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-                font-size: 14px;
-                line-height: 1.5;
-                padding: 10px;
-                background-color: #282a36;
-                color: #f8f8f2;
-                border: 1px solid #44475a;
-                border-radius: 4px;
-                resize: vertical;
-                tab-size: 4;
-                -moz-tab-size: 4;
-                white-space: pre;
-                overflow-wrap: normal;
-                overflow-x: auto;
+            body {
+                background-color: #f9f9f9;
             }
             
-            .code-editor:focus {
-                outline: none;
-                border-color: #6272a4;
-                box-shadow: 0 0 0 2px rgba(98, 114, 164, 0.3);
+            .ui.container {
+                padding: 20px;
             }
             
-            .editor-toolbar {
-                margin-bottom: 10px;
-                display: flex;
-                justify-content: space-between;
+            .ui.segment {
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             }
             
-            .editor-toolbar .ui.button {
-                margin-right: 5px;
+            .ui.accordion .title {
+                padding: 15px;
             }
             
-            pre {
-                background-color: #f5f5f5;
-                padding: 10px;
-                border-radius: 4px;
-                overflow-x: auto;
-                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            }
-            
-            #code-output {
-                background-color: #282a36;
-                color: #f8f8f2;
-                padding: 10px;
-                border-radius: 4px;
-                white-space: pre-wrap;
-                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            }
-            
-            .light-theme {
-                background-color: #f8f8f2;
-                color: #282a36;
-                border-color: #ddd;
-            }
-            
-            #monaco-editor-container {
-                width: 100%;
-                height: 400px;
-                border: 1px solid #444;
-                border-radius: 4px;
-                overflow: hidden;
+            .ui.accordion .content {
+                padding: 15px;
             }
             
             .editor-toolbar {
                 background-color: #252526;
-                color: #cccccc;
                 padding: 5px 10px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                border-bottom: 1px solid #444;
-            }
-            
-            .editor-toolbar .title {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                font-size: 12px;
-                font-weight: 500;
-            }
-            
-            .editor-toolbar .buttons {
-                display: flex;
                 gap: 5px;
             }
             
@@ -687,34 +741,51 @@ if ($is_finish || $question_index === -1) {
                 <?php foreach ($details as $i => $d): ?>
                     <div class="title<?= $i === 0 ? ' active' : '' ?>">
                         <i class="dropdown icon"></i>
-                        Вопрос <?= $i+1 ?>: <?= htmlspecialchars(mb_strimwidth($d['question'], 0, 60, '...')) ?>
-                        <span class="ui <?= $d['is_right'] ? 'green' : 'red' ?> text" style="margin-left: 10px;">
-                            <?= $d['is_right'] ? 'Верно' : 'Неверно' ?>
+                        Вопрос <?= $i+1 ?>: <?= htmlspecialchars(mb_strimwidth(isset($d['question']) ? $d['question'] : 'Вопрос без текста', 0, 60, '...')) ?>
+                        <span class="ui <?= isset($d['is_right']) && $d['is_right'] ? 'green' : 'red' ?> text" style="margin-left: 10px;">
+                            <?= isset($d['is_right']) && $d['is_right'] ? 'Верно' : 'Неверно' ?>
                         </span>
                     </div>
                     <div class="content<?= $i === 0 ? ' active' : '' ?>">
-                        <p><b>Вопрос:</b> <?= htmlspecialchars($d['question']) ?></p>
-                        <?php if ($d['type'] === 'single' || $d['type'] === 'multi'): ?>
-                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(is_array($d['user_answer']) ? implode(", ", $d['user_answer']) : $d['user_answer']) ?></p>
-                            <p><b>Правильный ответ:</b> <?= htmlspecialchars($d['right']) ?></p>
-                        <?php elseif ($d['type'] === 'match'): ?>
-                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(json_encode($d['user_answer'], JSON_UNESCAPED_UNICODE)) ?></p>
-                        <?php elseif ($d['type'] === 'code'): ?>
+                        <p><b>Вопрос:</b> <?= htmlspecialchars(isset($d['question']) ? $d['question'] : 'Вопрос без текста') ?></p>
+                        <?php $type = isset($d['type']) ? $d['type'] : ''; ?>
+                        <?php if ($type === 'single' || $type === 'multi'): ?>
+                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(isset($d['user_answer']) ? (is_array($d['user_answer']) ? implode(", ", $d['user_answer']) : $d['user_answer']) : 'Нет ответа') ?></p>
+                            <p><b>Правильный ответ:</b> <?= htmlspecialchars(isset($d['right']) ? $d['right'] : 'Нет данных') ?></p>
+                        <?php elseif ($type === 'match'): ?>
+                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(isset($d['user_answer']) ? json_encode($d['user_answer'], JSON_UNESCAPED_UNICODE) : 'Нет ответа') ?></p>
+                        <?php elseif ($type === 'code'): ?>
                             <p><b>Ваш код:</b></p>
-                            <pre style="background-color: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars($d['user_answer']) ?></pre>
+                            <pre style="background-color: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars(isset($d['user_answer']) ? $d['user_answer'] : '') ?></pre>
                             
                             <?php if (isset($d['ai_feedback'])): ?>
-                                <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid #007acc;">
-                                    <h4 style="color: #007acc;">
-                                        <i class="comment alternate outline icon"></i> Анализ кода от ИИ:
+                                <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? '#db2828' : '#007acc' ?>;">
+                                    <h4 style="color: <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? '#db2828' : '#007acc' ?>;">
+                                        <i class="<?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? 'exclamation triangle' : 'comment alternate outline' ?> icon"></i> 
+                                        <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? 'Ошибка проверки кода:' : 'Анализ кода от ИИ:' ?>
                                     </h4>
                                     <div style="padding: 10px; background-color: #f8f8f8; border-radius: 4px; margin-top: 10px;">
                                         <?= nl2br(htmlspecialchars($d['ai_feedback'])) ?>
                                     </div>
+                                    
+                                    <?php if ($d['ai_feedback'] === 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.'): ?>
+                                        <div style="margin-top: 10px; padding: 10px; background-color: #fffaf3; border-left: 4px solid #f2711c; border-radius: 4px;">
+                                            <i class="info circle icon"></i>
+                                            Код проверен по соответствию выходных данных: 
+                                            <b><?= isset($d['output_matches']) && $d['output_matches'] ? 'Выходные данные совпадают' : 'Выходные данные не совпадают' ?></b>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (isset($d['ai_feedback_error']) && $d['ai_feedback_error']): ?>
+                                        <div style="margin-top: 10px; padding: 10px; background-color: #fff6f6; border-left: 4px solid #db2828; border-radius: 4px;">
+                                            <i class="exclamation triangle icon"></i>
+                                            <b>Детали ошибки:</b> <?= htmlspecialchars($d['ai_feedback_error']) ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             <?php else: ?>
-                                <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid #007acc;">
-                                    <h4 style="color: #007acc;">
+                                <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid #f2711c;">
+                                    <h4 style="color: #f2711c;">
                                         <i class="comment alternate outline icon"></i> Анализ кода от ИИ:
                                     </h4>
                                     <div style="padding: 10px; background-color: #f8f8f8; border-radius: 4px; margin-top: 10px;">
@@ -755,6 +826,87 @@ $answered_count = 0;
 foreach ($_SESSION['test_answers'][$test_id] as $ans) {
     if ($ans !== null && $ans !== '' && $ans !== []) $answered_count++;
 }
+
+// AJAX endpoint для прогресса проверки кода
+if (isset($_GET['progress_check'])) {
+    $total_code = 0;
+    $checked_code = 0;
+    $error_msgs = [];
+    $pending_questions = [];
+    
+    header('Content-Type: application/json');
+    
+    // Получаем все вопросы теста
+    $stmt = $pdo->prepare("SELECT * FROM Questions WHERE id_test = ? ORDER BY id_question");
+    $stmt->execute([$test_id]);
+    $questions = $stmt->fetchAll();
+    
+    // Проверяем статус каждого вопроса с кодом
+    foreach ($questions as $i => $q) {
+        if ($q['type_question'] === 'code') {
+            $total_code++;
+            $user_answer = $_SESSION['test_answers'][$test_id][$i] ?? null;
+            
+            if (!$user_answer) {
+                continue; // Нет ответа на этот вопрос
+            }
+            
+            // Получаем задание с кодом
+            $stmt = $pdo->prepare("SELECT * FROM code_tasks WHERE id_question = ?");
+            $stmt->execute([$q['id_question']]);
+            $code_task = $stmt->fetch();
+            
+            if (!$code_task) {
+                continue; // Нет задания с кодом для этого вопроса
+            }
+            
+            // Повторно выполняем проверку кода
+            $result = execute_code_for_validation($user_answer, $code_task);
+            
+            // Обновляем детали результата
+            $details[$i]['ai_feedback'] = $result['ai_feedback'] ?? 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.';
+            $details[$i]['ai_feedback_error'] = $result['ai_feedback_error'] ?? null;
+            $details[$i]['output_matches'] = $result['output_matches'] ?? false;
+            $details[$i]['ai_is_correct'] = $result['ai_is_correct'] ?? false;
+            
+            // Проверяем, завершена ли проверка AI
+            if (isset($result['ai_feedback']) && 
+                $result['ai_feedback'] !== 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.' && 
+                strpos($result['ai_feedback'], 'Ошибка AI:') === false && 
+                $result['ai_feedback'] !== '') {
+                $checked_code++;
+            } else {
+                $pending_questions[] = $i + 1; // Номера вопросов для пользователя начинаются с 1
+                
+                if (isset($result['ai_feedback_error']) && $result['ai_feedback_error']) {
+                    $error_msgs[] = 'Ошибка проверки задания #' . ($i+1) . ': ' . $result['ai_feedback_error'];
+                }
+            }
+        }
+    }
+    
+    // Если все проверки завершены - возвращаем статус "done"
+    if ($checked_code >= $total_code || empty($pending_questions)) {
+        echo json_encode([
+            'status' => 'done',
+            'checked_code' => $checked_code,
+            'total_code' => $total_code,
+            'errors' => $error_msgs
+        ]);
+        exit;
+    }
+    
+    // Иначе возвращаем статус "progress"
+    echo json_encode([
+        'status' => 'progress',
+        'checked_code' => $checked_code,
+        'total_code' => $total_code,
+        'pending' => $pending_questions,
+        'errors' => $error_msgs
+    ]);
+    exit;
+}
+
 ?><!DOCTYPE html>
 <html lang="ru">
 <head>

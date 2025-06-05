@@ -363,6 +363,18 @@ try {
                                                     </div>
                                                 <?php endif; ?>
                                             </div>
+                                            
+                                            <?php if (is_admin() || is_teacher()): ?>
+                                                <?php if (!empty($answer['ai_feedback'])): ?>
+                                                <div class="ui segment">
+                                                    <h5>Комментарий ИИ:</h5>
+                                                    <div style="background-color: #f9f9f9; padding: 10px; border-radius: 4px; border-left: 3px solid #2185d0;">
+                                                        <?= nl2br(htmlspecialchars($answer['ai_feedback'])) ?>
+                                                    </div>
+                                                </div>
+                                                <?php endif; ?>
+                                            <?php endif; ?>
+                                            
                                             <p> <!-- Открываем новый тег <p> для продолжения -->
                                         <?php
                                         } else {
