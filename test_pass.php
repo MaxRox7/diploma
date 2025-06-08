@@ -311,10 +311,22 @@ if (
     $ai_pending = false;
     $ai_errors = [];
     foreach ($questions as $i => $q) {
+        // Initialize the details entry for this question first
+        $details[$i] = [
+            'question' => $q['text_question'] ?? '',
+            'type' => $q['type_question'],
+            'user_answer' => $_SESSION['test_answers'][$test_id][$i],
+            'is_right' => false,
+            'right' => $q['answer_question'] ?? '',
+            'ai_feedback' => '',
+            'ai_feedback_error' => null,
+            'output_matches' => false,
+        ];
+        
         $type = $q['type_question'];
         $user_answer = $_SESSION['test_answers'][$test_id][$i];
-        $is_right = isset($details[$i]['is_right']) ? $details[$i]['is_right'] : false;
-        $is_right_bool = $is_right ? true : false;
+        $is_right = false;
+        
         if ($user_answer === null || $user_answer === '' || $user_answer === []) {
             $is_right = false;
         } else {
@@ -374,16 +386,10 @@ if (
                 }
             }
         }
-        $details[] = [
-            'question' => $q['text_question'] ?? '',
-            'type' => $type,
-            'user_answer' => $user_answer,
-            'is_right' => $is_right,
-            'right' => $q['answer_question'] ?? '',
-            'ai_feedback' => $details[$i]['ai_feedback'] ?? ($ai_feedback ?? ''),
-            'ai_feedback_error' => $details[$i]['ai_feedback_error'] ?? null,
-            'output_matches' => $details[$i]['output_matches'] ?? false,
-        ];
+        
+        // Update the is_right value in the details array
+        $details[$i]['is_right'] = $is_right;
+        
         if ($is_right) $correct++;
     }
     // Если есть хотя бы один незавершённый/ошибочный AI-запрос — не показываем результат
@@ -478,7 +484,7 @@ if (
         exit;
     }
     $score = $correct;
-    $max_score = $total_questions;
+    $max_score = count($details);
     // Создаём новую попытку
     $stmt = $pdo->prepare("INSERT INTO test_attempts (id_test, id_user, score, max_score, status, end_time) VALUES (?, ?, ?, ?, 'completed', NOW()) RETURNING id_attempt");
     $stmt->execute([$test_id, $user_id, $score, $max_score]);
@@ -487,8 +493,8 @@ if (
     foreach ($questions as $i => $q) {
         $type = $q['type_question'];
         $user_answer = $_SESSION['test_answers'][$test_id][$i];
-        $is_right = isset($details[$i]['is_right']) ? $details[$i]['is_right'] : false;
-        $is_right_bool = $is_right ? true : false;
+        $is_right = $details[$i]['is_right'];
+        $is_right_bool = $is_right;
         // answer_text для сложных типов
         $answer_text = null;
         // Инициализируем переменную для хранения отзыва ИИ для текущего вопроса
@@ -715,24 +721,24 @@ if (
                 <?php foreach ($details as $i => $d): ?>
                     <div class="title<?= $i === 0 ? ' active' : '' ?>">
                         <i class="dropdown icon"></i>
-                        Вопрос <?= $i+1 ?>: <?= htmlspecialchars(mb_strimwidth(isset($d['question']) ? $d['question'] : 'Вопрос без текста', 0, 60, '...')) ?>
-                        <span class="ui <?= isset($d['is_right']) && $d['is_right'] ? 'green' : 'red' ?> text" style="margin-left: 10px;">
-                            <?= isset($d['is_right']) && $d['is_right'] ? 'Верно' : 'Неверно' ?>
+                        Вопрос <?= $i+1 ?>: <?= htmlspecialchars(mb_strimwidth($d['question'], 0, 60, '...')) ?>
+                        <span class="ui <?= $d['is_right'] ? 'green' : 'red' ?> text" style="margin-left: 10px;">
+                            <?= $d['is_right'] ? 'Верно' : 'Неверно' ?>
                         </span>
                     </div>
                     <div class="content<?= $i === 0 ? ' active' : '' ?>">
-                        <p><b>Вопрос:</b> <?= htmlspecialchars(isset($d['question']) ? $d['question'] : 'Вопрос без текста') ?></p>
-                        <?php $type = isset($d['type']) ? $d['type'] : ''; ?>
+                        <p><b>Вопрос:</b> <?= htmlspecialchars($d['question']) ?></p>
+                        <?php $type = $d['type']; ?>
                         <?php if ($type === 'single' || $type === 'multi'): ?>
-                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(isset($d['user_answer']) ? (is_array($d['user_answer']) ? implode(", ", $d['user_answer']) : $d['user_answer']) : 'Нет ответа') ?></p>
-                            <p><b>Правильный ответ:</b> <?= htmlspecialchars(isset($d['right']) ? $d['right'] : 'Нет данных') ?></p>
+                            <p><b>Ваш ответ:</b> <?= htmlspecialchars($d['user_answer'] !== null ? (is_array($d['user_answer']) ? implode(", ", $d['user_answer']) : $d['user_answer']) : 'Нет ответа') ?></p>
+                            <p><b>Правильный ответ:</b> <?= htmlspecialchars($d['right']) ?></p>
                         <?php elseif ($type === 'match'): ?>
-                            <p><b>Ваш ответ:</b> <?= htmlspecialchars(isset($d['user_answer']) ? json_encode($d['user_answer'], JSON_UNESCAPED_UNICODE) : 'Нет ответа') ?></p>
+                            <p><b>Ваш ответ:</b> <?= htmlspecialchars($d['user_answer'] !== null ? json_encode($d['user_answer'], JSON_UNESCAPED_UNICODE) : 'Нет ответа') ?></p>
                         <?php elseif ($type === 'code'): ?>
                             <p><b>Ваш код:</b></p>
-                            <pre style="background-color: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars(isset($d['user_answer']) ? $d['user_answer'] : '') ?></pre>
+                            <pre style="background-color: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars($d['user_answer'] !== null ? $d['user_answer'] : '') ?></pre>
                             
-                            <?php if (isset($d['ai_feedback'])): ?>
+                            <?php if (!empty($d['ai_feedback'])): ?>
                                 <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? '#db2828' : '#007acc' ?>;">
                                     <h4 style="color: <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? '#db2828' : '#007acc' ?>;">
                                         <i class="<?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? 'exclamation triangle' : 'comment alternate outline' ?> icon"></i> 
@@ -746,7 +752,7 @@ if (
                                         <div style="margin-top: 10px; padding: 10px; background-color: #fffaf3; border-left: 4px solid #f2711c; border-radius: 4px;">
                                             <i class="info circle icon"></i>
                                             Код проверен по соответствию выходных данных: 
-                                            <b><?= isset($d['output_matches']) && $d['output_matches'] ? 'Выходные данные совпадают' : 'Выходные данные не совпадают' ?></b>
+                                            <b><?= $d['output_matches'] ? 'Выходные данные совпадают' : 'Выходные данные не совпадают' ?></b>
                                         </div>
                                     <?php endif; ?>
                                     
