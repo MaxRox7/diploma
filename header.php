@@ -63,10 +63,22 @@ function get_avatar_path($user_id) {
                             <i class="user icon"></i>
                             Профиль
                         </a>
+                        <?php if (is_student()): ?>
                         <a href="learning_analytics.php" class="item <?= basename($_SERVER['PHP_SELF']) === 'learning_analytics.php' ? 'active' : '' ?>">
                             <i class="chart bar icon"></i>
                             Аналитика обучения
                         </a>
+                        <?php elseif (is_teacher()): ?>
+                        <a href="teacher_analytics.php" class="item <?= basename($_SERVER['PHP_SELF']) === 'teacher_analytics.php' ? 'active' : '' ?>">
+                            <i class="chart bar icon"></i>
+                            Аналитика преподавателя
+                        </a>
+                        <?php elseif (is_admin()): ?>
+                        <a href="admin_analytics.php" class="item <?= basename($_SERVER['PHP_SELF']) === 'admin_analytics.php' ? 'active' : '' ?>">
+                            <i class="chart line icon"></i>
+                            Аналитика платформы
+                        </a>
+                        <?php endif; ?>
                         <a href="logout.php" class="item">
                             <i class="sign out icon"></i>
                             Выход

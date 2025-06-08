@@ -63,13 +63,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $course_id = $stmt->fetchColumn();
             
-            // Добавляем создателя курса в таблицу create_passes
+            // Проверяем, не является ли пользователь уже создателем курса
             $stmt = $pdo->prepare("
-                INSERT INTO create_passes (id_course, id_user, is_creator, date_complete)
-                VALUES (?, ?, true, NULL)
+                SELECT COUNT(*) FROM create_passes 
+                WHERE id_course = ? AND id_user = ? AND is_creator = true
             ");
-            
             $stmt->execute([$course_id, $_SESSION['user']['id_user']]);
+            $already_creator = $stmt->fetchColumn() > 0;
+            
+            if (!$already_creator) {
+                // Добавляем создателя курса в таблицу create_passes
+                $stmt = $pdo->prepare("
+                    INSERT INTO create_passes (id_course, id_user, is_creator, date_complete)
+                    VALUES (?, ?, true, NULL)
+                ");
+                
+                $stmt->execute([$course_id, $_SESSION['user']['id_user']]);
+            }
             
             // Обрабатываем теги курса
             if (!empty($tags_course)) {

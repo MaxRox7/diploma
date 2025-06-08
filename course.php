@@ -197,18 +197,39 @@ try {
             // Запись на курс
             if ($_POST['action'] === 'enroll' && is_student()) {
                 try {
-                    $stmt = $pdo->prepare("
-                        INSERT INTO create_passes (id_course, id_user, date_complete)
-                        VALUES (?, ?, NULL)
+                    // Проверяем, не записан ли студент уже на этот курс
+                    $check_stmt = $pdo->prepare("
+                        SELECT COUNT(*) FROM create_passes 
+                        WHERE id_course = ? AND id_user = ?
                     ");
-                    $stmt->execute([$course_id, $user_id]);
+                    $check_stmt->execute([$course_id, $user_id]);
+                    $already_enrolled = $check_stmt->fetchColumn() > 0;
                     
-                    // Обновляем интересы пользователя на основе курсов
-                    update_user_interests($user_id);
-                    
-                    $success = 'Вы успешно записались на курс';
-                    $course['is_enrolled'] = true;
-                    $is_enrolled = true;
+                    if ($already_enrolled) {
+                        $success = 'Вы уже записаны на этот курс';
+                        $course['is_enrolled'] = true;
+                        $is_enrolled = true;
+                    } else {
+                        // Записываем студента на курс
+                        $stmt = $pdo->prepare("
+                            INSERT INTO create_passes (id_course, id_user, date_complete)
+                            VALUES (?, ?, NULL)
+                        ");
+                        $stmt->execute([$course_id, $user_id]);
+                        
+                        // Обновляем интересы пользователя на основе курсов
+                        update_user_interests($user_id);
+                        
+                        // Логируем активность студента
+                        $stmt = $pdo->prepare("
+                            SELECT log_student_activity(?, 'course_enrollment', ?, NULL, NULL, NULL, NULL, NULL)
+                        ");
+                        $stmt->execute([$user_id, $course_id]);
+                        
+                        $success = 'Вы успешно записались на курс';
+                        $course['is_enrolled'] = true;
+                        $is_enrolled = true;
+                    }
                 } catch (PDOException $e) {
                     $error = 'Ошибка при записи на курс: ' . $e->getMessage();
                 }
