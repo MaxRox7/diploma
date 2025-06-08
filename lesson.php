@@ -65,6 +65,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT s.*,
                m.path_matial as file_path,
+               m.link_material,
                t.id_test,
                CASE 
                    WHEN m.id_material IS NOT NULL AND EXISTS(
@@ -125,6 +126,7 @@ try {
                 $stmt = $pdo->prepare("
                     SELECT s.*,
                            m.path_matial as file_path,
+                           m.link_material,
                            t.id_test,
                            CASE 
                                WHEN m.id_material IS NOT NULL AND EXISTS(
@@ -374,11 +376,18 @@ function get_question_options($pdo, $question_id) {
                                     <i class="lock icon"></i>
                                     Сначала завершите предыдущие шаги
                                 </div>
-                            <?php elseif ($step['type_step'] === 'material' && $step['file_path']): ?>
+                            <?php elseif ($step['type_step'] === 'material'): ?>
+                                <?php if ($step['file_path']): ?>
                                 <a href="<?= htmlspecialchars($step['file_path']) ?>" class="ui primary button" target="_blank">
                                     <i class="file pdf icon"></i>
                                     Открыть материал
                                 </a>
+                                <?php elseif ($step['link_material']): ?>
+                                <a href="<?= htmlspecialchars($step['link_material']) ?>" class="ui primary button" target="_blank">
+                                    <i class="linkify icon"></i>
+                                    Перейти по ссылке
+                                </a>
+                                <?php endif; ?>
                                 <?php if (!$step['is_completed']): ?>
                                     <form method="post" style="display: inline-block; margin-left: 10px;">
                                         <input type="hidden" name="mark_material_completed" value="1">

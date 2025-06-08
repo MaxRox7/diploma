@@ -63,6 +63,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT s.*, 
                m.path_matial as material_file,
+               m.link_material,
                t.id_test as test_id
         FROM Steps s
         LEFT JOIN Material m ON s.id_step = m.id_step
@@ -96,9 +97,26 @@ try {
                         $stmt->execute([$lesson_id, $name_step, $type_step]);
                         $step_id = $stmt->fetchColumn();
                         
-                        // Если это материал, загружаем файл
+                        // Если это материал, загружаем файл или добавляем ссылку
                         if ($type_step === 'material') {
-                            if (isset($_FILES['material_file']) && $_FILES['material_file']['error'] === UPLOAD_ERR_OK) {
+                            // Проверяем, добавляется ли ссылка
+                            if (isset($_POST['material_link']) && !empty($_POST['material_link'])) {
+                                $material_link = trim($_POST['material_link']);
+                                
+                                // Проверяем, является ли ссылка действительным URL
+                                if (filter_var($material_link, FILTER_VALIDATE_URL)) {
+                                    // Сохраняем ссылку в базу данных
+                                    $stmt = $pdo->prepare("
+                                        INSERT INTO Material (id_material, id_step, link_material)
+                                        VALUES (?, ?, ?)
+                                    ");
+                                    $stmt->execute([uniqid(), $step_id, $material_link]);
+                                } else {
+                                    throw new Exception('Указан недействительный URL');
+                                }
+                            }
+                            // Если не ссылка, то должен быть файл
+                            else if (isset($_FILES['material_file']) && $_FILES['material_file']['error'] === UPLOAD_ERR_OK) {
                                 $upload_dir = 'materials/' . $_SESSION['user']['login_user'] . '/' . $lesson['name_lesson'] . '/';
                                 
                                 // Создаем директорию, если не существует
@@ -121,7 +139,7 @@ try {
                                     throw new Exception('Ошибка при загрузке файла');
                                 }
                             } else {
-                                throw new Exception('Файл материала не был загружен');
+                                throw new Exception('Необходимо загрузить файл или указать ссылку на материал');
                             }
                         }
                         
@@ -132,6 +150,7 @@ try {
                         $stmt = $pdo->prepare("
                             SELECT s.*, 
                                    m.path_matial as material_file,
+                                   m.link_material,
                                    t.id_test as test_id
                             FROM Steps s
                             LEFT JOIN Material m ON s.id_step = m.id_step
@@ -312,19 +331,37 @@ try {
             <form class="ui form" method="post" enctype="multipart/form-data" id="addMaterialForm">
                 <input type="hidden" name="action" value="add_step">
                 <input type="hidden" name="type_step" value="material">
-                <div class="fields">
-                    <div class="eight wide field">
-                        <input type="text" name="name_step" placeholder="Название шага" required>
+                <div class="ui segment">
+                    <div class="fields">
+                        <div class="eight wide field">
+                            <label>Название шага</label>
+                            <input type="text" name="name_step" placeholder="Название шага" required>
+                        </div>
                     </div>
-                    <div class="four wide field">
-                        <input type="file" name="material_file" accept=".pdf" required>
+                    
+                    <div class="ui two item menu">
+                        <a class="item active" data-tab="file">Загрузить файл</a>
+                        <a class="item" data-tab="link">Добавить ссылку</a>
                     </div>
-                    <div class="four wide field">
-                        <button type="submit" class="ui primary fluid button">
-                            <i class="file pdf icon"></i>
-                            Добавить материал
-                        </button>
+                    
+                    <div class="ui active tab segment" data-tab="file">
+                        <div class="field">
+                            <label>Файл материала (PDF)</label>
+                            <input type="file" name="material_file" accept=".pdf" id="materialFileInput">
+                        </div>
                     </div>
+                    
+                    <div class="ui tab segment" data-tab="link">
+                        <div class="field">
+                            <label>Ссылка на материал</label>
+                            <input type="url" name="material_link" placeholder="https://example.com/document.pdf" id="materialLinkInput">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="ui primary button">
+                        <i class="plus icon"></i>
+                        Добавить материал
+                    </button>
                 </div>
             </form>
 
@@ -362,11 +399,18 @@ try {
                     <?php foreach ($steps as $step): ?>
                         <div class="item">
                             <div class="right floated content">
-                                <?php if ($step['type_step'] === 'material' && $step['material_file']): ?>
+                                <?php if ($step['type_step'] === 'material'): ?>
+                                    <?php if ($step['material_file']): ?>
                                     <a href="<?= htmlspecialchars($step['material_file']) ?>" class="ui blue button" target="_blank">
                                         <i class="file pdf icon"></i>
                                         Просмотр материала
                                     </a>
+                                    <?php elseif ($step['link_material']): ?>
+                                    <a href="<?= htmlspecialchars($step['link_material']) ?>" class="ui blue button" target="_blank">
+                                        <i class="linkify icon"></i>
+                                        Перейти по ссылке
+                                    </a>
+                                    <?php endif; ?>
                                 <?php elseif ($step['type_step'] === 'test' && $step['test_id']): ?>
                                     <a href="edit_test.php?test_id=<?= $step['test_id'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui blue button">
                                         <i class="edit icon"></i>
@@ -404,6 +448,28 @@ try {
 <script>
 $(document).ready(function() {
     $('.ui.dropdown').dropdown();
+    
+    // Активация табов для выбора типа материала
+    $('.menu .item').tab();
+    
+    // Обработка переключения табов
+    $('.menu .item[data-tab="file"]').on('click', function() {
+        $('#materialLinkInput').removeAttr('required');
+        $('#materialFileInput').attr('required', 'required');
+        $('#materialLinkInput').closest('.tab').removeClass('active');
+        $('#materialFileInput').closest('.tab').addClass('active');
+    });
+    
+    $('.menu .item[data-tab="link"]').on('click', function() {
+        $('#materialFileInput').removeAttr('required');
+        $('#materialLinkInput').attr('required', 'required');
+        $('#materialFileInput').closest('.tab').removeClass('active');
+        $('#materialLinkInput').closest('.tab').addClass('active');
+    });
+    
+    // По умолчанию файл обязателен, ссылка нет
+    $('#materialFileInput').attr('required', 'required');
+    $('#materialLinkInput').removeAttr('required');
     
     $('.ui.form').form({
         fields: {
