@@ -66,11 +66,102 @@ try {
     $stmt->execute([$test_id]);
     $questions = $stmt->fetchAll();
     
+    // Получаем уровни оценок для этого теста
+    $stmt = $pdo->prepare("
+        SELECT * FROM test_grade_levels
+        WHERE id_test = ?
+        ORDER BY min_percentage
+    ");
+    $stmt->execute([$test_id]);
+    $grade_levels = $stmt->fetchAll();
+    
     // Обработка POST запросов
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['action'])) {
+            // Обновление настроек теста
+            if ($_POST['action'] === 'update_test_settings') {
+                $test_name = trim($_POST['test_name'] ?? '');
+                $test_description = trim($_POST['test_description'] ?? '');
+                $passing_percentage = min(100, max(0, (int)($_POST['passing_percentage'] ?? 70)));
+                $max_attempts = max(1, (int)($_POST['max_attempts'] ?? 3));
+                $time_between_attempts = max(0, (int)($_POST['time_between_attempts'] ?? 0));
+                $show_results = isset($_POST['show_results']) ? 1 : 0;
+                $practice_mode = isset($_POST['practice_mode']) ? 1 : 0;
+                
+                try {
+                    $stmt = $pdo->prepare("
+                        UPDATE Tests 
+                        SET name_test = ?, 
+                            desc_test = ?,
+                            passing_percentage = ?,
+                            max_attempts = ?,
+                            time_between_attempts = ?,
+                            show_results_after_completion = ?,
+                            practice_mode = ?
+                        WHERE id_test = ?
+                    ");
+                    $stmt->execute([
+                        $test_name,
+                        $test_description,
+                        $passing_percentage,
+                        $max_attempts,
+                        $time_between_attempts,
+                        $show_results,
+                        $practice_mode,
+                        $test_id
+                    ]);
+                    
+                    // Обновляем уровни оценок, если они были отправлены
+                    if (isset($_POST['grade_levels']) && is_array($_POST['grade_levels'])) {
+                        // Сначала удаляем существующие уровни
+                        $stmt = $pdo->prepare("DELETE FROM test_grade_levels WHERE id_test = ?");
+                        $stmt->execute([$test_id]);
+                        
+                        // Затем добавляем новые
+                        $stmt = $pdo->prepare("
+                            INSERT INTO test_grade_levels 
+                            (id_test, min_percentage, max_percentage, grade_name, grade_color)
+                            VALUES (?, ?, ?, ?, ?)
+                        ");
+                        
+                        foreach ($_POST['grade_levels'] as $level) {
+                            if (isset($level['min'], $level['max'], $level['name'])) {
+                                $min = min(100, max(0, (int)$level['min']));
+                                $max = min(100, max(0, (int)$level['max']));
+                                $name = trim($level['name']);
+                                $color = preg_match('/^#[0-9a-f]{6}$/i', $level['color'] ?? '') 
+                                    ? $level['color'] 
+                                    : '#000000';
+                                
+                                if ($min < $max && !empty($name)) {
+                                    $stmt->execute([$test_id, $min, $max, $name, $color]);
+                                }
+                            }
+                        }
+                    }
+                    
+                    $success = 'Настройки теста успешно обновлены';
+                    
+                    // Обновляем информацию о тесте
+                    $stmt = $pdo->prepare("SELECT * FROM Tests WHERE id_test = ?");
+                    $stmt->execute([$test_id]);
+                    $test = array_merge($test, $stmt->fetch());
+                    
+                    // Обновляем уровни оценок
+                    $stmt = $pdo->prepare("
+                        SELECT * FROM test_grade_levels
+                        WHERE id_test = ?
+                        ORDER BY min_percentage
+                    ");
+                    $stmt->execute([$test_id]);
+                    $grade_levels = $stmt->fetchAll();
+                    
+                } catch (Exception $e) {
+                    $error = 'Ошибка при обновлении настроек теста: ' . $e->getMessage();
+                }
+            }
             // Добавление нового вопроса
-            if ($_POST['action'] === 'add_question') {
+            elseif ($_POST['action'] === 'add_question') {
                 $question_text = trim($_POST['question_text']);
                 $type_question = $_POST['type_question'] ?? 'single';
                 if (empty($question_text)) {
@@ -362,131 +453,6 @@ try {
                     }
                 }
             }
-            // Редактирование настроек теста
-            elseif ($_POST['action'] === 'edit_test_settings') {
-                $test_name = trim($_POST['test_name']);
-                $test_description = trim($_POST['test_description']);
-                $passing_percentage = (int)$_POST['passing_percentage'];
-                $max_attempts = (int)$_POST['max_attempts'];
-                $time_between_attempts = (int)$_POST['time_between_attempts'];
-                $show_results = isset($_POST['show_results']) ? 'true' : 'false';
-                $practice_mode = isset($_POST['practice_mode']) ? 'true' : 'false';
-                
-                if (empty($test_name)) {
-                    $error = 'Введите название теста';
-                } else {
-                    try {
-                        $stmt = $pdo->prepare("
-                            UPDATE Tests 
-                            SET name_test = ?, 
-                                desc_test = ?,
-                                passing_percentage = ?,
-                                max_attempts = ?,
-                                time_between_attempts = ?,
-                                show_results_after_completion = ?,
-                                practice_mode = ?
-                            WHERE id_test = ?
-                        ");
-                        $stmt->execute([
-                            $test_name,
-                            $test_description,
-                            $passing_percentage,
-                            $max_attempts,
-                            $time_between_attempts,
-                            $show_results,
-                            $practice_mode,
-                            $test_id
-                        ]);
-                        
-                        // Проверяем, есть ли уже настроенные уровни оценок для этого теста
-                        $stmt = $pdo->prepare("SELECT COUNT(*) FROM test_grade_levels WHERE id_test = ?");
-                        $stmt->execute([$test_id]);
-                        $grade_levels_count = $stmt->fetchColumn();
-                        
-                        // Если уровней оценок еще нет, создаем их по умолчанию
-                        if ($grade_levels_count == 0) {
-                            // Создаем уровни оценок по умолчанию
-                            $default_levels = [
-                                ['0', '59', 'Не пройдено', '#DB2828'], // красный
-                                ['60', '74', 'Удовлетворительно', '#F2711C'], // оранжевый
-                                ['75', '89', 'Хорошо', '#2185D0'], // синий
-                                ['90', '100', 'Отлично', '#21BA45'] // зеленый
-                            ];
-                            
-                            $stmt = $pdo->prepare("
-                                INSERT INTO test_grade_levels (id_test, min_percentage, max_percentage, grade_name, grade_color)
-                                VALUES (?, ?, ?, ?, ?)
-                            ");
-                            
-                            foreach ($default_levels as $level) {
-                                $stmt->execute([
-                                    $test_id,
-                                    $level[0],
-                                    $level[1],
-                                    $level[2],
-                                    $level[3]
-                                ]);
-                            }
-                        }
-                        
-                        $success = 'Настройки теста успешно обновлены';
-                        
-                        // Обновляем информацию о тесте
-                        $stmt = $pdo->prepare("
-                            SELECT t.*, s.id_step, s.number_steps, l.id_lesson, l.name_lesson, c.id_course, c.name_course
-                            FROM Tests t
-                            JOIN Steps s ON t.id_step = s.id_step
-                            JOIN lessons l ON s.id_lesson = l.id_lesson
-                            JOIN course c ON l.id_course = c.id_course
-                            WHERE t.id_test = ?
-                        ");
-                        $stmt->execute([$test_id]);
-                        $test = $stmt->fetch();
-                        
-                    } catch (Exception $e) {
-                        $error = $e->getMessage();
-                    }
-                }
-            }
-            // Добавление уровня оценки
-            elseif ($_POST['action'] === 'add_grade_level') {
-                $min_percentage = (int)$_POST['min_percentage'];
-                $max_percentage = (int)$_POST['max_percentage'];
-                $grade_name = trim($_POST['grade_name']);
-                $grade_color = trim($_POST['grade_color']);
-                
-                if (empty($grade_name) || $min_percentage >= $max_percentage) {
-                    $error = 'Проверьте данные уровня оценки';
-                } else {
-                    try {
-                        $stmt = $pdo->prepare("
-                            INSERT INTO test_grade_levels (id_test, min_percentage, max_percentage, grade_name, grade_color)
-                            VALUES (?, ?, ?, ?, ?)
-                        ");
-                        $stmt->execute([$test_id, $min_percentage, $max_percentage, $grade_name, $grade_color]);
-                        
-                        $success = 'Уровень оценки успешно добавлен';
-                    } catch (Exception $e) {
-                        $error = $e->getMessage();
-                    }
-                }
-            }
-            // Удаление уровня оценки
-            elseif ($_POST['action'] === 'delete_grade_level') {
-                $level_id = (int)$_POST['level_id'];
-                
-                try {
-                    $stmt = $pdo->prepare("
-                        DELETE FROM test_grade_levels
-                        WHERE id_level = ? AND id_test = ?
-                    ");
-                    $stmt->execute([$level_id, $test_id]);
-                    
-                    $success = 'Уровень оценки успешно удален';
-                } catch (Exception $e) {
-                    $error = $e->getMessage();
-                }
-            }
         }
     }
     
@@ -561,6 +527,171 @@ function get_question_options($pdo, $question_id) {
                     <p><?= htmlspecialchars($success) ?></p>
                 </div>
             <?php endif; ?>
+
+            <!-- Настройки теста -->
+            <div class="ui segments">
+                <div class="ui segment">
+                    <h3>Настройки теста</h3>
+                </div>
+                <div class="ui segment">
+                    <form method="post" class="ui form">
+                        <input type="hidden" name="action" value="update_test_settings">
+                        <div class="two fields">
+                            <div class="field">
+                                <label>Название теста</label>
+                                <input type="text" name="test_name" value="<?= htmlspecialchars($test['name_test']) ?>" required>
+                            </div>
+                            <div class="field">
+                                <label>Проходной балл (в процентах)</label>
+                                <input type="number" name="passing_percentage" min="0" max="100" value="<?= (int)($test['passing_percentage'] ?? 70) ?>" required>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Описание теста</label>
+                            <textarea name="test_description" rows="2"><?= htmlspecialchars($test['desc_test'] ?? '') ?></textarea>
+                        </div>
+                        <div class="three fields">
+                            <div class="field">
+                                <label>Максимальное количество попыток</label>
+                                <input type="number" name="max_attempts" min="1" max="100" value="<?= (int)($test['max_attempts'] ?? 3) ?>" required>
+                            </div>
+                            <div class="field">
+                                <label>Интервал между попытками (минуты)</label>
+                                <input type="number" name="time_between_attempts" min="0" max="10080" value="<?= (int)($test['time_between_attempts'] ?? 0) ?>">
+                                <div class="ui mini label">0 = без ограничений</div>
+                            </div>
+                            <div class="field">
+                                <div class="ui segment">
+                                    <div class="field">
+                                        <div class="ui checkbox">
+                                            <input type="checkbox" name="show_results" <?= ($test['show_results_after_completion'] ?? true) ? 'checked' : '' ?>>
+                                            <label>Показывать результаты после прохождения</label>
+                                        </div>
+                                    </div>
+                                    <div class="field">
+                                        <div class="ui checkbox">
+                                            <input type="checkbox" name="practice_mode" <?= ($test['practice_mode'] ?? false) ? 'checked' : '' ?>>
+                                            <label>Режим практики (без ограничения попыток, не влияет на прогресс)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ui divider"></div>
+                        <h4 class="ui header">Шкала оценок</h4>
+                        <div class="ui info message">
+                            <p>Добавьте диапазоны оценок для теста. Уровни должны полностью покрывать диапазон от 0 до 100% без пересечений.</p>
+                        </div>
+                        
+                        <div id="grade-levels-container">
+                            <?php if (empty($grade_levels)): ?>
+                                <!-- Стандартные уровни если ещё не заданы -->
+                                <div class="grade-level four fields">
+                                    <div class="field">
+                                        <label>Минимум (%)</label>
+                                        <input type="number" name="grade_levels[0][min]" min="0" max="100" value="0" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Максимум (%)</label>
+                                        <input type="number" name="grade_levels[0][max]" min="1" max="100" value="59" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Название уровня</label>
+                                        <input type="text" name="grade_levels[0][name]" value="Не пройдено" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Цвет</label>
+                                        <input type="color" name="grade_levels[0][color]" value="#FF0000">
+                                    </div>
+                                </div>
+                                <div class="grade-level four fields">
+                                    <div class="field">
+                                        <label>Минимум (%)</label>
+                                        <input type="number" name="grade_levels[1][min]" min="0" max="100" value="60" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Максимум (%)</label>
+                                        <input type="number" name="grade_levels[1][max]" min="1" max="100" value="74" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Название уровня</label>
+                                        <input type="text" name="grade_levels[1][name]" value="Удовлетворительно" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Цвет</label>
+                                        <input type="color" name="grade_levels[1][color]" value="#FFA500">
+                                    </div>
+                                </div>
+                                <div class="grade-level four fields">
+                                    <div class="field">
+                                        <label>Минимум (%)</label>
+                                        <input type="number" name="grade_levels[2][min]" min="0" max="100" value="75" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Максимум (%)</label>
+                                        <input type="number" name="grade_levels[2][max]" min="1" max="100" value="89" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Название уровня</label>
+                                        <input type="text" name="grade_levels[2][name]" value="Хорошо" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Цвет</label>
+                                        <input type="color" name="grade_levels[2][color]" value="#2ECC40">
+                                    </div>
+                                </div>
+                                <div class="grade-level four fields">
+                                    <div class="field">
+                                        <label>Минимум (%)</label>
+                                        <input type="number" name="grade_levels[3][min]" min="0" max="100" value="90" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Максимум (%)</label>
+                                        <input type="number" name="grade_levels[3][max]" min="1" max="100" value="100" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Название уровня</label>
+                                        <input type="text" name="grade_levels[3][name]" value="Отлично" required>
+                                    </div>
+                                    <div class="field">
+                                        <label>Цвет</label>
+                                        <input type="color" name="grade_levels[3][color]" value="#0E6EB8">
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <!-- Существующие уровни из базы данных -->
+                                <?php foreach ($grade_levels as $index => $level): ?>
+                                    <div class="grade-level four fields">
+                                        <div class="field">
+                                            <label>Минимум (%)</label>
+                                            <input type="number" name="grade_levels[<?= $index ?>][min]" min="0" max="100" value="<?= (int)$level['min_percentage'] ?>" required>
+                                        </div>
+                                        <div class="field">
+                                            <label>Максимум (%)</label>
+                                            <input type="number" name="grade_levels[<?= $index ?>][max]" min="1" max="100" value="<?= (int)$level['max_percentage'] ?>" required>
+                                        </div>
+                                        <div class="field">
+                                            <label>Название уровня</label>
+                                            <input type="text" name="grade_levels[<?= $index ?>][name]" value="<?= htmlspecialchars($level['grade_name']) ?>" required>
+                                        </div>
+                                        <div class="field">
+                                            <label>Цвет</label>
+                                            <input type="color" name="grade_levels[<?= $index ?>][color]" value="<?= htmlspecialchars($level['grade_color']) ?>">
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="ui hidden divider"></div>
+                        <button type="button" class="ui basic button" onclick="addGradeLevel()"><i class="plus icon"></i> Добавить уровень оценки</button>
+                        <div class="ui hidden divider"></div>
+                        
+                        <button type="submit" class="ui primary button">Сохранить настройки теста</button>
+                    </form>
+                </div>
+            </div>
 
             <!-- Форма добавления вопроса -->
             <div class="ui segment">
@@ -744,153 +875,14 @@ function get_question_options($pdo, $question_id) {
                     <?php endforeach; ?>
                 </div>
             </div>
-
-            <!-- Редактирование настроек теста -->
-            <div class="ui segment">
-                <h3>Настройки теста</h3>
-                <form method="post" class="ui form">
-                    <input type="hidden" name="action" value="edit_test_settings">
-                    
-                    <div class="field">
-                        <label>Название теста</label>
-                        <input type="text" name="test_name" value="<?= htmlspecialchars($test['name_test']) ?>" required>
-                    </div>
-                    
-                    <div class="field">
-                        <label>Описание теста</label>
-                        <textarea name="test_description" rows="2"><?= htmlspecialchars($test['desc_test'] ?? '') ?></textarea>
-                    </div>
-                    
-                    <div class="two fields">
-                        <div class="field">
-                            <label>Проходной балл (в процентах)</label>
-                            <input type="number" name="passing_percentage" min="0" max="100" value="<?= $test['passing_percentage'] ?? 70 ?>" required>
-                        </div>
-                        
-                        <div class="field">
-                            <label>Максимальное количество попыток</label>
-                            <input type="number" name="max_attempts" min="1" value="<?= $test['max_attempts'] ?? 3 ?>" required>
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label>Время между попытками (в минутах)</label>
-                        <input type="number" name="time_between_attempts" min="0" value="<?= $test['time_between_attempts'] ?? 0 ?>">
-                        <small>0 = без ожидания между попытками</small>
-                    </div>
-                    
-                    <div class="two fields">
-                        <div class="field">
-                            <div class="ui checkbox">
-                                <input type="checkbox" name="show_results" value="1" <?= ($test['show_results_after_completion'] == 'true' || $test['show_results_after_completion'] === true || $test['show_results_after_completion'] == 't' || $test['show_results_after_completion'] == '1') ? 'checked' : '' ?>>
-                                <label>Показывать результаты сразу после завершения</label>
-                            </div>
-                        </div>
-                        
-                        <div class="field">
-                            <div class="ui checkbox">
-                                <input type="checkbox" name="practice_mode" value="1" <?= ($test['practice_mode'] == 'true' || $test['practice_mode'] === true || $test['practice_mode'] == 't' || $test['practice_mode'] == '1') ? 'checked' : '' ?>>
-                                <label>Режим практики (результаты не влияют на прогресс)</label>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="ui primary button">Сохранить настройки</button>
-                </form>
-                
-                <div class="ui divider"></div>
-                
-                <a href="manage_student_test_settings.php?test_id=<?= $test_id ?>" class="ui blue button">
-                    <i class="users icon"></i> Управление настройками для студентов
-                </a>
-            </div>
-            
-            <div class="ui segment">
-                <h3>Уровни оценок</h3>
-                
-                <?php
-                // Получаем уровни оценок для этого теста
-                $stmt = $pdo->prepare("
-                    SELECT * FROM test_grade_levels
-                    WHERE id_test = ?
-                    ORDER BY min_percentage
-                ");
-                $stmt->execute([$test_id]);
-                $grade_levels = $stmt->fetchAll();
-                ?>
-                
-                <table class="ui celled table">
-                    <thead>
-                        <tr>
-                            <th>Диапазон</th>
-                            <th>Название</th>
-                            <th>Цвет</th>
-                            <th>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($grade_levels as $level): ?>
-                        <tr>
-                            <td><?= $level['min_percentage'] ?>% - <?= $level['max_percentage'] ?>%</td>
-                            <td><?= htmlspecialchars($level['grade_name']) ?></td>
-                            <td>
-                                <div style="width: 20px; height: 20px; background-color: <?= htmlspecialchars($level['grade_color']) ?>"></div>
-                            </td>
-                            <td>
-                                <form method="post" style="display: inline;">
-                                    <input type="hidden" name="action" value="delete_grade_level">
-                                    <input type="hidden" name="level_id" value="<?= $level['id_level'] ?>">
-                                    <button type="submit" class="ui tiny red button" onclick="return confirm('Вы уверены?')">Удалить</button>
-                                </form>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                        <?php if (empty($grade_levels)): ?>
-                        <tr>
-                            <td colspan="4" class="center aligned">Нет настроенных уровней оценок</td>
-                        </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-                
-                <form method="post" class="ui form">
-                    <input type="hidden" name="action" value="add_grade_level">
-                    
-                    <div class="three fields">
-                        <div class="field">
-                            <label>Минимальный %</label>
-                            <input type="number" name="min_percentage" min="0" max="100" required>
-                        </div>
-                        <div class="field">
-                            <label>Максимальный %</label>
-                            <input type="number" name="max_percentage" min="0" max="100" required>
-                        </div>
-                        <div class="field">
-                            <label>Название</label>
-                            <input type="text" name="grade_name" required>
-                        </div>
-                    </div>
-                    
-                    <div class="field">
-                        <label>Цвет</label>
-                        <input type="color" name="grade_color" value="#4CAF50">
-                    </div>
-                    
-                    <button type="submit" class="ui primary button">Добавить уровень оценки</button>
-                </form>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
-$(function(){
-    $('.ui.checkbox').checkbox();
-    $('.ui.dropdown').dropdown();
+$(document).ready(function() {
     $('.ui.accordion').accordion();
-    
-    // Остальной код JavaScript
-    // ...
+    $('.ui.dropdown').dropdown();
 });
 
 // JS для динамического отображения вариантов
@@ -1418,6 +1410,78 @@ function generateCodeTemplate() {
         document.getElementById('code_output').value = '';
     });
 }
+
+// Функция для добавления нового уровня оценки
+function addGradeLevel() {
+    const container = document.getElementById('grade-levels-container');
+    const levels = container.querySelectorAll('.grade-level');
+    const newIndex = levels.length;
+    
+    const newLevel = document.createElement('div');
+    newLevel.className = 'grade-level four fields';
+    newLevel.innerHTML = `
+        <div class="field">
+            <label>Минимум (%)</label>
+            <input type="number" name="grade_levels[${newIndex}][min]" min="0" max="100" value="0" required>
+        </div>
+        <div class="field">
+            <label>Максимум (%)</label>
+            <input type="number" name="grade_levels[${newIndex}][max]" min="1" max="100" value="100" required>
+        </div>
+        <div class="field">
+            <label>Название уровня</label>
+            <input type="text" name="grade_levels[${newIndex}][name]" value="Новый уровень" required>
+        </div>
+        <div class="field">
+            <label>Цвет</label>
+            <input type="color" name="grade_levels[${newIndex}][color]" value="#000000">
+        </div>
+        <button type="button" class="ui negative icon button remove-level"><i class="trash icon"></i></button>
+    `;
+    
+    container.appendChild(newLevel);
+    
+    // Добавляем обработчик для кнопки удаления
+    newLevel.querySelector('.remove-level').addEventListener('click', function() {
+        container.removeChild(newLevel);
+    });
+    
+    // Добавляем кнопки удаления к существующим уровням, если их еще нет
+    levels.forEach(level => {
+        if (!level.querySelector('.remove-level')) {
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'ui negative icon button remove-level';
+            removeBtn.innerHTML = '<i class="trash icon"></i>';
+            removeBtn.addEventListener('click', function() {
+                container.removeChild(level);
+            });
+            level.appendChild(removeBtn);
+        }
+    });
+}
+
+// Инициализация чекбоксов
+$(document).ready(function() {
+    $('.ui.checkbox').checkbox();
+    
+    // Инициализируем кнопки удаления для существующих уровней оценок
+    const container = document.getElementById('grade-levels-container');
+    const levels = container.querySelectorAll('.grade-level');
+    
+    if (levels.length > 1) {  // Оставляем хотя бы один уровень
+        levels.forEach(level => {
+            if (!level.querySelector('.remove-level')) {
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'ui negative icon button remove-level';
+                removeBtn.innerHTML = '<i class="trash icon"></i>';
+                removeBtn.addEventListener('click', function() {
+                    container.removeChild(level);
+                });
+                level.appendChild(removeBtn);
+            }
+        });
+    }
+});
 </script>
 
 </body>

@@ -78,6 +78,7 @@ try {
                        WHERE ta.id_test = t.id_test 
                        AND ta.id_user = ?
                        AND ta.status = 'completed'
+                       AND ta.score >= (SELECT t2.passing_percentage * ta.max_score / 100 FROM Tests t2 WHERE t2.id_test = ta.id_test)
                    ) THEN true
                    ELSE false
                END as is_completed
@@ -139,6 +140,7 @@ try {
                                    WHERE ta.id_test = t.id_test 
                                    AND ta.id_user = ?
                                    AND ta.status = 'completed'
+                                   AND ta.score >= (SELECT t2.passing_percentage * ta.max_score / 100 FROM Tests t2 WHERE t2.id_test = ta.id_test)
                                ) THEN true
                                ELSE false
                            END as is_completed
@@ -212,7 +214,11 @@ try {
                     
                     if ($user_answer !== null) {
                         // Получаем правильный ответ
-                        $stmt = $pdo->prepare("SELECT answer_question FROM Questions WHERE id_question = ?");
+                        $stmt = $pdo->prepare("
+                            SELECT id_option 
+                            FROM Answer_options 
+                            WHERE id_question = ? AND is_correct = true
+                        ");
                         $stmt->execute([$question_id]);
                         $correct_option = $stmt->fetchColumn();
                         
@@ -395,16 +401,38 @@ function get_question_options($pdo, $question_id) {
                                     </form>
                                 <?php endif; ?>
                             <?php elseif ($step['type_step'] === 'test' && $step['id_test']): ?>
-                                <?php if (!$step['is_completed']): ?>
+                                <?php 
+                                // Проверяем, пытался ли пользователь проходить тест
+                                $stmt = $pdo->prepare("
+                                    SELECT * FROM test_attempts 
+                                    WHERE id_test = ? AND id_user = ? 
+                                    ORDER BY end_time DESC LIMIT 1
+                                ");
+                                $stmt->execute([$step['id_test'], $user_id]);
+                                $last_attempt = $stmt->fetch();
+                                
+                                if (!$step['is_completed'] && $last_attempt && $last_attempt['status'] === 'completed'): 
+                                    // Тест завершен, но не пройден (статус не passed)
+                                ?>
+                                    <div class="ui negative message">
+                                        <i class="times circle icon"></i>
+                                        <strong>Тест не пройден.</strong> Вы набрали <?= round(($last_attempt['score'] / $last_attempt['max_score']) * 100) ?>% баллов.
+                                        <div class="ui divider"></div>
+                                        <p>Рекомендуем обратиться к преподавателю за помощью или подготовиться лучше и пройти тест снова.</p>
+                                        <a href="test_pass.php?test_id=<?= $step['id_test'] ?>" class="ui primary button">
+                                            <i class="redo icon"></i> Пройти тест снова
+                                        </a>
+                                    </div>
+                                <?php elseif (!$step['is_completed']): ?>
                                     <?php $questions = get_test_questions($pdo, $step['id_test']); if (!empty($questions)): ?>
                                         <a href="test_pass.php?test_id=<?= $step['id_test'] ?>" class="ui primary button">
                                             <i class="play icon"></i> Пройти тест
                                         </a>
                                     <?php endif; ?>
                                 <?php else: ?>
-                                    <div class="ui message">
-                                        <i class="info circle icon"></i>
-                                        Тест уже пройден
+                                    <div class="ui positive message">
+                                        <i class="check circle icon"></i>
+                                        Тест успешно пройден
                                     </div>
                                 <?php endif; ?>
                             <?php endif; ?>

@@ -64,6 +64,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+// Добавление дополнительных попыток
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if ($_POST['action'] === 'add_attempts' && is_teacher()) {
+        $student_id = isset($_POST['student_id']) ? (int)$_POST['student_id'] : 0;
+        $additional_attempts = isset($_POST['additional_attempts']) ? max(1, (int)$_POST['additional_attempts']) : 1;
+        
+        if ($student_id > 0) {
+            try {
+                // Проверяем, существует ли запись для этого студента
+                $stmt = $pdo->prepare("
+                    SELECT COUNT(*) 
+                    FROM student_test_settings 
+                    WHERE id_user = ? AND id_test = ?
+                ");
+                $stmt->execute([$student_id, $test_id]);
+                $exists = (int)$stmt->fetchColumn() > 0;
+                
+                if ($exists) {
+                    // Обновляем существующую запись
+                    $stmt = $pdo->prepare("
+                        UPDATE student_test_settings 
+                        SET additional_attempts = additional_attempts + ?
+                        WHERE id_user = ? AND id_test = ?
+                    ");
+                    $stmt->execute([$additional_attempts, $student_id, $test_id]);
+                } else {
+                    // Создаем новую запись
+                    $stmt = $pdo->prepare("
+                        INSERT INTO student_test_settings 
+                        (id_user, id_test, additional_attempts)
+                        VALUES (?, ?, ?)
+                    ");
+                    $stmt->execute([$student_id, $test_id, $additional_attempts]);
+                }
+                
+                $success = "Добавлено {$additional_attempts} дополнительных попыток для студента";
+            } catch (Exception $e) {
+                $error = "Ошибка при добавлении попыток: " . $e->getMessage();
+            }
+        } else {
+            $error = "Не выбран студент";
+        }
+    }
+}
+
 // Показываем сообщение об успехе, если есть
 if (isset($_GET['success']) && $_GET['success'] == 1) {
     $success_message = 'Оценка успешно обновлена!';
@@ -179,8 +224,50 @@ try {
         $attempts = $stmt->fetchAll();
     }
 
+    // Получаем уровни оценок для теста
+    $stmt = $pdo->prepare("
+        SELECT * FROM test_grade_levels
+        WHERE id_test = ?
+        ORDER BY min_percentage
+    ");
+    $stmt->execute([$test_id]);
+    $grade_levels = $stmt->fetchAll();
+
 } catch (PDOException $e) {
     $error = 'Ошибка базы данных: ' . $e->getMessage();
+}
+
+// Функция для получения цвета текста в зависимости от фона
+function getContrastColor($hexColor) {
+    // Удаляем # из начала строки
+    $hex = ltrim($hexColor, '#');
+    
+    // Разбираем RGB значения
+    $r = hexdec(substr($hex, 0, 2));
+    $g = hexdec(substr($hex, 2, 2));
+    $b = hexdec(substr($hex, 4, 2));
+    
+    // Рассчитываем яркость (по формуле ITU-R BT.709)
+    $brightness = (($r * 299) + ($g * 587) + ($b * 114)) / 1000;
+    
+    // Возвращаем белый или черный в зависимости от яркости
+    return $brightness > 128 ? '#000000' : '#FFFFFF';
+}
+
+// Функция для получения цвета уровня оценки
+function getGradeColor($percentage, $grade_levels) {
+    foreach ($grade_levels as $level) {
+        if ($percentage >= $level['min_percentage'] && $percentage <= $level['max_percentage']) {
+            return [
+                'name' => $level['grade_name'],
+                'color' => $level['grade_color']
+            ];
+        }
+    }
+    return [
+        'name' => 'Не определено',
+        'color' => '#000000'
+    ];
 }
 ?>
 <!DOCTYPE html>
@@ -260,11 +347,37 @@ try {
                             </tr>
                             <tr>
                                 <td><strong>Результат</strong></td>
-                                <td><?= htmlspecialchars($attempt['score']) ?> из <?= htmlspecialchars($attempt['max_score']) ?></td>
+                                <td>
+                                    <?php if ($attempt['score'] !== null && $attempt['max_score'] !== null): ?>
+                                        <?= htmlspecialchars($attempt['score']) ?> из <?= htmlspecialchars($attempt['max_score']) ?>
+                                    <?php else: ?>
+                                        <span class="text-muted">В процессе</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                             <tr>
                                 <td><strong>Статус</strong></td>
-                                <td><?= htmlspecialchars($attempt['status']) ?></td>
+                                <td>
+                                    <?php 
+                                    if ($attempt['status'] === 'completed') {
+                                        if ($attempt['score'] !== null && $attempt['max_score'] !== null) {
+                                            $score_percentage = ($attempt['score'] / $attempt['max_score']) * 100;
+                                            $is_passed = isset($test['passing_percentage']) && $score_percentage >= $test['passing_percentage'];
+                                            echo '<span class="ui ' . ($is_passed ? 'green' : 'red') . ' text">' . 
+                                                ($is_passed ? 'Пройден' : 'Не пройден') . '</span>';
+                                                
+                                            if (!$is_passed && $attempt['id_user'] == $_SESSION['user']['id_user']) {
+                                                echo ' <a href="test_pass.php?test_id=' . $test_id . '" class="ui mini primary button" style="margin-left: 15px;">';
+                                                echo '<i class="redo icon"></i> Пройти снова</a>';
+                                            }
+                                        } else {
+                                            echo '<span class="ui blue text">Обрабатывается</span>';
+                                        }
+                                    } else {
+                                        echo htmlspecialchars($attempt['status'] ?? 'Неизвестно');
+                                    }
+                                    ?>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -325,19 +438,18 @@ try {
                                             }
                                         }
                                         elseif ($answer['type_question'] === 'code') {
-                                            // Программирование
-                                            echo '</p>'; // Закрываем тег <p> перед выводом кода
-                                        ?>
+                                            // Код - закрываем текущий параграф перед отображением кода
+                                            echo '<span class="text-muted">См. ниже</span></p>';
+                                            
+                                            // Отображаем код и результаты
+                                            ?>
                                             <div class="field">
                                                 <label>Код студента:</label>
                                                 <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars($answer['answer_text'] ?? 'Код не предоставлен') ?></pre>
                                                 
                                                 <?php
-                                                // Get code task details
-                                                $stmt = $pdo->prepare("
-                                                    SELECT * FROM code_tasks
-                                                    WHERE id_question = ?
-                                                ");
+                                                // Получаем детали задания с кодом
+                                                $stmt = $pdo->prepare("SELECT * FROM code_tasks WHERE id_question = ?");
                                                 $stmt->execute([$answer['id_question']]);
                                                 $code_task = $stmt->fetch();
                                                 
@@ -373,7 +485,8 @@ try {
                                                 </div>
                                             <?php endif; ?>
                                             
-                                            <p> <!-- Открываем новый тег <p> для продолжения -->
+                                            <!-- Открываем новый параграф для продолжения -->
+                                            <p>
                                         <?php
                                         } else {
                                             // Неизвестный тип вопроса
@@ -421,8 +534,9 @@ try {
                         <tr>
                             <th>Студент</th>
                             <th>Дата начала</th>
-                            <th>Статус</th>
+                            <th>Дата завершения</th>
                             <th>Результат</th>
+                            <th>Статус</th>
                             <th>Действия</th>
                         </tr>
                     </thead>
@@ -431,13 +545,29 @@ try {
                             <tr>
                                 <td><?= htmlspecialchars($attempt['fn_user']) ?></td>
                                 <td><?= htmlspecialchars($attempt['start_time']) ?></td>
-                                <td><?= htmlspecialchars($attempt['status']) ?></td>
+                                <td><?= htmlspecialchars($attempt['end_time'] ?? 'Не завершен') ?></td>
                                 <td>
-                                    <?php if ($attempt['status'] === 'completed'): ?>
+                                    <?php if ($attempt['score'] !== null && $attempt['max_score'] !== null): ?>
                                         <?= htmlspecialchars($attempt['score']) ?> из <?= htmlspecialchars($attempt['max_score']) ?>
                                     <?php else: ?>
-                                        -
+                                        <span class="text-muted">В процессе</span>
                                     <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php 
+                                    if ($attempt['status'] === 'completed') {
+                                        if ($attempt['score'] !== null && $attempt['max_score'] !== null) {
+                                            $score_percentage = ($attempt['score'] / $attempt['max_score']) * 100;
+                                            $is_passed = isset($test['passing_percentage']) && $score_percentage >= $test['passing_percentage'];
+                                            echo '<span class="ui ' . ($is_passed ? 'green' : 'red') . ' text">' . 
+                                                ($is_passed ? 'Пройден' : 'Не пройден') . '</span>';
+                                        } else {
+                                            echo '<span class="ui blue text">Обрабатывается</span>';
+                                        }
+                                    } else {
+                                        echo htmlspecialchars($attempt['status'] ?? 'Неизвестно');
+                                    }
+                                    ?>
                                 </td>
                                 <td>
                                     <a href="test_results.php?test_id=<?= $test_id ?>&attempt_id=<?= $attempt['id_attempt'] ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" 
