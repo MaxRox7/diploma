@@ -32,6 +32,12 @@ function get_avatar_path($user_id) {
                     <i class="book icon"></i>
                     Курсы
                 </a>
+                <?php if (is_student()): ?>
+                    <a href="student_courses.php" class="item <?= basename($_SERVER['PHP_SELF']) === 'student_courses.php' ? 'active' : '' ?>">
+                        <i class="folder open icon"></i>
+                        Мои курсы
+                    </a>
+                <?php endif; ?>
                 <?php if (is_teacher()): ?>
                     <a href="my_courses.php" class="item <?= basename($_SERVER['PHP_SELF']) === 'my_courses.php' ? 'active' : '' ?>">
                         <i class="folder open icon"></i>
