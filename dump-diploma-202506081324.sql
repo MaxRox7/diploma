@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.0
 
--- Started on 2025-06-05 13:08:45
+-- Started on 2025-06-08 13:24:40
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -1007,6 +1007,16 @@ COPY public.answer_options (id_option, id_question, text_option) FROM stdin;
 140	55	Через переменную $_REQUEST.
 141	56	1||1
 142	56	2||2
+143	66	я
+144	66	Ты
+145	66	Он
+146	66	Мы
+147	67	я
+148	67	Я
+149	67	Ты
+150	67	Он/она/оно (например, животное или предмет)
+151	68	1||1
+152	68	2||2
 \.
 
 
@@ -1044,6 +1054,12 @@ COPY public.code_tasks (id_ct, id_question, input_ct, output_ct, execution_timeo
 4	60		15	5	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	php
 5	61		Сумма элементов массива: 15	5	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	cpp
 6	62		15	5	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	python
+7	63		hello world	5	<?php\r\n// Ваш код здесь\r\n?>	php
+8	64		hello world	5	# Ваш код здесь	python
+9	65		hello world	5	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	cpp
+10	70		15	5	<?php\r\n\r\nfunction sumOfFourElements($arr) {\r\n    // Ваш код здесь\r\n    return null;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfFourElements($array);\r\necho $result;\r\n?>	php
+11	71		hello world	5	# Напишите ваш код здесь	python
+12	72		Результат: 8	5	#include <iostream>\r\n\r\nint main() {\r\n    int a = 3;\r\n    int b = 5;\r\n    int res;\r\n\r\n    // Здесь должно быть решение\r\n\r\n    std::cout << "Результат: " << res << std::endl;\r\n    return 0;\r\n}	cpp
 \.
 
 
@@ -1054,6 +1070,8 @@ COPY public.code_tasks (id_ct, id_question, input_ct, output_ct, execution_timeo
 --
 
 COPY public.course (id_course, name_course, desc_course, with_certificate, hourse_course, requred_year, required_spec, required_uni, level_course, tags_course, status_course, moderation_comment) FROM stdin;
+27	фыфы	фыфы	f	12	\N	\N	\N	\N	фы	approved	as
+28	Курс с тестом	курс	f	12	\N	\N	\N	\N	php, c++, python	approved	\N
 16	fxg	dfg	f	1	\N	\N	\N	\N	dfg	pending	\N
 17	курс	курс	f	1	\N	\N	\N	\N	12	pending	\N
 18	asd	asd	t	1	\N	\N	\N	\N	asd	pending	\N
@@ -1157,9 +1175,52 @@ COPY public.create_passes (id_course, id_user, is_creator, date_complete) FROM s
 26	28	t	\N
 26	2	f	2025-06-05 09:57:07.87469
 26	9	f	2025-06-05 09:58:28.380094
-26	10	f	\N
 26	3	f	2025-06-05 10:05:28.047959
-26	18	f	\N
+26	8	f	\N
+26	16	f	\N
+26	29	f	2025-06-05 10:25:17.137593
+26	13	f	2025-06-05 10:30:40.27986
+26	22	f	\N
+26	31	f	\N
+26	30	f	\N
+26	18	f	2025-06-05 10:54:33.814922
+26	10	f	2025-06-05 10:54:39.170457
+26	14	f	2025-06-05 10:54:56.072916
+26	6	f	2025-06-05 11:07:48.062751
+26	12	f	\N
+26	23	f	\N
+26	15	f	2025-06-05 11:37:21.204933
+26	32	f	2025-06-05 11:44:53.799942
+24	32	f	\N
+26	25	f	2025-06-05 12:43:29.251179
+26	19	f	\N
+27	28	t	\N
+27	6	f	\N
+27	23	f	\N
+27	7	f	2025-06-05 13:03:40.234646
+27	24	f	\N
+27	25	f	\N
+27	2	f	\N
+27	3	f	2025-06-05 13:13:08.426719
+27	8	f	2025-06-05 13:26:39.554257
+27	9	f	\N
+27	10	f	2025-06-05 13:47:28.945326
+27	12	f	\N
+27	13	f	\N
+27	14	f	\N
+24	33	f	\N
+26	33	f	\N
+27	33	f	2025-06-05 14:12:35.633058
+27	18	f	2025-06-05 14:17:36.730345
+27	19	f	2025-06-05 14:28:14.418555
+27	20	f	\N
+27	29	f	\N
+27	22	f	\N
+27	30	f	\N
+28	28	t	\N
+28	6	f	\N
+28	23	f	\N
+28	7	f	2025-06-08 10:03:34.216813
 \.
 
 
@@ -1200,6 +1261,8 @@ COPY public.lessons (id_lesson, id_course, id_stat, name_lesson, status_lesson) 
 30	24	\N	Что такое FIGMA?	new
 31	25	\N	Переменные	new
 32	26	\N	Переменные	new
+33	27	\N	фы	new
+34	28	\N	тестик	new
 \.
 
 
@@ -1222,6 +1285,8 @@ MAT6051717                                                                      
 683dca3327f5f                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	63	materials/maxrox1904@gmail.com/Переменные/ывывыв_63.pdf	\N
 683ec8ca6cc07                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	65	materials/quixotesoul@gmail.com/Что такое FIGMA?/Как начать работу в програмее?_65.pdf	\N
 683ed04a95a0c                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	66	materials/quixotesoul@gmail.com/Переменные/asasas_66.pdf	\N
+68455a468dcb8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	75	materials/quixotesoul@gmail.com/тестик/тестик_75.pdf	\N
+684562279386a                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           	77	\N	https://dzen.ru/?clid=2411725&yredirect=true
 \.
 
 
@@ -1250,6 +1315,7 @@ COPY public.questions (id_question, id_test, text_question, answer_question, typ
 28	22	111	0,1	multi	\N
 29	22	sdfsdfsdfsdf		code	\N
 62	27	Сумма элементов массива из функции		code	\N
+63	28	Вывести hello world, и больше ничего		code	\N
 30	23	Какой комбинацией можно найти нужный фрейм?	1	single	\N
 31	24	кто?	2	single	\N
 32	24	не	0,1	multi	\N
@@ -1274,6 +1340,14 @@ COPY public.questions (id_question, id_test, text_question, answer_question, typ
 51	25	1. Как получить данные POST-запроса?	0	single	\N
 52	25	1. Как получить данные POST-запроса?	0	single	\N
 53	25	1. Как получить данные POST-запроса?	0	single	\N
+64	28	Вывести hello world, и больше ничего		code	\N
+65	28	Вывести hello world, и больше ничего		code	\N
+66	29	кто?	0	single	\N
+67	29	кто?	0,1	multi	\N
+68	29	число?		match	\N
+70	29	Сумма 4 элементов массива		code	\N
+71	29	вывести hello world		code	\N
+72	29	Сложить две переменные 3 и 5 в переменную res		code	\N
 \.
 
 
@@ -1322,6 +1396,10 @@ COPY public.steps (id_step, id_lesson, number_steps, status_step, type_step) FRO
 68	31	asas	not_started	test
 70	32	код тест	not_started	test
 21	10	Читайте	completed	material
+71	33	фы	not_started	test
+72	34	тест	not_started	test
+75	34	тестик	not_started	material
+77	34	as	not_started	material
 27	19	asd	completed	material
 \.
 
@@ -1381,6 +1459,7 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 68	29	58	\N	f	2025-06-04 13:03:16.504744	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
 130	45	60	\N	f	2025-06-05 09:56:04.364035	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	\N
 131	45	61	\N	f	2025-06-05 09:56:04.368093	\r\n#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+249	86	63	\N	f	2025-06-05 14:34:58.364488	<?php\r\n// Ваш код здесь\r\n?>	НЕПРАВИЛЬНО: код не содержит вывода 'hello world'.
 69	29	59	\N	f	2025-06-04 13:03:16.506869	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
 70	30	30	49	t	2025-06-04 13:10:58.010504	\N	\N
 71	30	57	\N	f	2025-06-04 13:10:58.013414	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 " . sum_array($test_array);\r\n?>',	\N
@@ -1399,6 +1478,7 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 84	33	58	\N	f	2025-06-04 13:26:30.367412	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
 103	38	57	\N	f	2025-06-04 13:51:24.737702	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 " . sum_array($test_array);\r\n?>',	\N
 104	38	58	\N	f	2025-06-04 13:51:24.742482	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    total = 0\r\n    for num in arr:\r\n        total += num\r\n    return total\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Вывод: Сумма массива: 15	\N
+250	86	64	\N	f	2025-06-05 14:34:58.369055	# Ваш код здесь	НЕПРАВИЛЬНО: код не представлен, невозможно проверить его корректность.
 85	33	59	\N	t	2025-06-04 13:26:30.369044	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
 86	34	30	49	t	2025-06-04 13:29:02.91345	\N	\N
 87	34	57	\N	f	2025-06-04 13:29:02.916498	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
@@ -1446,6 +1526,8 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 126	44	30	49	t	2025-06-04 15:25:23.571819	\N	\N
 127	44	57	\N	f	2025-06-04 15:25:23.5765	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	\N
 128	44	58	\N	f	2025-06-04 15:25:23.57842	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+246	85	63	\N	f	2025-06-05 14:30:16.569353	<?php\r\n// Ваш код здесь\r\n?>	\N
+247	85	64	\N	f	2025-06-05 14:30:16.572432	# Ваш код здесь	\N
 136	47	60	\N	f	2025-06-05 09:58:42.463277	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
 137	47	61	\N	f	2025-06-05 09:58:42.466875	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
 138	47	62	\N	f	2025-06-05 09:58:42.469263	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
@@ -1455,6 +1537,130 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 142	49	60	\N	f	2025-06-05 10:07:03.70786	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	\N
 143	49	61	\N	f	2025-06-05 10:07:03.715361	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
 144	49	62	\N	f	2025-06-05 10:07:03.721454	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+145	50	60	\N	f	2025-06-05 10:18:10.570946	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+146	50	61	\N	f	2025-06-05 10:18:10.573156	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+147	50	62	\N	f	2025-06-05 10:18:10.574292	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+148	53	60	\N	f	2025-06-05 10:23:49.803177	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	\N
+149	53	61	\N	f	2025-06-05 10:23:49.805851	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+150	53	62	\N	f	2025-06-05 10:23:49.807008	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+151	54	60	\N	f	2025-06-05 10:28:01.68606	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+152	54	61	\N	f	2025-06-05 10:28:01.688599	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+153	54	62	\N	f	2025-06-05 10:28:01.689947	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint("15")	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+154	55	60	\N	f	2025-06-05 10:47:02.661918	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+155	55	61	\N	f	2025-06-05 10:47:02.665354	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+156	55	62	\N	f	2025-06-05 10:47:02.667784	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint("15")	\N
+157	56	60	\N	f	2025-06-05 10:50:19.323976	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>\r\n	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+158	56	61	\N	f	2025-06-05 10:50:19.325865	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+159	56	62	\N	f	2025-06-05 10:50:19.327084	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint("15")	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+160	57	60	\N	f	2025-06-05 10:52:56.685056	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+161	57	61	\N	f	2025-06-05 10:52:56.687255	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+162	57	62	\N	f	2025-06-05 10:52:56.688382	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+163	58	60	\N	f	2025-06-05 10:55:15.30544	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+164	58	61	\N	f	2025-06-05 10:55:15.307457	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+165	58	62	\N	f	2025-06-05 10:55:15.308438	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+166	59	60	\N	f	2025-06-05 11:01:42.245599	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>\r\n	Ошибка при обращении к ИИ: Failed to connect to localhost port 81 after 0 ms: Couldn't connect to server
+167	59	61	\N	f	2025-06-05 11:01:42.24778	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Ошибка при обращении к ИИ: Failed to connect to localhost port 81 after 0 ms: Couldn't connect to server
+168	59	62	\N	f	2025-06-05 11:01:42.2488	def sum_of_elements(arr):\r\n    return sum(arr)\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)  # Выведет 15	Ошибка при обращении к ИИ: Failed to connect to localhost port 81 after 0 ms: Couldn't connect to server
+169	60	60	\N	f	2025-06-05 11:08:13.242401	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	Ошибка при обращении к ИИ: Failed to connect to localhost port 81 after 0 ms: Couldn't connect to server
+170	60	61	\N	f	2025-06-05 11:08:13.244813	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Ошибка при обращении к ИИ: Failed to connect to localhost port 81 after 0 ms: Couldn't connect to server
+171	60	62	\N	f	2025-06-05 11:08:13.245913	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	Ошибка при обращении к ИИ: Failed to connect to localhost port 81 after 0 ms: Couldn't connect to server
+172	61	60	\N	f	2025-06-05 11:35:53.812503	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+173	61	61	\N	f	2025-06-05 11:35:53.815681	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+174	61	62	\N	f	2025-06-05 11:35:53.818119	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+175	62	60	\N	f	2025-06-05 11:38:29.387194	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+176	62	61	\N	f	2025-06-05 11:38:29.390204	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+177	62	62	\N	f	2025-06-05 11:38:29.392751	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+178	63	60	\N	f	2025-06-05 11:38:33.117399	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+179	63	61	\N	f	2025-06-05 11:38:33.120586	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+180	63	62	\N	f	2025-06-05 11:38:33.123087	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+181	64	60	\N	f	2025-06-05 11:42:37.244379	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+182	64	61	\N	f	2025-06-05 11:42:37.2475	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+183	64	62	\N	f	2025-06-05 11:42:37.249914	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+184	65	60	\N	f	2025-06-05 11:42:41.585519	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+185	65	61	\N	f	2025-06-05 11:42:41.588662	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+186	65	62	\N	f	2025-06-05 11:42:41.591379	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+187	66	60	\N	f	2025-06-05 11:42:53.738917	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+188	66	61	\N	f	2025-06-05 11:42:53.7418	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+189	66	62	\N	f	2025-06-05 11:42:53.744191	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+190	67	60	\N	f	2025-06-05 11:43:43.327474	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+191	67	61	\N	f	2025-06-05 11:43:43.33056	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+192	67	62	\N	f	2025-06-05 11:43:43.33312	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+193	68	30	48	f	2025-06-05 11:45:02.214341	\N	\N
+195	68	58	\N	f	2025-06-05 11:45:02.220595	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Ожидаемый вывод: 15	\N
+196	68	59	\N	f	2025-06-05 11:45:02.222938	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: " << sumArray(testArray) << endl;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+194	68	57	\N	f	2025-06-05 11:45:02.218191	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array);\r\n?>',	ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.
+197	69	60	\N	f	2025-06-05 12:44:13.036512	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+198	69	61	\N	f	2025-06-05 12:44:13.040446	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+199	69	62	\N	f	2025-06-05 12:44:13.043499	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+248	85	65	\N	f	2025-06-05 14:30:16.574929	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+200	70	63	\N	f	2025-06-05 13:03:34.162221	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	\N
+201	70	64	\N	f	2025-06-05 13:03:34.166573	def sum_of_elements(arr):\r\n    return sum(arr)\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)  # Выведет 15\r\n	\N
+202	70	65	\N	f	2025-06-05 13:03:34.16982	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+203	71	63	\N	f	2025-06-05 13:03:54.74273	<?php\r\n// Ваш код здесь\r\n?>	\N
+204	71	64	\N	f	2025-06-05 13:03:54.746454	# Ваш код здесь	\N
+205	71	65	\N	f	2025-06-05 13:03:54.749528	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+206	72	63	\N	f	2025-06-05 13:05:54.422973	<?php\r\n// Ваш код здесь\r\n?>	\N
+207	72	64	\N	f	2025-06-05 13:05:54.426683	# Ваш код здесь	\N
+208	72	65	\N	f	2025-06-05 13:05:54.429821	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+209	73	63	\N	f	2025-06-05 13:07:25.438158	<?php\r\n// Ваш код здесь\r\n?>	\N
+210	73	64	\N	f	2025-06-05 13:07:25.441691	# Ваш код здесь	\N
+211	73	65	\N	f	2025-06-05 13:07:25.445064	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+212	74	63	\N	f	2025-06-05 13:10:48.392694	<?php\r\n// Ваш код здесь\r\n?>	\N
+213	74	64	\N	f	2025-06-05 13:10:48.396401	# Ваш код здесь	\N
+214	74	65	\N	f	2025-06-05 13:10:48.39951	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+215	75	63	\N	f	2025-06-05 13:13:21.076275	<?php\r\n// Ваш код здесь\r\n?>	\N
+216	75	64	\N	f	2025-06-05 13:13:21.080229	# Ваш код здесь	\N
+217	75	65	\N	f	2025-06-05 13:13:21.084384	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+218	76	63	\N	f	2025-06-05 13:26:54.919028	<?php\r\n// Ваш код здесь\r\n?>	\N
+219	76	64	\N	f	2025-06-05 13:26:54.923141	# Ваш код здесь	\N
+220	76	65	\N	f	2025-06-05 13:26:54.926081	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+221	77	63	\N	f	2025-06-05 13:28:28.049503	<?php\r\n// Ваш код здесь\r\n?>	\N
+222	77	64	\N	f	2025-06-05 13:28:28.053387	# Ваш код здесь	\N
+223	77	65	\N	f	2025-06-05 13:28:28.05679	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+224	78	63	\N	f	2025-06-05 13:56:39.082147	<?php\r\n// Ваш код здесь\r\n?>	\N
+225	78	64	\N	f	2025-06-05 13:56:39.086269	# Ваш код здесь	\N
+226	78	65	\N	f	2025-06-05 13:56:39.089564	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+227	79	30	49	t	2025-06-05 13:58:47.875268	\N	\N
+229	79	58	\N	t	2025-06-05 13:58:47.88375	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    pass  # Замените pass на ваш код\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: 15")  # Ожидаемый вывод: 15	\N
+230	79	59	\N	t	2025-06-05 13:58:47.887097	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15" ;  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
+228	79	57	\N	f	2025-06-05 13:58:47.88016	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>\r\n	ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.
+231	80	63	\N	f	2025-06-05 14:08:06.249738	<?php\r\n// Ваш код здесь\r\n?>	\N
+232	80	64	\N	f	2025-06-05 14:08:06.2538	# Ваш код здесь	\N
+233	80	65	\N	f	2025-06-05 14:08:06.257062	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+234	81	60	\N	f	2025-06-05 14:08:46.197088	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>\r\n	\N
+235	81	61	\N	t	2025-06-05 14:08:46.201229	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}\r\n	\N
+236	81	62	\N	t	2025-06-05 14:08:46.204804	def sum_of_elements(arr):\r\n    return sum(arr)\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)  # Выведет 15\r\n	\N
+237	82	63	\N	f	2025-06-05 14:12:59.905146	<?php\r\n// Ваш код здесь\r\n?>	\N
+238	82	64	\N	f	2025-06-05 14:12:59.909495	# Ваш код здесь	\N
+239	82	65	\N	f	2025-06-05 14:12:59.913014	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+240	83	63	\N	f	2025-06-05 14:18:51.224169	<?php\r\necho "hello world"\r\n?>	\N
+241	83	64	\N	t	2025-06-05 14:18:51.227493	print("hello world")	\N
+242	83	65	\N	t	2025-06-05 14:18:51.230286	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
+243	84	63	\N	f	2025-06-05 14:28:37.078879	<?php\r\n// Ваш код здесь\r\n?>	\N
+244	84	64	\N	f	2025-06-05 14:28:37.082881	# Ваш код здесь	\N
+245	84	65	\N	f	2025-06-05 14:28:37.086164	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	\N
+251	86	65	\N	f	2025-06-05 14:34:58.372545	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	НЕПРАВИЛЬНО: код не выводит 'hello world', так как в представленном коде нет инструкций для вывода текста.
+252	87	63	\N	f	2025-06-05 14:39:17.455143	<?php\r\n// Ваш код здесь\r\n?>	НЕПРАВИЛЬНО: код не содержит вывода 'hello world'.
+253	87	64	\N	f	2025-06-05 14:39:17.458039	# Ваш код здесь	НЕПРАВИЛЬНО: код не представлен, невозможно проверить его корректность.
+254	87	65	\N	f	2025-06-05 14:39:17.460223	#include <iostream>\r\n\r\nint main() {\r\n    // ваш код здесь\r\n    return 0;\r\n}	НЕПРАВИЛЬНО: код не выводит 'hello world', так как в представленном коде нет инструкций для вывода текста.
+285	120	66	143	t	2025-06-08 09:47:42.430423	\N	\N
+286	120	67	147	t	2025-06-08 09:47:42.433709	["0","1"]	\N
+287	120	68	\N	t	2025-06-08 09:47:42.435259	["0","1"]	\N
+288	120	70	\N	f	2025-06-08 09:47:42.439247	<?php\r\n\r\nfunction sumOfFourElements($arr) {\r\n    $res = array_sum($arr);\r\n    return $res;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfFourElements($array);\r\necho $result;\r\n?>	НЕПРАВИЛЬНО: функция sumOfFourElements должна суммировать только четыре элемента массива, а не все.
+289	120	71	\N	f	2025-06-08 09:47:42.441083	print("poka")	НЕПРАВИЛЬНО: вывод программы не соответствует ожидаемому результату
+290	120	72	\N	f	2025-06-08 09:47:42.442817	#include <iostream>\r\n\r\nint main() {\r\n    int a = 3;\r\n    int b = 5;\r\n    int res;\r\n\r\n    // Здесь должно быть решение\r\n\r\n    std::cout << "Результат: 8 ";\r\n    return 0;\r\n}	НЕПРАВИЛЬНО: хотя код компилируется и выводит правильный результат, в комментарии указано 'std::cout << "Результат: 8 ";', что не соответствует ожидаемому шаблону вывода.
+291	121	66	144	f	2025-06-08 09:58:58.734292	\N	\N
+292	121	67	147	t	2025-06-08 09:58:58.736842	["0","1"]	\N
+293	121	68	\N	t	2025-06-08 09:58:58.738418	["0","1"]	\N
+294	121	70	\N	f	2025-06-08 09:58:58.743112	<?php\r\n\r\nfunction sumOfFourElements($arr) {\r\n    $res = array_sum($arr);\r\n    return $res;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfFourElements($array);\r\necho $result;\r\n?>	НЕПРАВИЛЬНО: функция должна возвращать сумму только четырёх элементов, а не всех элементов массива.
+295	121	71	\N	f	2025-06-08 09:58:58.744989	print("pika")	НЕПРАВИЛЬНО: вывод не соответствует ожидаемому ('pika' вместо 'hello world')
+296	121	72	\N	f	2025-06-08 09:58:58.747075	#include <iostream>\r\n\r\nint main() {\r\n    int a = 3;\r\n    int b = 5;\r\n    int res;\r\n\r\n    // Здесь должно быть решение\r\n\r\n    std::cout << "Результат: " << res << std::endl;\r\n    return 0;\r\n}	НЕПРАВИЛЬНО: необходимо добавить операцию сложения переменных a и b и присвоить результат переменной res.
+297	122	66	143	t	2025-06-08 10:01:51.548286	\N	\N
+298	122	67	147	t	2025-06-08 10:01:51.550654	["0","1"]	\N
+299	122	68	\N	t	2025-06-08 10:01:51.552182	["0","1"]	\N
+300	122	70	\N	f	2025-06-08 10:01:51.554266	<?php\r\n\r\nfunction sumOfFourElements($arr) {\r\n    $sum = 0;\r\n    for ($i = 0; $i < 4 && $i < count($arr); $i++) {\r\n        $sum += $arr[$i];\r\n    }\r\n    return $sum;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfFourElements($array);\r\necho $result; // Выведет 10 (1+2+3+4)\r\n?>	НЕПРАВИЛЬНО: функция корректно суммирует только первые четыре элемента массива, однако в массиве $array всего пять элементов, и сумма должна быть 15 (1+2+3+4+5), а не 10.
+301	122	71	\N	t	2025-06-08 10:01:51.556027	print("hello world")	ПРАВИЛЬНО: код корректно выводит 'hello world'
+302	122	72	\N	t	2025-06-08 10:01:51.557871	#include <iostream>\r\n\r\nint main() {\r\n    int a = 3;\r\n    int b = 5;\r\n    int res = a+b;\r\n\r\n    // Здесь должно быть решение\r\n\r\n    std::cout << "Результат: " << res << std::endl;\r\n    return 0;\r\n}	ПРАВИЛЬНО: задача решена корректно, переменные a и b складываются и результат сохраняется в переменную res, которая затем выводится на экран.
 \.
 
 
@@ -1501,6 +1707,47 @@ COPY public.test_attempts (id_attempt, id_test, id_user, start_time, end_time, s
 47	27	10	2025-06-05 09:58:42.45804	2025-06-05 09:58:42.45804	0	3	completed
 48	27	3	2025-06-05 09:59:42.623881	2025-06-05 09:59:42.623881	0	3	completed
 49	27	18	2025-06-05 10:07:03.678088	2025-06-05 10:07:03.678088	0	3	completed
+50	27	8	2025-06-05 10:18:10.566514	2025-06-05 10:18:10.566514	0	3	completed
+51	27	16	2025-06-05 10:20:03.590231	2025-06-05 10:20:03.590231	0	3	completed
+52	27	14	2025-06-05 10:21:57.351392	2025-06-05 10:21:57.351392	0	3	completed
+53	27	29	2025-06-05 10:23:49.763352	2025-06-05 10:23:49.763352	0	3	completed
+54	27	13	2025-06-05 10:28:01.682448	2025-06-05 10:28:01.682448	0	3	completed
+55	27	22	2025-06-05 10:47:02.656253	2025-06-05 10:47:02.656253	0	3	completed
+56	27	31	2025-06-05 10:50:19.320883	2025-06-05 10:50:19.320883	0	3	completed
+57	27	30	2025-06-05 10:52:56.682251	2025-06-05 10:52:56.682251	0	3	completed
+58	27	25	2025-06-05 10:55:15.302969	2025-06-05 10:55:15.302969	0	3	completed
+59	27	6	2025-06-05 11:01:42.242027	2025-06-05 11:01:42.242027	0	3	completed
+60	27	12	2025-06-05 11:08:13.23892	2025-06-05 11:08:13.23892	0	3	completed
+61	27	15	2025-06-05 11:35:53.806717	2025-06-05 11:35:53.806717	0	3	completed
+62	27	32	2025-06-05 11:38:29.38211	2025-06-05 11:38:29.38211	0	3	completed
+63	27	32	2025-06-05 11:38:33.113066	2025-06-05 11:38:33.113066	0	3	completed
+64	27	32	2025-06-05 11:42:37.238675	2025-06-05 11:42:37.238675	0	3	completed
+65	27	32	2025-06-05 11:42:41.580752	2025-06-05 11:42:41.580752	0	3	completed
+66	27	32	2025-06-05 11:42:53.734424	2025-06-05 11:42:53.734424	0	3	completed
+67	27	32	2025-06-05 11:43:43.322062	2025-06-05 11:43:43.322062	0	3	completed
+68	23	32	2025-06-05 11:45:02.210447	2025-06-05 11:45:02.210447	0	4	completed
+69	27	19	2025-06-05 12:44:13.028975	2025-06-05 12:44:13.028975	0	3	completed
+70	28	7	2025-06-05 13:03:34.119297	2025-06-05 13:03:34.119297	0	3	completed
+71	28	24	2025-06-05 13:03:54.737519	2025-06-05 13:03:54.737519	0	3	completed
+72	28	25	2025-06-05 13:05:54.417524	2025-06-05 13:05:54.417524	0	3	completed
+73	28	2	2025-06-05 13:07:25.432945	2025-06-05 13:07:25.432945	0	3	completed
+74	28	3	2025-06-05 13:10:48.387309	2025-06-05 13:10:48.387309	0	3	completed
+75	28	8	2025-06-05 13:13:21.07034	2025-06-05 13:13:21.07034	0	3	completed
+76	28	9	2025-06-05 13:26:54.912517	2025-06-05 13:26:54.912517	0	3	completed
+77	28	10	2025-06-05 13:28:28.043607	2025-06-05 13:28:28.043607	0	3	completed
+78	28	14	2025-06-05 13:56:39.038258	2025-06-05 13:56:39.038258	0	3	completed
+79	23	33	2025-06-05 13:58:47.833725	2025-06-05 13:58:47.833725	3	4	completed
+80	28	33	2025-06-05 14:08:06.243492	2025-06-05 14:08:06.243492	0	3	completed
+81	27	33	2025-06-05 14:08:46.153131	2025-06-05 14:08:46.153131	3	3	completed
+82	28	18	2025-06-05 14:12:59.880904	2025-06-05 14:12:59.880904	0	3	completed
+83	28	19	2025-06-05 14:18:51.181141	2025-06-05 14:18:51.181141	2	3	completed
+84	28	20	2025-06-05 14:28:37.072619	2025-06-05 14:28:37.072619	0	3	completed
+85	28	29	2025-06-05 14:30:16.544675	2025-06-05 14:30:16.544675	0	3	completed
+86	28	22	2025-06-05 14:34:58.320831	2025-06-05 14:34:58.320831	0	3	completed
+87	28	30	2025-06-05 14:39:17.413813	2025-06-05 14:39:17.413813	0	3	completed
+120	29	6	2025-06-08 09:47:42.389402	2025-06-08 09:47:42.389402	3	6	completed
+121	29	23	2025-06-08 09:58:58.69624	2025-06-08 09:58:58.69624	2	6	completed
+122	29	7	2025-06-08 10:01:51.51106	2025-06-08 10:01:51.51106	5	6	completed
 \.
 
 
@@ -1518,6 +1765,8 @@ COPY public.tests (id_test, id_step, name_test, desc_test) FROM stdin;
 24	67	Новый тест	
 25	68	Новый тест	
 27	70	Новый тест	
+28	71	Новый тест	
+29	72	Новый тест	
 \.
 
 
@@ -1554,6 +1803,7 @@ COPY public.user_material_progress (id_user, id_step, completed_at) FROM stdin;
 2	66	2025-06-04 10:58:24.643045
 7	65	2025-06-04 13:53:38.264113
 29	65	2025-06-04 15:04:58.106382
+7	75	2025-06-08 10:03:29.795102
 \.
 
 
@@ -1594,6 +1844,8 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 21	Maxim Boldyrev	2003-03-19	ЛГТУ	teacher	Информатика	1	oops	$2y$12$O4xRZxgvK/WJPH0JKq9XV.YtyN7eGZjqDNu3ZwBh5wHDnLNYbknlu	\N	approved	\N	\N	\N	\N
 27	Пупкин Кирилл Васильевич	2003-03-19	ыфва	teacher	ваып	2	asdsadasD@mail.ru	$2y$12$2T9g.ZfYsYaewsakcw20NO.ioKXZBJ2yC9SKTBffgc17cjZJFkCI6	uploads/teachers/criminal/criminal_683dc7568fa22_default.jpg	approved	\N	\N	uploads/teachers/passport/passport_683dc7568fa1b_default.jpg	uploads/teachers/diploma/diploma_683dc7568fa20_0QwgmBt4IN8.jpg
 31	ЫФЫФЫФЫ	2003-03-19	ФЫ	student	ФЫ	2	russia@bkb.ru	$2y$12$rJJXMmL.KpS1yjK3o1CsReJA9dhP.hwKK15aJahPA/xECPXdjPRbS	\N	approved	\N	uploads/students/student_card_6840648c25f7f_curl_test.php	\N	\N
+32	asasa	3712-09-12	12	student	12	1	rus@bbkbkb.ru	$2y$12$rbAZ2Jx/R7SuopucqEwMWuputR/R/wenV7zvWvZMAIqZQ84Cqu0I.	\N	approved	\N	uploads/students/student_card_684181a06bf8c_requirements.txt	\N	\N
+33	ыфыфы	2003-03-19	ыв	student	ыв	1	jasjasj@bkk.ru	$2y$12$jILnwfJsvj1AJ2Tvy7NaMeGl5LN4GlRH9QuJ1hb/UukFeIaTvC3ti	\N	approved	\N	uploads/students/student_card_6841a259ea915_main.py	\N	\N
 \.
 
 
@@ -1603,7 +1855,7 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 -- Name: answer_options_id_option_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.answer_options_id_option_seq', 142, true);
+SELECT pg_catalog.setval('public.answer_options_id_option_seq', 156, true);
 
 
 --
@@ -1630,7 +1882,7 @@ SELECT pg_catalog.setval('public.certificates_id_certificate_seq', 1, true);
 -- Name: code_tasks_id_ct_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 6, true);
+SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 12, true);
 
 
 --
@@ -1639,7 +1891,7 @@ SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 6, true);
 -- Name: course_id_course_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.course_id_course_seq', 26, true);
+SELECT pg_catalog.setval('public.course_id_course_seq', 28, true);
 
 
 --
@@ -1657,7 +1909,7 @@ SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 13, true);
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 32, true);
+SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 34, true);
 
 
 --
@@ -1666,7 +1918,7 @@ SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 32, true);
 -- Name: questions_id_question_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.questions_id_question_seq', 62, true);
+SELECT pg_catalog.setval('public.questions_id_question_seq', 72, true);
 
 
 --
@@ -1693,7 +1945,7 @@ SELECT pg_catalog.setval('public.stat_id_stat_seq', 1, false);
 -- Name: steps_id_step_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.steps_id_step_seq', 70, true);
+SELECT pg_catalog.setval('public.steps_id_step_seq', 77, true);
 
 
 --
@@ -1702,7 +1954,7 @@ SELECT pg_catalog.setval('public.steps_id_step_seq', 70, true);
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 144, true);
+SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 302, true);
 
 
 --
@@ -1711,7 +1963,7 @@ SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 144, true);
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 49, true);
+SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 122, true);
 
 
 --
@@ -1720,7 +1972,7 @@ SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 49, true);
 -- Name: tests_id_test_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.tests_id_test_seq', 27, true);
+SELECT pg_catalog.setval('public.tests_id_test_seq', 29, true);
 
 
 --
@@ -1729,7 +1981,7 @@ SELECT pg_catalog.setval('public.tests_id_test_seq', 27, true);
 -- Name: users_id_user_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.users_id_user_seq', 31, true);
+SELECT pg_catalog.setval('public.users_id_user_seq', 33, true);
 
 
 --
@@ -2444,7 +2696,7 @@ ALTER TABLE ONLY public.user_material_progress
     ADD CONSTRAINT user_material_progress_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.users(id_user);
 
 
--- Completed on 2025-06-05 13:08:47
+-- Completed on 2025-06-08 13:24:42
 
 --
 -- PostgreSQL database dump complete
