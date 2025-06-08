@@ -690,6 +690,13 @@ function get_question_options($pdo, $question_id) {
                         
                         <button type="submit" class="ui primary button">Сохранить настройки теста</button>
                     </form>
+                    
+                    <div class="ui divider"></div>
+                    <h4>Управление попытками</h4>
+                    <p>Предоставление дополнительных попыток для прохождения теста студентам</p>
+                    <a href="manage_test_attempts.php?test_id=<?= $test_id ?>" class="ui teal button">
+                        <i class="users icon"></i> Управление попытками студентов
+                    </a>
                 </div>
             </div>
 

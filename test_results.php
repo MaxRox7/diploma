@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     if ($_POST['action'] === 'add_attempts' && is_teacher()) {
         $student_id = isset($_POST['student_id']) ? (int)$_POST['student_id'] : 0;
-        $additional_attempts = isset($_POST['additional_attempts']) ? max(1, (int)$_POST['additional_attempts']) : 1;
+        $attempts = isset($_POST['attempts']) ? max(1, (int)$_POST['attempts']) : 1;
         
         if ($student_id > 0) {
             try {
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         SET additional_attempts = additional_attempts + ?
                         WHERE id_user = ? AND id_test = ?
                     ");
-                    $stmt->execute([$additional_attempts, $student_id, $test_id]);
+                    $stmt->execute([$attempts, $student_id, $test_id]);
                 } else {
                     // Создаем новую запись
                     $stmt = $pdo->prepare("
@@ -96,15 +96,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                         (id_user, id_test, additional_attempts)
                         VALUES (?, ?, ?)
                     ");
-                    $stmt->execute([$student_id, $test_id, $additional_attempts]);
+                    $stmt->execute([$student_id, $test_id, $attempts]);
                 }
                 
-                $success = "Добавлено {$additional_attempts} дополнительных попыток для студента";
+                $success_message = "Добавлено {$attempts} дополнительных попыток для студента";
             } catch (Exception $e) {
-                $error = "Ошибка при добавлении попыток: " . $e->getMessage();
+                $error_message = "Ошибка при добавлении попыток: " . $e->getMessage();
             }
         } else {
-            $error = "Не выбран студент";
+            $error_message = "Не выбран студент";
         }
     }
 }
@@ -367,8 +367,48 @@ function getGradeColor($percentage, $grade_levels) {
                                                 ($is_passed ? 'Пройден' : 'Не пройден') . '</span>';
                                                 
                                             if (!$is_passed && $attempt['id_user'] == $_SESSION['user']['id_user']) {
-                                                echo ' <a href="test_pass.php?test_id=' . $test_id . '" class="ui mini primary button" style="margin-left: 15px;">';
-                                                echo '<i class="redo icon"></i> Пройти снова</a>';
+                                                // Получаем количество попыток студента
+                                                $stmt = $pdo->prepare("
+                                                    SELECT COUNT(*) as attempt_count 
+                                                    FROM test_attempts 
+                                                    WHERE id_test = ? AND id_user = ?
+                                                ");
+                                                $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+                                                $attempts_used = $stmt->fetchColumn();
+                                                
+                                                // Получаем дополнительные попытки из настроек
+                                                $stmt = $pdo->prepare("
+                                                    SELECT additional_attempts
+                                                    FROM student_test_settings
+                                                    WHERE id_test = ? AND id_user = ?
+                                                ");
+                                                $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+                                                $additional_attempts = $stmt->fetchColumn();
+                                                if ($additional_attempts === false) {
+                                                    $additional_attempts = 0;
+                                                }
+                                                
+                                                $total_allowed = $test['max_attempts'] + $additional_attempts;
+                                                
+                                                if ($attempts_used < $total_allowed) {
+                                                    $remaining = $total_allowed - $attempts_used;
+                                                    echo '<div class="ui segment" style="margin-top: 10px;">
+                                                        <p>У вас осталось попыток: <strong>' . $remaining . '</strong></p>
+                                                        <a href="test_pass.php?test_id=' . $test_id . '" class="ui blue button">
+                                                            Попробовать ещё раз
+                                                        </a>
+                                                    </div>';
+                                                } else {
+                                                    if ($additional_attempts > 0) {
+                                                        echo '<div class="ui segment" style="margin-top: 10px;">
+                                                            <p>Вы использовали все свои попытки, включая ' . $additional_attempts . ' дополнительных.</p>
+                                                        </div>';
+                                                    } else {
+                                                        echo '<div class="ui segment" style="margin-top: 10px;">
+                                                            <p>Вы использовали все свои попытки.</p>
+                                                        </div>';
+                                                    }
+                                                }
                                             }
                                         } else {
                                             echo '<span class="ui blue text">Обрабатывается</span>';
@@ -379,6 +419,49 @@ function getGradeColor($percentage, $grade_levels) {
                                     ?>
                                 </td>
                             </tr>
+                            <?php 
+                            // Показываем информацию о дополнительных попытках только для текущего пользователя
+                            if ($attempt['id_user'] == $_SESSION['user']['id_user']):
+                                // Получаем количество попыток и дополнительные попытки
+                                $stmt = $pdo->prepare("
+                                    SELECT COUNT(*) as attempt_count 
+                                    FROM test_attempts
+                                    WHERE id_test = ? AND id_user = ? AND status = 'completed'
+                                ");
+                                $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+                                $attempt_count = (int)$stmt->fetchColumn();
+                                
+                                // Получаем дополнительные попытки
+                                $stmt = $pdo->prepare("
+                                    SELECT additional_attempts 
+                                    FROM student_test_settings
+                                    WHERE id_test = ? AND id_user = ?
+                                ");
+                                $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+                                $additional_attempts = (int)($stmt->fetchColumn() ?: 0);
+                                
+                                // Максимальное количество попыток
+                                $max_attempts = (int)$test['max_attempts'] + $additional_attempts;
+                                $remaining_attempts = $max_attempts - $attempt_count;
+                            ?>
+                            <tr>
+                                <td><strong>Попытки</strong></td>
+                                <td>
+                                    Использовано: <?= $attempt_count ?> из <?= $max_attempts ?>
+                                    <?php if ($additional_attempts > 0): ?>
+                                        <span class="ui olive label">+<?= $additional_attempts ?> дополнительных</span>
+                                    <?php endif; ?>
+                                    <br>
+                                    Осталось: <?= $remaining_attempts ?> 
+                                    <?php if ($remaining_attempts <= 0 && !$is_passed): ?>
+                                        <span class="ui red text">
+                                            <i class="exclamation triangle icon"></i>
+                                            У вас закончились попытки. Обратитесь к преподавателю для получения дополнительных попыток.
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
 
@@ -580,6 +663,106 @@ function getGradeColor($percentage, $grade_levels) {
                     </tbody>
                 </table>
             </div>
+            
+            <?php if (is_teacher()): ?>
+            <!-- Блок управления попытками для преподавателя -->
+            <div class="ui segment">
+                <h3>Управление попытками студентов</h3>
+                <p>Здесь вы можете добавить дополнительные попытки прохождения теста для студентов.</p>
+                
+                <?php if (!empty($success_message)): ?>
+                <div class="ui positive message">
+                    <i class="close icon"></i>
+                    <div class="header">Успех</div>
+                    <p><?= htmlspecialchars($success_message) ?></p>
+                </div>
+                <?php endif; ?>
+                
+                <?php if (!empty($error_message)): ?>
+                <div class="ui negative message">
+                    <i class="close icon"></i>
+                    <div class="header">Ошибка</div>
+                    <p><?= htmlspecialchars($error_message) ?></p>
+                </div>
+                <?php endif; ?>
+                
+                <?php
+                // Получаем список всех студентов, записанных на курс
+                $stmt = $pdo->prepare("
+                    SELECT u.id_user, u.fn_user, u.login_user,
+                           COALESCE(sts.additional_attempts, 0) as additional_attempts,
+                           COUNT(ta.id_attempt) as attempts_count,
+                           MAX(CASE WHEN ta.status = 'completed' AND ta.score >= (t.passing_percentage * ta.max_score / 100) THEN 1 ELSE 0 END) as has_passed
+                    FROM users u
+                    JOIN create_passes cp ON u.id_user = cp.id_user
+                    JOIN course c ON cp.id_course = c.id_course
+                    JOIN lessons l ON c.id_course = l.id_course
+                    JOIN Steps s ON l.id_lesson = s.id_lesson
+                    JOIN Tests t ON s.id_step = t.id_step AND t.id_test = ?
+                    LEFT JOIN student_test_settings sts ON u.id_user = sts.id_user AND t.id_test = sts.id_test
+                    LEFT JOIN test_attempts ta ON u.id_user = ta.id_user AND t.id_test = ta.id_test
+                    WHERE cp.is_creator = false AND u.role_user = ?
+                    GROUP BY u.id_user, u.fn_user, u.login_user, sts.additional_attempts
+                    ORDER BY u.fn_user
+                ");
+                $stmt->execute([$test_id, ROLE_STUDENT]);
+                $course_students = $stmt->fetchAll();
+                
+                if (!empty($course_students)):
+                ?>
+                <table class="ui celled table">
+                    <thead>
+                        <tr>
+                            <th>Студент</th>
+                            <th>Email</th>
+                            <th>Статус</th>
+                            <th>Использовано попыток</th>
+                            <th>Доп. попытки</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($course_students as $student): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($student['fn_user']) ?></td>
+                                <td><?= htmlspecialchars($student['login_user']) ?></td>
+                                <td>
+                                    <?php if ($student['has_passed']): ?>
+                                        <div class="ui green label">Пройден</div>
+                                    <?php elseif ($student['attempts_count'] > 0): ?>
+                                        <div class="ui red label">Не пройден</div>
+                                    <?php else: ?>
+                                        <div class="ui grey label">Не приступал</div>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= $student['attempts_count'] ?> / <?= $test['max_attempts'] + $student['additional_attempts'] ?></td>
+                                <td><?= $student['additional_attempts'] ?></td>
+                                <td>
+                                    <form method="post" class="ui form" style="display: flex; align-items: center;">
+                                        <input type="hidden" name="action" value="add_attempts">
+                                        <input type="hidden" name="student_id" value="<?= $student['id_user'] ?>">
+                                        <div style="display: flex; align-items: center;">
+                                            <input type="number" name="attempts" min="1" value="1" required style="width: 70px; margin-right: 10px;">
+                                            <button type="submit" class="ui tiny blue button">
+                                                <i class="plus icon"></i> Добавить
+                                            </button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+                <?php else: ?>
+                <div class="ui placeholder segment">
+                    <div class="ui icon header">
+                        <i class="users icon"></i>
+                        На курс пока не записаны студенты
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
 
             <div class="ui segment">
                 <a href="edit_test.php?test_id=<?= $test_id ?><?= $is_admin_view ? '&admin_view=1' : '' ?>" class="ui button">
