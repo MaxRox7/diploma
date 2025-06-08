@@ -220,3 +220,52 @@ function send_email_smtp($to, $subject, $message) {
         return send_email($to, $subject, $message);
     }
 }
+
+// Функция обновления интересов пользователя на основе курсов, на которые он записан
+function update_user_interests($user_id) {
+    try {
+        $pdo = get_db_connection();
+        
+        // Начинаем транзакцию
+        $pdo->beginTransaction();
+        
+        // Получаем все теги курсов, на которые записан пользователь
+        $stmt = $pdo->prepare("
+            SELECT DISTINCT t.id_tag, t.name_tag, COUNT(*) as tag_count
+            FROM course_tags ct
+            JOIN tags t ON ct.id_tag = t.id_tag
+            JOIN create_passes cp ON ct.id_course = cp.id_course
+            WHERE cp.id_user = ?
+            GROUP BY t.id_tag, t.name_tag
+        ");
+        $stmt->execute([$user_id]);
+        $user_course_tags = $stmt->fetchAll();
+        
+        if (!empty($user_course_tags)) {
+            // Удаляем существующие интересы пользователя
+            $stmt = $pdo->prepare("DELETE FROM user_tag_interests WHERE id_user = ?");
+            $stmt->execute([$user_id]);
+            
+            // Добавляем новые интересы на основе тегов курсов
+            $stmt = $pdo->prepare("
+                INSERT INTO user_tag_interests (id_user, id_tag, interest_weight)
+                VALUES (?, ?, ?)
+            ");
+            
+            foreach ($user_course_tags as $tag) {
+                $weight = min(5.0, 1.0 + ($tag['tag_count'] * 0.5)); // Увеличиваем вес в зависимости от количества курсов с этим тегом
+                $stmt->execute([$user_id, $tag['id_tag'], $weight]);
+            }
+        }
+        
+        // Завершаем транзакцию
+        $pdo->commit();
+        return true;
+    } catch (PDOException $e) {
+        if (isset($pdo)) {
+            $pdo->rollBack();
+        }
+        error_log('Ошибка при обновлении интересов пользователя: ' . $e->getMessage());
+        return false;
+    }
+}

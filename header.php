@@ -63,6 +63,10 @@ function get_avatar_path($user_id) {
                             <i class="user icon"></i>
                             Профиль
                         </a>
+                        <a href="learning_analytics.php" class="item <?= basename($_SERVER['PHP_SELF']) === 'learning_analytics.php' ? 'active' : '' ?>">
+                            <i class="chart bar icon"></i>
+                            Аналитика обучения
+                        </a>
                         <a href="logout.php" class="item">
                             <i class="sign out icon"></i>
                             Выход

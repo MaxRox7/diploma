@@ -33,6 +33,25 @@ try {
     $stmt->execute([$course_id]);
     $course = $stmt->fetch();
     
+    // Регистрируем просмотр курса
+    if (isset($_SESSION['user'])) {
+        $stmt = $pdo->prepare("
+            INSERT INTO course_views (id_course, id_user)
+            VALUES (?, ?)
+        ");
+        $stmt->execute([$course_id, $user_id]);
+        
+        // Обновляем статистику курса
+        $stmt = $pdo->prepare("
+            INSERT INTO course_statistics (id_course, views_count, enrollment_count, completion_count)
+            VALUES (?, 1, 0, 0)
+            ON CONFLICT (id_course) DO UPDATE SET
+            views_count = course_statistics.views_count + 1,
+            last_updated = CURRENT_TIMESTAMP
+        ");
+        $stmt->execute([$course_id]);
+    }
+    
     if (!$course) {
         throw new Exception('Курс не найден');
     }
@@ -183,6 +202,10 @@ try {
                         VALUES (?, ?, NULL)
                     ");
                     $stmt->execute([$course_id, $user_id]);
+                    
+                    // Обновляем интересы пользователя на основе курсов
+                    update_user_interests($user_id);
+                    
                     $success = 'Вы успешно записались на курс';
                     $course['is_enrolled'] = true;
                     $is_enrolled = true;

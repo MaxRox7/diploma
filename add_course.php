@@ -40,16 +40,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 RETURNING id_course
             ");
             
+            // Проверяем и преобразуем значения перед отправкой в БД
+            $hourse_course = is_numeric($hourse_course) ? $hourse_course : null;
+            $requred_year = !empty($requred_year) ? (int)$requred_year : null;
+            $required_spec = !empty($required_spec) ? $required_spec : null;
+            $required_uni = !empty($required_uni) ? $required_uni : null;
+            $level_course = !empty($level_course) ? $level_course : null;
+            
             $status = is_teacher() ? 'draft' : 'approved';
             $stmt->execute([
                 $name_course,
                 $desc_course,
                 $with_certificate,
                 $hourse_course,
-                $requred_year ?: null,
-                $required_spec ?: null,
-                $required_uni ?: null,
-                $level_course ?: null,
+                $requred_year,
+                $required_spec,
+                $required_uni,
+                $level_course,
                 $tags_course,
                 $status
             ]);
@@ -63,6 +70,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             
             $stmt->execute([$course_id, $_SESSION['user']['id_user']]);
+            
+            // Обрабатываем теги курса
+            if (!empty($tags_course)) {
+                $tag_names = explode(',', $tags_course);
+                foreach ($tag_names as $tag_name) {
+                    $tag_name = trim($tag_name);
+                    if (empty($tag_name)) continue;
+                    
+                    // Проверяем, существует ли тег
+                    $stmt = $pdo->prepare("
+                        SELECT id_tag FROM tags 
+                        WHERE LOWER(name_tag) = LOWER(?) 
+                        LIMIT 1
+                    ");
+                    $stmt->execute([$tag_name]);
+                    $tag_id = $stmt->fetchColumn();
+                    
+                    // Если тег не существует, создаем его
+                    if (!$tag_id) {
+                        $stmt = $pdo->prepare("
+                            INSERT INTO tags (name_tag) 
+                            VALUES (?) 
+                            RETURNING id_tag
+                        ");
+                        $stmt->execute([$tag_name]);
+                        $tag_id = $stmt->fetchColumn();
+                    }
+                    
+                    // Связываем тег с курсом
+                    $stmt = $pdo->prepare("
+                        INSERT INTO course_tags (id_course, id_tag)
+                        VALUES (?, ?)
+                        ON CONFLICT (id_course, id_tag) DO NOTHING
+                    ");
+                    $stmt->execute([$course_id, $tag_id]);
+                }
+            }
             
             // Завершаем транзакцию
             $pdo->commit();
@@ -85,7 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Создание курса - CodeSphere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 </head>
 <body>
@@ -129,6 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="required field">
                     <label>Теги курса</label>
                     <input type="text" name="tags_course" placeholder="Введите теги через запятую" required maxlength="255">
+                    <small class="description">Перечислите теги через запятую. Например: "PHP, MySQL, Программирование"</small>
                 </div>
 
                 <div class="field">
@@ -192,6 +239,32 @@ $(document).ready(function() {
             hourse_course: ['empty', 'number'],
             tags_course: 'empty'
         }
+    });
+    
+    // Получаем все существующие теги для автозаполнения
+    $.getJSON('get_tags.php', function(data) {
+        $('input[name="tags_course"]').autocomplete({
+            source: function(request, response) {
+                var terms = request.term.split(/,\s*/);
+                var currentTerm = terms.pop();
+                var filteredData = $.grep(data, function(item) {
+                    return item.toLowerCase().indexOf(currentTerm.toLowerCase()) === 0;
+                });
+                response(filteredData);
+            },
+            focus: function() {
+                return false;
+            },
+            select: function(event, ui) {
+                var terms = this.value.split(/,\s*/);
+                terms.pop();
+                terms.push(ui.item.value);
+                terms.push("");
+                this.value = terms.join(", ");
+                return false;
+            },
+            minLength: 1
+        });
     });
 });
 </script>

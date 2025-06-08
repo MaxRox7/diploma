@@ -218,6 +218,10 @@ $has_avatar = file_exists($avatar_path);
             <i class="edit icon"></i>
             Редактировать профиль
         </a>
+        <a href="learning_analytics.php" class="ui teal button">
+            <i class="chart bar icon"></i>
+            Аналитика обучения
+        </a>
     </div>
 </div>
 

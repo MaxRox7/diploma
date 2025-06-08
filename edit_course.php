@@ -15,15 +15,27 @@ $success = '';
 try {
     $pdo = get_db_connection();
     
-    // Проверяем права доступа (должен быть создателем курса)
+    // Получаем информацию о курсе
     $stmt = $pdo->prepare("
-        SELECT c.*, cp.id_user, cp.is_creator
+        SELECT c.*, cp.id_user, cp.is_creator 
         FROM course c
-        JOIN create_passes cp ON c.id_course = cp.id_course
-        WHERE c.id_course = ? AND cp.id_user = ?
+        LEFT JOIN create_passes cp ON c.id_course = cp.id_course AND cp.id_user = ?
+        WHERE c.id_course = ?
     ");
-    $stmt->execute([$course_id, $user_id]);
+    $stmt->execute([$user_id, $course_id]);
     $course = $stmt->fetch();
+    
+    // Получаем теги курса для формирования строки tags_course
+    $stmt = $pdo->prepare("
+        SELECT t.name_tag 
+        FROM tags t
+        JOIN course_tags ct ON t.id_tag = ct.id_tag
+        WHERE ct.id_course = ?
+        ORDER BY t.name_tag
+    ");
+    $stmt->execute([$course_id]);
+    $tags = $stmt->fetchAll(PDO::FETCH_COLUMN);
+    $course['tags_course'] = implode(', ', $tags);
     
     // Если администратор просматривает курс с параметром admin_view=1
     if (is_admin() && isset($_GET['admin_view']) && $_GET['admin_view'] == 1) {
@@ -70,7 +82,7 @@ try {
         }
         $name_course = trim($_POST['name_course']);
         $desc_course = trim($_POST['desc_course']);
-        $with_certificate = isset($_POST['with_certificate']) ? true : false;
+        $with_certificate = isset($_POST['with_certificate']) ? 'true' : 'false';
         $hourse_course = trim($_POST['hourse_course']);
         $requred_year = trim($_POST['requred_year']);
         $required_spec = trim($_POST['required_spec']);
@@ -96,18 +108,67 @@ try {
                     WHERE id_course = ?
                 ");
                 
+                // Проверяем и преобразуем значения перед отправкой в БД
+                $hourse_course = is_numeric($hourse_course) ? $hourse_course : null;
+                $requred_year = !empty($requred_year) ? (int)$requred_year : null;
+                $required_spec = !empty($required_spec) ? $required_spec : null;
+                $required_uni = !empty($required_uni) ? $required_uni : null;
+                $level_course = !empty($level_course) ? $level_course : null;
+                
                 $stmt->execute([
                     $name_course,
                     $desc_course,
                     $with_certificate,
                     $hourse_course,
-                    $requred_year ?: null,
-                    $required_spec ?: null,
-                    $required_uni ?: null,
-                    $level_course ?: null,
+                    $requred_year,
+                    $required_spec,
+                    $required_uni,
+                    $level_course,
                     $tags_course,
                     $course_id
                 ]);
+                
+                // Обрабатываем теги курса
+                if (!empty($tags_course)) {
+                    // Удаляем существующие связи тегов с курсом
+                    $stmt = $pdo->prepare("DELETE FROM course_tags WHERE id_course = ?");
+                    $stmt->execute([$course_id]);
+                    
+                    // Добавляем новые теги
+                    $tag_names = explode(',', $tags_course);
+                    foreach ($tag_names as $tag_name) {
+                        $tag_name = trim($tag_name);
+                        if (empty($tag_name)) continue;
+                        
+                        // Проверяем, существует ли тег
+                        $stmt = $pdo->prepare("
+                            SELECT id_tag FROM tags 
+                            WHERE LOWER(name_tag) = LOWER(?) 
+                            LIMIT 1
+                        ");
+                        $stmt->execute([$tag_name]);
+                        $tag_id = $stmt->fetchColumn();
+                        
+                        // Если тег не существует, создаем его
+                        if (!$tag_id) {
+                            $stmt = $pdo->prepare("
+                                INSERT INTO tags (name_tag) 
+                                VALUES (?) 
+                                RETURNING id_tag
+                            ");
+                            $stmt->execute([$tag_name]);
+                            $tag_id = $stmt->fetchColumn();
+                        }
+                        
+                        // Связываем тег с курсом
+                        $stmt = $pdo->prepare("
+                            INSERT INTO course_tags (id_course, id_tag)
+                            VALUES (?, ?)
+                            ON CONFLICT (id_course, id_tag) DO NOTHING
+                        ");
+                        $stmt->execute([$course_id, $tag_id]);
+                    }
+                }
                 
                 $success = 'Курс успешно обновлен';
                 
@@ -133,7 +194,9 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Редактирование курса - CodeSphere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 </head>
 <body>
@@ -148,6 +211,9 @@ try {
                     <div class="sub header"><?= htmlspecialchars($course['name_course']) ?></div>
                 </h2>
                 <div class="ui right floated buttons">
+                    <a href="manage_tags.php?course_id=<?= $course_id ?><?= isset($admin_view) && $admin_view ? '&admin_view=1' : '' ?>" class="ui teal button">
+                        <i class="tags icon"></i> Управление тегами
+                    </a>
                     <a href="course.php?id=<?= $course_id ?>" class="ui button">Назад к курсу</a>
                 </div>
             </div>
@@ -193,11 +259,12 @@ try {
                 <div class="required field">
                     <label>Теги курса</label>
                     <input type="text" name="tags_course" value="<?= htmlspecialchars($course['tags_course']) ?>" required maxlength="255">
+                    <small class="description">Перечислите теги через запятую. Например: "PHP, MySQL, Программирование"</small>
                 </div>
 
                 <div class="field">
                     <div class="ui checkbox">
-                        <input type="checkbox" name="with_certificate" <?= $course['with_certificate'] ? 'checked' : '' ?>>
+                        <input type="checkbox" name="with_certificate" <?= $course['with_certificate'] == 'true' ? 'checked' : '' ?>>
                         <label>Выдавать сертификат по окончании</label>
                     </div>
                 </div>
@@ -284,6 +351,32 @@ $(document).ready(function() {
             hourse_course: ['empty', 'number'],
             tags_course: 'empty'
         }
+    });
+    
+    // Получаем все существующие теги для автозаполнения
+    $.getJSON('get_tags.php', function(data) {
+        $('input[name="tags_course"]').autocomplete({
+            source: function(request, response) {
+                var terms = request.term.split(/,\s*/);
+                var currentTerm = terms.pop();
+                var filteredData = $.grep(data, function(item) {
+                    return item.toLowerCase().indexOf(currentTerm.toLowerCase()) === 0;
+                });
+                response(filteredData);
+            },
+            focus: function() {
+                return false;
+            },
+            select: function(event, ui) {
+                var terms = this.value.split(/,\s*/);
+                terms.pop();
+                terms.push(ui.item.value);
+                terms.push("");
+                this.value = terms.join(", ");
+                return false;
+            },
+            minLength: 1
+        });
     });
 });
 </script>
