@@ -14,88 +14,117 @@ $user_id = $_SESSION['user']['id_user'];
 try {
     $pdo = get_db_connection();
     
-    // Получаем общую статистику преподавателя
-    $stmt = $pdo->prepare("
-        SELECT 
-            COUNT(DISTINCT c.id_course) as total_courses,
-            COUNT(DISTINCT cp.id_user) as total_students,
-            SUM(CAST(c.hourse_course AS INTEGER)) as total_hours
-        FROM course c
-        JOIN create_passes cp1 ON c.id_course = cp1.id_course AND cp1.id_user = ? AND cp1.is_creator = true
-        LEFT JOIN create_passes cp ON c.id_course = cp.id_course AND cp.is_creator = false
-        WHERE c.status_course = 'approved'
-    ");
-    $stmt->execute([$user_id]);
-    $general_stats = $stmt->fetch();
+    // Инициализируем переменные значениями по умолчанию
+    $general_stats = [
+        'total_courses' => 0,
+        'total_students' => 0,
+        'total_hours' => 0
+    ];
+    $courses_stats = [];
+    $tests_stats = [];
+    $students_progress = [];
     
-    // Получаем статистику по каждому курсу преподавателя
-    $stmt = $pdo->prepare("
-        SELECT 
-            c.id_course,
-            c.name_course,
-            c.status_course,
-            COUNT(DISTINCT cp.id_user) as students_count,
-            COUNT(DISTINCT CASE WHEN cp.date_complete IS NOT NULL THEN cp.id_user END) as completed_count,
-            AVG(f.rate_feedback) as average_rating,
-            COUNT(DISTINCT f.id_feedback) as feedback_count
-        FROM course c
-        JOIN create_passes cp1 ON c.id_course = cp1.id_course AND cp1.id_user = ? AND cp1.is_creator = true
-        LEFT JOIN create_passes cp ON c.id_course = cp.id_course AND cp.is_creator = false
-        LEFT JOIN feedback f ON c.id_course = f.id_course
-        GROUP BY c.id_course, c.name_course, c.status_course
-        ORDER BY students_count DESC
-    ");
-    $stmt->execute([$user_id]);
-    $courses_stats = $stmt->fetchAll();
+    try {
+        // Получаем общую статистику преподавателя
+        $stmt = $pdo->prepare("
+            SELECT 
+                COUNT(DISTINCT c.id_course) as total_courses,
+                COUNT(DISTINCT cp.id_user) as total_students,
+                SUM(CAST(c.hourse_course AS INTEGER)) as total_hours
+            FROM course c
+            JOIN create_passes cp1 ON c.id_course = cp1.id_course AND cp1.id_user = ? AND cp1.is_creator = true
+            LEFT JOIN create_passes cp ON c.id_course = cp.id_course AND cp.is_creator = false
+            WHERE c.status_course = 'approved'
+        ");
+        $stmt->execute([$user_id]);
+        $result = $stmt->fetch();
+        if ($result) {
+            $general_stats = $result;
+        }
+    } catch (PDOException $e) {
+        // Продолжаем со значениями по умолчанию
+    }
     
-    // Получаем статистику по результатам тестов в курсах
-    $stmt = $pdo->prepare("
-        SELECT 
-            c.id_course,
-            c.name_course,
-            t.id_test,
-            t.name_test,
-            COUNT(DISTINCT ta.id_attempt) as attempts_count,
-            AVG(ta.score) as average_score,
-            AVG(ta.score * 100.0 / NULLIF(ta.max_score, 0)) as average_percentage
-        FROM course c
-        JOIN create_passes cp ON c.id_course = cp.id_course AND cp.id_user = ? AND cp.is_creator = true
-        JOIN lessons l ON c.id_course = l.id_course
-        JOIN steps s ON l.id_lesson = s.id_lesson
-        JOIN tests t ON s.id_step = t.id_step
-        LEFT JOIN test_attempts ta ON t.id_test = ta.id_test AND ta.status = 'completed'
-        GROUP BY c.id_course, c.name_course, t.id_test, t.name_test
-        ORDER BY c.name_course, t.name_test
-    ");
-    $stmt->execute([$user_id]);
-    $tests_stats = $stmt->fetchAll();
+    try {
+        // Получаем статистику по каждому курсу преподавателя
+        $stmt = $pdo->prepare("
+            SELECT 
+                c.id_course,
+                c.name_course,
+                c.status_course,
+                COUNT(DISTINCT cp.id_user) as students_count,
+                COUNT(DISTINCT CASE WHEN cp.date_complete IS NOT NULL THEN cp.id_user END) as completed_count,
+                AVG(CAST(f.rate_feedback AS INTEGER)) as average_rating,
+                COUNT(DISTINCT f.id_feedback) as feedback_count
+            FROM course c
+            JOIN create_passes cp1 ON c.id_course = cp1.id_course AND cp1.id_user = ? AND cp1.is_creator = true
+            LEFT JOIN create_passes cp ON c.id_course = cp.id_course AND cp.is_creator = false
+            LEFT JOIN feedback f ON c.id_course = f.id_course
+            GROUP BY c.id_course, c.name_course, c.status_course
+            ORDER BY students_count DESC
+        ");
+        $stmt->execute([$user_id]);
+        $courses_stats = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        // Продолжаем с пустым массивом
+    }
     
-    // Получаем список студентов с их прогрессом по курсам
-    $stmt = $pdo->prepare("
-        SELECT 
-            u.id_user,
-            u.fn_user,
-            u.login_user,
-            c.id_course,
-            c.name_course,
-            COUNT(DISTINCT s.id_step) as total_steps,
-            COUNT(DISTINCT CASE WHEN ump.id_user IS NOT NULL OR ta.id_user IS NOT NULL THEN s.id_step END) as completed_steps,
-            MAX(ta.end_time) as last_activity,
-            cp.date_complete
-        FROM users u
-        JOIN create_passes cp ON u.id_user = cp.id_user AND cp.is_creator = false
-        JOIN course c ON cp.id_course = c.id_course
-        JOIN create_passes teacher_cp ON c.id_course = teacher_cp.id_course AND teacher_cp.id_user = ? AND teacher_cp.is_creator = true
-        LEFT JOIN lessons l ON c.id_course = l.id_course
-        LEFT JOIN steps s ON l.id_lesson = s.id_lesson
-        LEFT JOIN user_material_progress ump ON s.id_step = ump.id_step AND ump.id_user = u.id_user
-        LEFT JOIN tests t ON s.id_step = t.id_step
-        LEFT JOIN test_attempts ta ON t.id_test = ta.id_test AND ta.id_user = u.id_user AND ta.status = 'completed'
-        GROUP BY u.id_user, u.fn_user, u.login_user, c.id_course, c.name_course, cp.date_complete
-        ORDER BY c.name_course, u.fn_user
-    ");
-    $stmt->execute([$user_id]);
-    $students_progress = $stmt->fetchAll();
+    try {
+        // Получаем статистику по результатам тестов в курсах
+        $stmt = $pdo->prepare("
+            SELECT 
+                c.id_course,
+                c.name_course,
+                t.id_test,
+                t.name_test,
+                COUNT(DISTINCT ta.id_attempt) as attempts_count,
+                AVG(ta.score) as average_score,
+                AVG(ta.score * 100.0 / NULLIF(ta.max_score, 0)) as average_percentage
+            FROM course c
+            JOIN create_passes cp ON c.id_course = cp.id_course AND cp.id_user = ? AND cp.is_creator = true
+            JOIN lessons l ON c.id_course = l.id_course
+            JOIN steps s ON l.id_lesson = s.id_lesson
+            JOIN tests t ON s.id_step = t.id_step
+            LEFT JOIN test_attempts ta ON t.id_test = ta.id_test AND ta.status = 'completed'
+            GROUP BY c.id_course, c.name_course, t.id_test, t.name_test
+            ORDER BY c.name_course, t.name_test
+        ");
+        $stmt->execute([$user_id]);
+        $tests_stats = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        // Продолжаем с пустым массивом
+    }
+    
+    try {
+        // Получаем список студентов с их прогрессом по курсам
+        $stmt = $pdo->prepare("
+            SELECT 
+                u.id_user,
+                u.fn_user,
+                u.login_user,
+                c.id_course,
+                c.name_course,
+                COUNT(DISTINCT s.id_step) as total_steps,
+                COUNT(DISTINCT CASE WHEN ump.id_user IS NOT NULL OR ta.id_user IS NOT NULL THEN s.id_step END) as completed_steps,
+                MAX(ta.end_time) as last_activity,
+                cp.date_complete
+            FROM users u
+            JOIN create_passes cp ON u.id_user = cp.id_user AND cp.is_creator = false
+            JOIN course c ON cp.id_course = c.id_course
+            JOIN create_passes teacher_cp ON c.id_course = teacher_cp.id_course AND teacher_cp.id_user = ? AND teacher_cp.is_creator = true
+            LEFT JOIN lessons l ON c.id_course = l.id_course
+            LEFT JOIN steps s ON l.id_lesson = s.id_lesson
+            LEFT JOIN user_material_progress ump ON s.id_step = ump.id_step AND ump.id_user = u.id_user
+            LEFT JOIN tests t ON s.id_step = t.id_step
+            LEFT JOIN test_attempts ta ON t.id_test = ta.id_test AND ta.id_user = u.id_user AND ta.status = 'completed'
+            GROUP BY u.id_user, u.fn_user, u.login_user, c.id_course, c.name_course, cp.date_complete
+            ORDER BY c.name_course, u.fn_user
+        ");
+        $stmt->execute([$user_id]);
+        $students_progress = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        // Продолжаем с пустым массивом
+    }
     
 } catch (PDOException $e) {
     $error = 'Ошибка базы данных: ' . $e->getMessage();

@@ -218,13 +218,20 @@ try {
                         $stmt->execute([$course_id, $user_id]);
                         
                         // Обновляем интересы пользователя на основе курсов
-                        update_user_interests($user_id);
+                        try {
+                            update_user_interests($user_id);
+                        } catch (Exception $e) {
+                            // Игнорируем ошибку, если таблицы для интересов не существуют
+                            error_log('Ошибка при обновлении интересов пользователя: ' . $e->getMessage());
+                        }
                         
-                        // Логируем активность студента
+                        // Логируем активность студента - функция не существует, поэтому комментируем
+                        /*
                         $stmt = $pdo->prepare("
                             SELECT log_student_activity(?, 'course_enrollment', ?, NULL, NULL, NULL, NULL, NULL)
                         ");
                         $stmt->execute([$user_id, $course_id]);
+                        */
                         
                         $success = 'Вы успешно записались на курс';
                         $course['is_enrolled'] = true;

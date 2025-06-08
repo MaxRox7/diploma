@@ -35,18 +35,28 @@ try {
     $popular_courses = [];
     
     // Обновляем интересы пользователя при каждом посещении страницы
-    update_user_interests($user_id);
+    try {
+        update_user_interests($user_id);
+    } catch (Exception $e) {
+        // Игнорируем ошибку, если таблицы для интересов не существуют
+        error_log('Ошибка при обновлении интересов пользователя: ' . $e->getMessage());
+    }
     
     // Получаем теги, которые интересуют пользователя
-    $stmt = $pdo->prepare("
-        SELECT t.* 
-        FROM tags t
-        JOIN user_tag_interests uti ON t.id_tag = uti.id_tag
-        WHERE uti.id_user = ?
-        ORDER BY uti.interest_weight DESC
-    ");
-    $stmt->execute([$user_id]);
-    $user_tags = $stmt->fetchAll();
+    try {
+        $stmt = $pdo->prepare("
+            SELECT t.* 
+            FROM tags t
+            JOIN user_tag_interests uti ON t.id_tag = uti.id_tag
+            WHERE uti.id_user = ?
+            ORDER BY uti.interest_weight DESC
+        ");
+        $stmt->execute([$user_id]);
+        $user_tags = $stmt->fetchAll();
+    } catch (Exception $e) {
+        // Если таблицы не существуют, продолжаем с пустым массивом тегов
+        $user_tags = [];
+    }
     
     // Если у пользователя есть интересы, получаем рекомендации
     if (!empty($user_tags)) {

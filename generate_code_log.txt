@@ -619,3 +619,90 @@ echo "Сумма элементов массива: $sum";
 Extracted output: Сумма элементов массива: 15
 === END ===
 
+=== 2025-06-08 11:40:13 ===
+Raw input: {"question":"Сумма элементов массива из функции","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Сумма элементов массива из функции\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 2.957272 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\nfunction sumOfArrayElements(array $array): int {\n    // ваш код здесь\n}\n\n$array = [1, 2, 3, 4, 5];\n$result = sumOfArrayElements($array);\n\necho $result; // вывод результата\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\nfunction sumOfArrayElements(array $array): int {\n    $sum = 0;\n    foreach ($array as $element) {\n        $sum += $element;\n    }\n    return $sum;\n}\n\n$array = [1, 2, 3, 4, 5];\n$result = sumOfArrayElements($array);\n\necho $result; // вывод результата\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"141","completionTokens":"197","totalTokens":"338","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+function sumOfArrayElements(array $array): int {
+    // ваш код здесь
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumOfArrayElements($array);
+
+echo $result; // вывод результата
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+function sumOfArrayElements(array $array): int {
+    $sum = 0;
+    foreach ($array as $element) {
+        $sum += $element;
+    }
+    return $sum;
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumOfArrayElements($array);
+
+echo $result; // вывод результата
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: <?php
+
+function sumOfArrayElements(array $array): int {
+    // ваш код здесь
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumOfArrayElements($array);
+
+echo $result; // вывод результата
+?>
+Extracted solution: <?php
+
+function sumOfArrayElements(array $array): int {
+    $sum = 0;
+    foreach ($array as $element) {
+        $sum += $element;
+    }
+    return $sum;
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumOfArrayElements($array);
+
+echo $result; // вывод результата
+?>
+Extracted output: 15
+=== END ===
+

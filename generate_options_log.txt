@@ -937,3 +937,67 @@ Final options: Array
 
 === END ===
 
+=== 2025-06-08 11:39:18 ===
+Raw input: {"question":"Как получить значение в переменную из пост запроса в PHP?","correct_answer":"$_POST","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Как получить значение в переменную из пост запроса в PHP?\n\nПравильный ответ: $_POST\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.292059 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"$_GET  \n$POST  \n$_SESSION"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"87","completionTokens":"10","totalTokens":"97","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: $_GET  
+$POST  
+$_SESSION
+Final options: Array
+(
+    [0] => $_GET
+    [1] => $POST
+    [2] => $_SESSION
+)
+
+=== END ===
+
+=== 2025-06-08 11:39:40 ===
+Raw input: {"question":"Какая лучшая машина?","correct_answer":"BMW","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какая лучшая машина?\n\nОдин из правильных ответов: BMW\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.258559 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Toyota\nMercedes-Benz\nFord"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"104","completionTokens":"7","totalTokens":"111","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Toyota
+Mercedes-Benz
+Ford
+Final options: Array
+(
+    [0] => Toyota
+    [1] => Mercedes-Benz
+    [2] => Ford
+)
+
+=== END ===
+
