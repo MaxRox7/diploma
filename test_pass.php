@@ -1,4 +1,6 @@
 <?php
+ob_start();
+$current_attempt = null;
 require 'vendor/autoload.php';
 Dotenv\Dotenv::createUnsafeImmutable(__DIR__)->load();
 
@@ -165,6 +167,25 @@ if (!$test_id) {
 
 $pdo = get_db_connection();
 
+// Проверяем, есть ли активная попытка для этого теста
+$attempt_id = isset($_GET['attempt_id']) ? (int)$_GET['attempt_id'] : 0;
+if (!$attempt_id && isset($_GET['q']) && $_GET['q'] !== 'finish' && (int)$_GET['q'] >= 0) {
+    // Если нет ID попытки, но есть номер вопроса, ищем активную попытку
+    $stmt = $pdo->prepare("
+        SELECT id_attempt FROM test_attempts 
+        WHERE id_test = ? AND id_user = ? AND status = 'in_progress'
+        ORDER BY start_time DESC LIMIT 1
+    ");
+    $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+    $attempt_id = $stmt->fetchColumn();
+    
+    if (!$attempt_id) {
+        // Если нет активной попытки, перенаправляем на страницу начала теста
+        header('Location: test_pass.php?test_id=' . $test_id);
+        exit;
+    }
+}
+
 // Получаем информацию о тесте и шаге
 $stmt = $pdo->prepare("
     SELECT t.*, s.id_step, s.id_lesson, l.id_lesson, l.id_course
@@ -181,8 +202,111 @@ if (!$test_info) {
     exit;
 }
 
-// Проверяем, что пользователь завершил все предыдущие шаги
+// Проверяем, можно ли пользователю проходить этот тест - с учетом лимита попыток
 $user_id = $_SESSION['user']['id_user'];
+$can_start_new_attempt = true;
+$attempts_left = 0;
+$need_wait = false;
+$wait_until = null;
+
+try {
+    // Получаем настройки теста
+    $stmt = $pdo->prepare("
+        SELECT max_attempts, time_between_attempts, practice_mode, passing_percentage, show_results_after_completion
+        FROM Tests WHERE id_test = ?
+    ");
+    $stmt->execute([$test_id]);
+    $test_settings = $stmt->fetch();
+    
+    if (!$test_settings) {
+        throw new Exception("Не удалось получить настройки теста");
+    }
+    
+    // Если это режим практики, всегда разрешаем новые попытки
+    if ($test_settings['practice_mode']) {
+        $can_start_new_attempt = true;
+    } else {
+        // Получаем количество завершенных попыток
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as attempt_count,
+                   MAX(end_time) as last_attempt_time
+            FROM test_attempts
+            WHERE id_test = ? AND id_user = ? AND status = 'completed'
+        ");
+        $stmt->execute([$test_id, $user_id]);
+        $attempt_data = $stmt->fetch();
+        
+        // Проверяем, есть ли успешные попытки
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as success_count
+            FROM test_attempts
+            WHERE id_test = ? AND id_user = ? AND status = 'completed'
+            AND CAST(score * 100.0 / NULLIF(max_score, 0) AS INTEGER) >= ?
+        ");
+        $stmt->execute([$test_id, $user_id, $test_settings['passing_percentage']]);
+        $success_data = $stmt->fetch();
+        
+        // Проверяем доп. попытки для студента
+        $stmt = $pdo->prepare("
+            SELECT additional_attempts
+            FROM student_test_settings
+            WHERE id_test = ? AND id_user = ?
+        ");
+        $stmt->execute([$test_id, $user_id]);
+        $additional_data = $stmt->fetch();
+        $additional_attempts = $additional_data ? (int)$additional_data['additional_attempts'] : 0;
+        
+        // Получаем количество оставшихся попыток
+        $max_allowed = $test_settings['max_attempts'] + $additional_attempts;
+        $used_attempts = (int)$attempt_data['attempt_count'];
+        $attempts_left = max(0, $max_allowed - $used_attempts);
+        $can_start_new_attempt = ($attempts_left > 0);
+        
+        // Если есть ограничение по времени между попытками
+        if ($can_start_new_attempt && $test_settings['time_between_attempts'] > 0 && $attempt_data['last_attempt_time']) {
+            $last_time = strtotime($attempt_data['last_attempt_time']);
+            $wait_time = $test_settings['time_between_attempts'] * 60; // конвертируем в секунды
+            $next_allowed_time = $last_time + $wait_time;
+            
+            if (time() < $next_allowed_time) {
+                $need_wait = true;
+                $wait_until = date('Y-m-d H:i:s', $next_allowed_time);
+                $can_start_new_attempt = false;
+            }
+        }
+
+        // Получаем количество оставшихся попыток
+        // Если есть успешная попытка, больше не даем проходить (если не режим практики)
+        if ($success_data['success_count'] > 0) {
+            $can_start_new_attempt = false;
+            $attempts_left = 0;
+        } else {
+            // Проверяем количество оставшихся попыток
+            $max_allowed = $test_settings['max_attempts'] + $additional_attempts;
+            $used_attempts = (int)$attempt_data['attempt_count'];
+            $attempts_left = max(0, $max_allowed - $used_attempts);
+            $can_start_new_attempt = ($attempts_left > 0);
+        }
+    }
+} catch (Exception $e) {
+    error_log("Ошибка при проверке попыток: " . $e->getMessage());
+    // По умолчанию разрешаем, если произошла ошибка
+    $can_start_new_attempt = true;
+}
+
+// Если у нас есть текущая завершенная попытка, и мы на странице результатов, 
+// уменьшаем количество оставшихся попыток на 1, так как текущая попытка еще не учтена в запросе выше
+if ($is_finish && $current_attempt && $current_attempt['status'] === 'completed') {
+    // Проверяем, не была ли эта попытка уже учтена в attempt_data
+    $completed_after_query = (strtotime($current_attempt['end_time']) > strtotime($attempt_data['last_attempt_time'] ?? '0'));
+    if ($completed_after_query) {
+        $attempts_left = max(0, $attempts_left - 1);
+    }
+}
+
+$can_start_new_attempt = ($attempts_left > 0);
+
+// Проверяем, что пользователь завершил все предыдущие шаги
 $stmt = $pdo->prepare("
     SELECT s.*,
            m.path_matial as file_path,
@@ -258,6 +382,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $match_answer = $_POST['match_answer'] ?? null;
     $code_answer = $_POST['code_answer'] ?? null;
     $action = $_POST['action'] ?? '';
+    $attempt_id = isset($_POST['attempt_id']) ? (int)$_POST['attempt_id'] : 0;
 
     if ($action === 'answer') {
         $type = $questions[$question_index]['type_question'];
@@ -287,282 +412,171 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: test_pass.php?test_id=' . $test_id . '&q=' . ($question_index - 1));
             exit;
         }
-    } elseif ($action === 'finish') {
-        header('Location: test_pass.php?test_id=' . $test_id . '&q=finish');
+    } elseif ($action === 'finish' && $attempt_id) {
+        error_log('DEBUG: action=finish, attempt_id=' . $attempt_id);
+        try {
+            // Получаем все вопросы теста
+            $stmt = $pdo->prepare("SELECT * FROM Questions WHERE id_test = ? ORDER BY id_question");
+            $stmt->execute([$test_id]);
+            $questions = $stmt->fetchAll();
+            $score = 0;
+            $max_score = count($questions);
+
+            // Для каждого вопроса сверяем ответ и пишем в test_answers
+            foreach ($questions as $index => $question) {
+                $answer_value = $_SESSION['test_answers'][$test_id][$index] ?? null;
+                $is_correct = false;
+
+                if ($answer_value !== null) {
+                    if ($question['type_question'] === 'single') {
+                        $stmt = $pdo->prepare("SELECT id_option, is_correct FROM Answer_options WHERE id_question = ? ORDER BY id_option LIMIT 1 OFFSET ?");
+                        $stmt->execute([$question['id_question'], $answer_value]);
+                        $option = $stmt->fetch();
+                        if ($option) {
+                            $is_correct = (bool)$option['is_correct'];
+                            $stmt = $pdo->prepare("INSERT INTO test_answers (id_attempt, id_question, id_selected_option, is_correct) VALUES (?, ?, ?, ?)");
+                            $stmt->execute([$attempt_id, $question['id_question'], $option['id_option'], $is_correct]);
+                            if ($is_correct) $score++;
+                        }
+                    } else if ($question['type_question'] === 'code') {
+                        // Для вопросов с кодом, получаем задание
+                        $stmt = $pdo->prepare("SELECT * FROM code_tasks WHERE id_question = ?");
+                        $stmt->execute([$question['id_question']]);
+                        $code_task = $stmt->fetch();
+                        
+                        if ($code_task && $answer_value) {
+                            // Выполняем код и проверяем его правильность
+                            $result = execute_code_for_validation($answer_value, $code_task);
+                            $is_correct = $result['success'] ?? false;
+                            
+                            // Записываем ответ в базу
+                            $stmt = $pdo->prepare("
+                                INSERT INTO test_answers (id_attempt, id_question, answer_text, is_correct, ai_feedback)
+                                VALUES (?, ?, ?, ?, ?)
+                            ");
+                            $stmt->execute([
+                                $attempt_id, 
+                                $question['id_question'], 
+                                $answer_value, 
+                                $is_correct,
+                                $result['ai_feedback'] ?? null
+                            ]);
+                            
+                            if ($is_correct) {
+                                $score++;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Обновляем статус попытки
+            $stmt = $pdo->prepare("UPDATE test_attempts SET status = 'completed', score = ?, max_score = ?, end_time = CURRENT_TIMESTAMP WHERE id_attempt = ?");
+            $stmt->execute([$score, $max_score, $attempt_id]);
+            error_log('DEBUG: UPDATE test_attempts status=completed, affected rows: ' . $stmt->rowCount());
+            if ($stmt->rowCount() === 0) {
+                echo '<div class="ui error message">Ошибка: Не удалось обновить статус попытки. Попытка не найдена или уже завершена.</div>';
+                exit;
+            }
+            
+        } catch (Exception $e) {
+            error_log('Ошибка при завершении теста: ' . $e->getMessage());
+            echo '<div class="ui error message">Ошибка: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            exit;
+        }
+        
+        // Перенаправляем на страницу результатов
+        header('Location: test_pass.php?test_id=' . $test_id . '&q=finish&attempt_id=' . $attempt_id);
         exit;
     }
 }
 
 // Завершение теста
-if (
-    $is_finish || $question_index === -1
-) {
-    // Проверяем, не проходил ли пользователь этот тест ранее
-    $stmt = $pdo->prepare("SELECT * FROM test_attempts WHERE id_test = ? AND id_user = ? AND status = 'completed'");
+if ($is_finish || $question_index === -1) {
+    // Теперь получаем текущую попытку для отображения результатов
+    $stmt = $pdo->prepare("
+        SELECT ta.*, 
+               (CAST(ta.score * 100.0 / NULLIF(ta.max_score, 0) AS INTEGER)) as percentage
+        FROM test_attempts ta
+        WHERE ta.id_test = ? AND ta.id_user = ? 
+        ORDER BY ta.end_time DESC LIMIT 1
+    ");
     $stmt->execute([$test_id, $user_id]);
-    $existing_attempt = $stmt->fetch();
-    if ($existing_attempt) {
-        echo '<div class="ui warning message">Вы уже проходили этот тест. Ваш результат: ' . $existing_attempt['score'] . ' из ' . $existing_attempt['max_score'] . '</div>';
-        exit;
-    }
-    // Считаем результат
-    $correct = 0;
-    $details = [];
-    $ai_pending = false;
-    $ai_errors = [];
-    foreach ($questions as $i => $q) {
-        // Initialize the details entry for this question first
-        $details[$i] = [
-            'question' => $q['text_question'] ?? '',
-            'type' => $q['type_question'],
-            'user_answer' => $_SESSION['test_answers'][$test_id][$i],
-            'is_right' => false,
-            'right' => $q['answer_question'] ?? '',
-            'ai_feedback' => '',
-            'ai_feedback_error' => null,
-            'output_matches' => false,
-        ];
-        
-        $type = $q['type_question'];
-        $user_answer = $_SESSION['test_answers'][$test_id][$i];
-        $is_right = false;
-        
-        if ($user_answer === null || $user_answer === '' || $user_answer === []) {
-            $is_right = false;
-        } else {
-            if ($type === 'single') {
-                $right = $q['answer_question'];
-                $is_right = ($user_answer !== null && (string)$user_answer === (string)$right);
-            } elseif ($type === 'multi') {
-                $right = array_map('strval', explode(',', $q['answer_question']));
-                $is_right = (is_array($user_answer) && count($right) && count(array_diff($right, $user_answer)) === 0 && count(array_diff($user_answer, $right)) === 0);
-            } elseif ($type === 'match') {
-                $right = [];
-                $stmt = $pdo->prepare("SELECT * FROM Answer_options WHERE id_question = ? ORDER BY id_option");
-                $stmt->execute([$q['id_question']]);
-                $options = $stmt->fetchAll();
-                foreach ($options as $opt_index => $option) {
-                    $pair = explode('||', $option['text_option']);
-                    $right[$opt_index] = $opt_index;
-                }
-                $is_right = (is_array($user_answer) && $user_answer == $right);
-            } elseif ($type === 'code') {
-                // Get code task details
-                $stmt = $pdo->prepare("
-                    SELECT * FROM code_tasks
-                    WHERE id_question = ?
-                ");
-                $stmt->execute([$q['id_question']]);
-                $code_task = $stmt->fetch();
-                if ($code_task && !empty($user_answer)) {
-                    // Execute the code to check if it produces the expected output
-                    $result = execute_code_for_validation($user_answer, $code_task);
-                    
-                    // Сохраняем все детали результата проверки
-                    $details[$i]['ai_feedback'] = $result['ai_feedback'] ?? 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.';
-                    $details[$i]['ai_feedback_error'] = $result['ai_feedback_error'] ?? null;
-                    $details[$i]['output_matches'] = $result['output_matches'] ?? false;
-                    
-                    // Проверяем результат выполнения
-                    if (isset($result['ai_feedback'])) {
-                        $is_right = $result['success'] && $result['ai_is_correct'];
-                        
-                        // Если не получили нормальный ответ от AI — помечаем как pending
-                        if ($result['ai_feedback'] === 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.' || 
-                            strpos($result['ai_feedback'], 'Ошибка AI:') !== false) {
-                            $ai_pending = true;
-                            $ai_errors[] = $i;
-                            error_log("Помечаем вопрос #$i как pending из-за ошибки AI: " . ($result['ai_feedback_error'] ?? 'неизвестная ошибка'));
-                        }
-                    } else {
-                        // Если не получили ответ от AI — помечаем как pending
-                        $ai_pending = true;
-                        $ai_errors[] = $i;
-                        error_log("Помечаем вопрос #$i как pending из-за отсутствия ответа AI");
-                        $is_right = $result['output_matches'] ?? (trim($result['output']) === trim($code_task['output_ct']));
-                    }
-                } else {
-                    $is_right = false;
-                }
-            }
-        }
-        
-        // Update the is_right value in the details array
-        $details[$i]['is_right'] = $is_right;
-        
-        if ($is_right) $correct++;
-    }
-    // Если есть хотя бы один незавершённый/ошибочный AI-запрос — не показываем результат
-    if ($ai_pending) {
-        $total_code = 0;
-        $checked_code = 0;
-        $error_msgs = [];
-        $pending_questions = [];
-        
-        foreach ($questions as $i => $q) {
-            if ($q['type_question'] === 'code') {
-                $total_code++;
-                if (isset($details[$i]['ai_feedback']) && 
-                    $details[$i]['ai_feedback'] !== 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.' && 
-                    strpos($details[$i]['ai_feedback'], 'Ошибка AI:') === false && 
-                    $details[$i]['ai_feedback'] !== '') {
-                    $checked_code++;
-                } else {
-                    $pending_questions[] = $i + 1; // Номера вопросов для пользователя начинаются с 1
-                    if (isset($details[$i]['ai_feedback_error']) && $details[$i]['ai_feedback_error']) {
-                        $error_msgs[] = 'Ошибка проверки задания #' . ($i+1) . ': ' . htmlspecialchars($details[$i]['ai_feedback_error']);
-                    }
-                }
-            }
-        }
-        
-        echo '<div class="ui info message" style="max-width:600px;margin:auto;margin-top:40px;">'
-            .'<b>Пожалуйста, подождите, идёт проверка всех заданий с кодом...</b><br>'
-            .'Не закрывайте вкладку. Проверка может занять до 30 секунд.<br><br>'
-            .'<div id="progress-bar-container" style="margin-top:20px;">'
-            .'<div class="ui indicating progress" id="ai-progress" data-total="' . $total_code . '" data-value="' . $checked_code . '" style="height:30px;">'
-            .'<div class="bar" style="transition-duration: 300ms; width: ' . ($total_code > 0 ? round($checked_code/$total_code*100) : 0) . '%;"></div>'
-            .'<div class="label" id="progress-label">Проверено ' . $checked_code . ' из ' . $total_code . '</div>'
-            .'</div>'
-            .'</div>';
-            
-        if (!empty($pending_questions)) {
-            echo '<div class="ui warning message" style="margin-top:20px;">';
-            echo '<b>Ожидают проверки задания:</b> #' . implode(', #', $pending_questions);
-            echo '</div>';
-        }
-        
-        if (!empty($error_msgs)) {
-            echo '<div class="ui error message" style="margin-top:20px;">';
-            echo '<b>Обнаружены ошибки при проверке:</b><ul>';
-            foreach ($error_msgs as $msg) echo '<li>' . $msg . '</li>';
-            echo '</ul></div>';
-        }
-        
-        echo '</div>';
-        echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>';
-        echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>';
-        echo '<script>';
-        echo 'function checkProgress() {';
-        echo '  $.get(window.location.href, {progress_check: 1}, function(data) {';
-        echo '    if (data && data.status === "done") {';
-        echo '      location.reload();';
-        echo '    } else if (data && data.status === "progress") {';
-        echo '      var checked = data.checked_code, total = data.total_code;';
-        echo '      var percent = total > 0 ? Math.round(checked/total*100) : 0;';
-        echo '      $("#ai-progress .bar").css("width", percent+"%");';
-        echo '      $("#progress-label").text("Проверено "+checked+" из "+total);';
-        
-        echo '      // Обновляем список ожидающих проверки заданий';
-        echo '      if (data.pending && data.pending.length > 0) {';
-        echo '        var pendingHtml = "<b>Ожидают проверки задания:</b> #" + data.pending.join(", #");';
-        echo '        if ($("#pending-tasks").length) { $("#pending-tasks").html(pendingHtml); } else { $("#progress-bar-container").after("<div class=\"ui warning message\" id=\"pending-tasks\" style=\"margin-top:20px;\">"+pendingHtml+"</div>"); }';
-        echo '      } else {';
-        echo '        $("#pending-tasks").remove();';
-        echo '      }';
-        
-        echo '      // Обновляем список ошибок';
-        echo '      if (data.errors && data.errors.length > 0) {';
-        echo '        var html = "<b>Обнаружены ошибки при проверке:</b><ul>";';
-        echo '        for (var i=0; i<data.errors.length; i++) html += "<li>"+data.errors[i]+"</li>";';
-        echo '        html += "</ul>";';
-        echo '        if ($("#ai-errors").length) { $("#ai-errors").html(html); } else { $("#progress-bar-container").after("<div class=\"ui error message\" id=\"ai-errors\" style=\"margin-top:20px;\">"+html+"</div>"); }';
-        echo '      } else {';
-        echo '        $("#ai-errors").remove();';
-        echo '      }';
-        
-        echo '      setTimeout(checkProgress, 3000);';
-        echo '    } else {';
-        echo '      setTimeout(checkProgress, 5000);';
-        echo '    }';
-        echo '  }, "json").fail(function() {';
-        echo '    setTimeout(checkProgress, 5000);'; // В случае ошибки запроса пробуем снова через 5 секунд
-        echo '  });';
-        echo '}';
-        echo 'checkProgress();';
-        echo '</script>';
-        exit;
-    }
-    $score = $correct;
-    $max_score = count($details);
-    // Создаём новую попытку
-    $stmt = $pdo->prepare("INSERT INTO test_attempts (id_test, id_user, score, max_score, status, end_time) VALUES (?, ?, ?, ?, 'completed', NOW()) RETURNING id_attempt");
-    $stmt->execute([$test_id, $user_id, $score, $max_score]);
-    $id_attempt = $stmt->fetchColumn();
-    // Сохраняем ответы с учетом результатов AI-проверки
-    foreach ($questions as $i => $q) {
-        $type = $q['type_question'];
-        $user_answer = $_SESSION['test_answers'][$test_id][$i];
-        $is_right = $details[$i]['is_right'];
-        $is_right_bool = $is_right;
-        // answer_text для сложных типов
-        $answer_text = null;
-        // Инициализируем переменную для хранения отзыва ИИ для текущего вопроса
-        $ai_feedback_text = null;
-        
-        if ($type === 'multi' || $type === 'match') {
-            $answer_text = json_encode($user_answer, JSON_UNESCAPED_UNICODE);
-        } elseif ($type === 'code') {
-            $answer_text = $user_answer;
-            
-            // Получаем отзыв ИИ для текущего вопроса
-            if (isset($details[$i]['ai_feedback'])) {
-                $ai_feedback_text = $details[$i]['ai_feedback'];
-                error_log("Вопрос #$i: Установлен отзыв ИИ: " . substr($ai_feedback_text, 0, 50) . "...");
-            } else {
-                $ai_feedback_text = 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.';
-                error_log("Вопрос #$i: Отзыв ИИ не найден, используем значение по умолчанию");
-            }
-            
-            // Принудительно создаем колонку ai_feedback, если её нет
-            try {
-                $pdo->exec("ALTER TABLE test_answers ADD COLUMN IF NOT EXISTS ai_feedback TEXT");
-            } catch (PDOException $e) {
-                error_log("Ошибка при создании колонки ai_feedback: " . $e->getMessage());
-            }
-        }
-        
-        $stmt = $pdo->prepare("INSERT INTO test_answers (id_attempt, id_question, id_selected_option, is_correct, answer_text, ai_feedback) VALUES (?, ?, ?, ?, ?, ?)");
-        // Получаем варианты ответа для текущего вопроса
-        $options = [];
-        if (in_array($type, ['single', 'multi', 'match'])) {
-            $stmt_opts = $pdo->prepare("SELECT * FROM Answer_options WHERE id_question = ? ORDER BY id_option");
-            $stmt_opts->execute([$q['id_question']]);
-            $options = $stmt_opts->fetchAll();
-        }
-        // Для single/multi/match сохраняем id_option выбранного варианта, для code — null
-        $selected = null;
-        if ($type === 'single') {
-            $selected = is_numeric($user_answer) && isset($options[$user_answer]) ? $options[$user_answer]['id_option'] : null;
-        } elseif ($type === 'multi') {
-            $selected = is_array($user_answer) && count($user_answer) && isset($options[$user_answer[0]]) ? $options[$user_answer[0]]['id_option'] : null;
-        } elseif ($type === 'match') {
-            $selected = null; // Можно доработать для хранения всех пар
-        } elseif ($type === 'code') {
-            $selected = null;
-        }
-        $stmt->bindValue(1, $id_attempt, PDO::PARAM_INT);
-        $stmt->bindValue(2, $q['id_question'], PDO::PARAM_INT);
-        if ($selected === null) {
-            $stmt->bindValue(3, null, PDO::PARAM_NULL);
-        } else {
-            $stmt->bindValue(3, $selected, PDO::PARAM_INT);
-        }
-        $stmt->bindValue(4, $is_right_bool, PDO::PARAM_BOOL);
-        $stmt->bindValue(5, $answer_text, $answer_text === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
-        $stmt->bindValue(6, $ai_feedback_text, $ai_feedback_text === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
-        $stmt->execute();
-        
-        // Логируем информацию о сохранении
-        if ($type === 'code') {
-            error_log("Сохранен ответ на вопрос #{$i}, id_question={$q['id_question']}, тип={$type}, ai_feedback=" . 
-                      ($ai_feedback_text ? substr($ai_feedback_text, 0, 30) . "..." : "NULL"));
-        }
-    }
-    // Очищаем сессию
-    unset($_SESSION['test_answers'][$test_id]);
+    $current_attempt = $stmt->fetch();
     
-    // Показываем результаты теста
+    // Если мы на странице результатов, обновляем количество оставшихся попыток
+    if ($current_attempt) {
+        // Получаем общее количество попыток
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) as total_attempts
+            FROM test_attempts
+            WHERE id_test = ? AND id_user = ? AND status = 'completed'
+        ");
+        $stmt->execute([$test_id, $user_id]);
+        $total_attempts = (int)$stmt->fetchColumn();
+        
+        // Пересчитываем количество оставшихся попыток
+        $max_allowed = $test_settings['max_attempts'] + $additional_attempts;
+        $attempts_left = max(0, $max_allowed - $total_attempts);
+        
+        // Проверяем, прошел ли тест успешно
+        $percentage = $current_attempt['percentage'] ?? 0;
+        $is_passed = $percentage >= $test_settings['passing_percentage'];
+        
+        // Определяем уровень оценки
+        $grade_level = null;
+        $stmt = $pdo->prepare("
+            SELECT * FROM test_grade_levels
+            WHERE id_test = ? AND min_percentage <= ? AND max_percentage >= ?
+            ORDER BY min_percentage DESC LIMIT 1
+        ");
+        $stmt->execute([$test_id, $percentage, $percentage]);
+        $grade_level = $stmt->fetch();
+        
+        // Если тест пройден успешно и это не режим практики, отмечаем шаг как завершенным
+        if ($is_passed && isset($test_settings['practice_mode']) && $test_settings['practice_mode'] != 'true') {
+            try {
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_material_progress (id_user, id_step)
+                    VALUES (?, ?)
+                    ON CONFLICT (id_user, id_step) DO NOTHING
+                ");
+                $stmt->execute([$user_id, $test_info['id_step']]);
+            } catch (Exception $e) {
+                error_log("Ошибка при обновлении прогресса: " . $e->getMessage());
+            }
+        }
+        
+        // Получаем результаты текущей попытки для детализации
+        $test_answers = [];
+        try {
+            $stmt = $pdo->prepare("
+                SELECT ta.*, q.text_question, q.type_question, ao.text_option,
+                       q.answer_question as correct_answer
+                FROM test_answers ta
+                JOIN Questions q ON ta.id_question = q.id_question
+                LEFT JOIN Answer_options ao ON ta.id_selected_option = ao.id_option
+                WHERE ta.id_attempt = ?
+                ORDER BY q.id_question
+            ");
+            $stmt->execute([$current_attempt['id_attempt']]);
+            $test_answers = $stmt->fetchAll();
+        } catch (Exception $e) {
+            error_log("Ошибка при получении ответов: " . $e->getMessage());
+        }
+        
+        // Если тест пройден успешно и не режим практики, больше не даем попыток
+        if ($is_passed && isset($test_settings['practice_mode']) && $test_settings['practice_mode'] != 'true') {
+            $can_start_new_attempt = false;
+        } else {
+            $can_start_new_attempt = $attempts_left > 0;
+        }
+    } else {
+        echo '<div class="ui error message">Ошибка: Не удалось найти результаты теста.</div>';
+        exit;
+    }
+    
+    // Выводим красивую страницу с результатами
     ?><!DOCTYPE html>
     <html lang="ru">
     <head>
@@ -592,201 +606,124 @@ if (
             .ui.accordion .content {
                 padding: 15px;
             }
-            
-            .editor-toolbar {
-                background-color: #252526;
-                padding: 5px 10px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 5px;
-            }
-            
-            .editor-toolbar .ui.button {
-                margin: 0;
-                background-color: #0e639c;
-                color: white;
-                font-size: 12px;
-                padding: 6px 10px;
-                border-radius: 2px;
-            }
-            
-            .editor-toolbar .ui.button:hover {
-                background-color: #1177bb;
-            }
-            
-            .editor-status-bar {
-                background-color: #007acc;
-                color: white;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                font-size: 12px;
-                padding: 2px 10px;
-                display: flex;
-                justify-content: space-between;
-            }
-            
-            .editor-container {
-                display: flex;
-                flex-direction: column;
-                margin-bottom: 15px;
-                border-radius: 4px;
-                overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            }
-            
-            pre {
-                background-color: #1e1e1e;
-                color: #d4d4d4;
-                padding: 10px;
-                border-radius: 4px;
-                overflow-x: auto;
-                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-                margin-top: 0;
-            }
-            
-            #code-output {
-                background-color: #1e1e1e;
-                color: #d4d4d4;
-                padding: 10px;
-                border-radius: 4px;
-                white-space: pre-wrap;
-                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-            }
-            
-            .output-container {
-                margin-top: 15px;
-                border-radius: 4px;
-                overflow: hidden;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            }
-            
-            .output-header {
-                background-color: #252526;
-                color: #cccccc;
-                padding: 5px 10px;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                font-size: 12px;
-                font-weight: 500;
-                border-bottom: 1px solid #444;
-            }
-            
-            .output-content {
-                background-color: #1e1e1e;
-                padding: 0;
-            }
-            
-            .ui.info.message {
-                background-color: #252526;
-                color: #cccccc;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                border: none;
-                border-left: 4px solid #007acc;
-            }
-            
-            .ui.info.message .header {
-                color: #ffffff;
-            }
-            
-            .ui.info.message pre {
-                background-color: #1e1e1e;
-                border: 1px solid #444;
-            }
-            
-            .ui.success.message {
-                background-color: #1e1e1e;
-                color: #89D185;
-                border: none;
-            }
-            
-            .ui.error.message {
-                background-color: #1e1e1e;
-                color: #F14C4C;
-                border: none;
-            }
         </style>
     </head>
     <body>
     <div class="ui container" style="margin-top: 50px; max-width: 700px;">
         <div class="ui raised very padded segment">
             <h2 class="ui center aligned header">
-                <i class="check circle outline green icon"></i>
-                Тест завершён!
+                <?php if ($is_passed): ?>
+                    <i class="check circle outline green icon"></i> Тест пройден успешно!
+                <?php else: ?>
+                    <i class="times circle outline red icon"></i> Тест не пройден
+                <?php endif; ?>
             </h2>
+            
             <div class="ui center aligned huge header" style="margin-top: 20px;">
-                Ваш результат: <span class="ui green text"><b><?= $score ?> / <?= $max_score ?></b></span>
+                Ваш результат: <span class="ui <?= $is_passed ? 'green' : 'red' ?> text"><b><?= $current_attempt['score'] ?> / <?= $current_attempt['max_score'] ?></b></span>
+                <div class="sub header"><?= $percentage ?>%</div>
             </div>
-            <div class="ui divider"></div>
-            <h4 class="ui header">Разбор вопросов:</h4>
-            <div class="ui styled fluid accordion">
-                <?php foreach ($details as $i => $d): ?>
-                    <div class="title<?= $i === 0 ? ' active' : '' ?>">
-                        <i class="dropdown icon"></i>
-                        Вопрос <?= $i+1 ?>: <?= htmlspecialchars(mb_strimwidth($d['question'], 0, 60, '...')) ?>
-                        <span class="ui <?= $d['is_right'] ? 'green' : 'red' ?> text" style="margin-left: 10px;">
-                            <?= $d['is_right'] ? 'Верно' : 'Неверно' ?>
-                        </span>
-                    </div>
-                    <div class="content<?= $i === 0 ? ' active' : '' ?>">
-                        <p><b>Вопрос:</b> <?= htmlspecialchars($d['question']) ?></p>
-                        <?php $type = $d['type']; ?>
-                        <?php if ($type === 'single' || $type === 'multi'): ?>
-                            <p><b>Ваш ответ:</b> <?= htmlspecialchars($d['user_answer'] !== null ? (is_array($d['user_answer']) ? implode(", ", $d['user_answer']) : $d['user_answer']) : 'Нет ответа') ?></p>
-                            <p><b>Правильный ответ:</b> <?= htmlspecialchars($d['right']) ?></p>
-                        <?php elseif ($type === 'match'): ?>
-                            <p><b>Ваш ответ:</b> <?= htmlspecialchars($d['user_answer'] !== null ? json_encode($d['user_answer'], JSON_UNESCAPED_UNICODE) : 'Нет ответа') ?></p>
-                        <?php elseif ($type === 'code'): ?>
-                            <p><b>Ваш код:</b></p>
-                            <pre style="background-color: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;"><?= htmlspecialchars($d['user_answer'] !== null ? $d['user_answer'] : '') ?></pre>
-                            
-                            <?php if (!empty($d['ai_feedback'])): ?>
-                                <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? '#db2828' : '#007acc' ?>;">
-                                    <h4 style="color: <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? '#db2828' : '#007acc' ?>;">
-                                        <i class="<?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? 'exclamation triangle' : 'comment alternate outline' ?> icon"></i> 
-                                        <?= strpos($d['ai_feedback'], 'Ошибка AI:') !== false ? 'Ошибка проверки кода:' : 'Анализ кода от ИИ:' ?>
-                                    </h4>
-                                    <div style="padding: 10px; background-color: #f8f8f8; border-radius: 4px; margin-top: 10px;">
-                                        <?= nl2br(htmlspecialchars($d['ai_feedback'])) ?>
+            
+            <?php if ($grade_level): ?>
+                <div class="ui center aligned header" style="color: <?= htmlspecialchars($grade_level['grade_color']) ?>">
+                    <strong><?= htmlspecialchars($grade_level['grade_name']) ?></strong>
                                     </div>
-                                    
-                                    <?php if ($d['ai_feedback'] === 'Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.'): ?>
-                                        <div style="margin-top: 10px; padding: 10px; background-color: #fffaf3; border-left: 4px solid #f2711c; border-radius: 4px;">
-                                            <i class="info circle icon"></i>
-                                            Код проверен по соответствию выходных данных: 
-                                            <b><?= $d['output_matches'] ? 'Выходные данные совпадают' : 'Выходные данные не совпадают' ?></b>
+            <?php endif; ?>
+            
+            <div class="ui divider"></div>
+            
+            <div class="ui center aligned basic segment">
+                <div class="ui statistic">
+                    <div class="label">Проходной балл</div>
+                    <div class="value"><?= $test_settings['passing_percentage'] ?>%</div>
                                         </div>
-                                    <?php endif; ?>
-                                    
-                                    <?php if (isset($d['ai_feedback_error']) && $d['ai_feedback_error']): ?>
-                                        <div style="margin-top: 10px; padding: 10px; background-color: #fff6f6; border-left: 4px solid #db2828; border-radius: 4px;">
-                                            <i class="exclamation triangle icon"></i>
-                                            <b>Детали ошибки:</b> <?= htmlspecialchars($d['ai_feedback_error']) ?>
+                
+                <?php if (!isset($test_settings['practice_mode']) || $test_settings['practice_mode'] != 'true'): ?>
+                    <div class="ui statistic">
+                        <div class="label">Попыток осталось</div>
+                        <div class="value"><?= $attempts_left ?></div>
                                         </div>
                                     <?php endif; ?>
                                 </div>
+            
+            <div class="ui divider"></div>
+            
+            <?php 
+            // Показываем детали по ответам, если разрешено
+            if (isset($test_settings['show_results_after_completion']) && $test_settings['show_results_after_completion'] == 'true' && !empty($test_answers)): 
+            ?>
+                <h3 class="ui header">Детализация ответов</h3>
+                <div class="ui styled fluid accordion">
+                    <?php foreach ($test_answers as $index => $answer): ?>
+                        <div class="title<?= $index === 0 ? ' active' : '' ?>">
+                            <i class="dropdown icon"></i>
+                            Вопрос <?= $index + 1 ?>: 
+                            <?= htmlspecialchars(mb_substr($answer['text_question'], 0, 50)) ?><?= mb_strlen($answer['text_question']) > 50 ? '...' : '' ?>
+                            
+                            <?php if ($answer['is_correct']): ?>
+                                <span class="ui green text" style="margin-left: 10px;">Верно</span>
                             <?php else: ?>
-                                <div class="ui raised segment" style="margin-top: 20px; border-left: 4px solid #f2711c;">
-                                    <h4 style="color: #f2711c;">
-                                        <i class="comment alternate outline icon"></i> Анализ кода от ИИ:
-                                    </h4>
-                                    <div style="padding: 10px; background-color: #f8f8f8; border-radius: 4px; margin-top: 10px;">
-                                        Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+                                <span class="ui red text" style="margin-left: 10px;">Неверно</span>
+                            <?php endif; ?>
                                     </div>
+                        <div class="content<?= $index === 0 ? ' active' : '' ?>">
+                            <p><strong>Вопрос:</strong> <?= htmlspecialchars($answer['text_question']) ?></p>
+                            
+                            <?php if ($answer['type_question'] === 'single'): ?>
+                                <p><strong>Ваш ответ:</strong> <?= htmlspecialchars($answer['text_option'] ?? 'Не выбрано') ?></p>
+                                
+                                <?php 
+                                // Получаем правильный ответ
+                                $stmt = $pdo->prepare("
+                                    SELECT text_option FROM Answer_options 
+                                    WHERE id_question = ? AND id_option = ?
+                                ");
+                                $stmt->execute([$answer['id_question'], $answer['correct_answer']]);
+                                $correct_option = $stmt->fetchColumn();
+                                ?>
+                                
+                                <p><strong>Правильный ответ:</strong> <?= htmlspecialchars($correct_option ?? '-') ?></p>
+                            
+                            <?php elseif ($answer['type_question'] === 'code' && !empty($answer['ai_feedback'])): ?>
+                                <p><strong>Ваш код:</strong></p>
+                                <pre style="background-color: #f5f5f5; padding: 10px; border-radius: 4px;"><?= htmlspecialchars($answer['answer_text'] ?? '') ?></pre>
+                                
+                                <div class="ui segment">
+                                    <h4 class="ui header">Результат проверки:</h4>
+                                    <p><?= nl2br(htmlspecialchars($answer['ai_feedback'] ?? 'Нет данных')) ?></p>
                                 </div>
                             <?php endif; ?>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+            
             <div class="ui divider"></div>
-            <a href="lesson.php?id=<?= htmlspecialchars($_GET['lesson_id'] ?? '') ?>" class="ui big button"><i class="arrow left icon"></i>Назад к уроку</a>
+            
+            <div class="ui center aligned basic segment">
+                <a href="lesson.php?id=<?= $test_info['id_lesson'] ?>" class="ui big button">
+                    <i class="arrow left icon"></i>Вернуться к уроку
+                </a>
+                
+                <?php if ($can_start_new_attempt): ?>
+                    <a href="test_pass.php?test_id=<?= $test_id ?>&start=1" class="ui big primary button">
+                        <i class="redo icon"></i>Попробовать снова
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
     <script>
-    $(function(){ $('.ui.accordion').accordion(); });
+    $(function(){ 
+        $('.ui.accordion').accordion();
+    });
     </script>
     </body>
     </html>
-    <?php exit; }
+<?php
+        exit;
+    }
+
 
 // Получаем текущий вопрос
 $question = $questions[$question_index];
@@ -885,6 +822,45 @@ if (isset($_GET['progress_check'])) {
         'errors' => $error_msgs
     ]);
     exit;
+}
+
+// После получения всех данных, проверяем, нужно ли начать новую попытку
+if (isset($_GET['start']) && $_GET['start'] == 1 && $can_start_new_attempt) {
+    try {
+        // Проверяем, сколько попыток уже использовано
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) FROM test_attempts 
+            WHERE id_test = ? AND id_user = ? AND status = 'completed'
+        ");
+        $stmt->execute([$test_id, $user_id]);
+        $used_attempts = (int)$stmt->fetchColumn();
+        
+        // Проверяем, не превышен ли лимит попыток
+        $max_allowed = $test_settings['max_attempts'] + $additional_attempts;
+        if ($used_attempts >= $max_allowed && !$test_settings['practice_mode']) {
+            // Если попыток больше не осталось, показываем ошибку
+            $error = 'У вас не осталось попыток для прохождения этого теста.';
+        } else {
+            // Создаем новую попытку
+            $stmt = $pdo->prepare("
+                INSERT INTO test_attempts (id_test, id_user, status)
+                VALUES (?, ?, 'in_progress')
+                RETURNING id_attempt
+            ");
+            $stmt->execute([$test_id, $user_id]);
+            $attempt_id = $stmt->fetchColumn();
+            
+            // Сбрасываем предыдущие ответы в сессии
+            $_SESSION['test_answers'][$test_id] = array_fill(0, $total_questions, null);
+            
+            // Перенаправляем на первый вопрос
+            header('Location: test_pass.php?test_id=' . $test_id . '&q=0&attempt_id=' . $attempt_id);
+            exit;
+        }
+    } catch (Exception $e) {
+        error_log('Ошибка при создании попытки: ' . $e->getMessage());
+        $error = 'Произошла ошибка при начале теста. Пожалуйста, попробуйте снова.';
+    }
 }
 
 ?><!DOCTYPE html>
@@ -1091,6 +1067,8 @@ if (isset($_GET['progress_check'])) {
 </head>
 <body>
 <div class="ui container" style="margin-top: 50px; max-width: 700px;">
+    <?php if ($attempt_id && isset($_GET['q']) && $_GET['q'] !== 'finish' && (int)$_GET['q'] >= 0): ?>
+        <!-- Отображаем интерфейс вопроса -->
     <div class="ui segment">
         <div class="ui grid">
             <div class="ten wide column">
@@ -1101,7 +1079,7 @@ if (isset($_GET['progress_check'])) {
                     <?php for ($i = 0; $i < $total_questions; $i++): ?>
                         <?php $answered = $_SESSION['test_answers'][$test_id][$i] !== null && $_SESSION['test_answers'][$test_id][$i] !== '' && $_SESSION['test_answers'][$test_id][$i] !== []; ?>
                         <div class="item">
-                            <a href="test_pass.php?test_id=<?= $test_id ?>&q=<?= $i ?>" class="ui circular label <?= $i === $question_index ? 'blue' : '' ?> <?= $answered ? 'green' : 'grey' ?>">
+                                <a href="test_pass.php?test_id=<?= $test_id ?>&q=<?= $i ?>&attempt_id=<?= $attempt_id ?>" class="ui circular label <?= $i === $question_index ? 'blue' : '' ?> <?= $answered ? 'green' : 'grey' ?>">
                                 <?= $i + 1 ?>
                             </a>
                         </div>
@@ -1111,6 +1089,7 @@ if (isset($_GET['progress_check'])) {
         </div>
         <form class="ui form" method="post">
             <input type="hidden" name="q" value="<?= $question_index ?>">
+            <input type="hidden" name="attempt_id" value="<?= $attempt_id ?>">
             <div class="field">
                 <label><?= htmlspecialchars($question['text_question']) ?></label>
                 <?php if ($type === 'single'): ?>
@@ -1253,10 +1232,8 @@ if (isset($_GET['progress_check'])) {
         <div class="ui divider"></div>
         <div>Отвечено: <?= $answered_count ?> / <?= $total_questions ?></div>
     </div>
-</div>
-<script>
-$(function(){ $('.ui.radio.checkbox').checkbox(); $('.ui.checkbox').checkbox(); $('.ui.dropdown').dropdown(); });
-</script>
+
+        <?php if ($type === 'code'): ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const runBtn = document.getElementById('run-code-btn');
@@ -1362,6 +1339,61 @@ document.addEventListener('DOMContentLoaded', function() {
             output.textContent = error.message;
         });
     });
+        });
+        </script>
+        <?php endif; ?>
+    <?php else: ?>
+        <!-- Отображаем информацию о тесте -->
+        <div class="ui segment">
+            <h1><?= htmlspecialchars($test_info['name_test']) ?></h1>
+            <?php if (!empty($test_info['desc_test'])): ?>
+                <p><?= htmlspecialchars($test_info['desc_test']) ?></p>
+            <?php endif; ?>
+            
+            <div class="ui info message">
+                <p><strong>Проходной балл:</strong> <?= $test_settings['passing_percentage'] ?>%</p>
+                <?php if (!$test_settings['practice_mode']): ?>
+                    <p><strong>Попыток:</strong> <?= $attempts_left ?> из <?= $test_settings['max_attempts'] ?></p>
+                <?php else: ?>
+                    <p><strong>Режим:</strong> Практика (неограниченное количество попыток)</p>
+                <?php endif; ?>
+                
+                <?php if ($test_settings['time_between_attempts'] > 0): ?>
+                    <p><strong>Ожидание между попытками:</strong> <?= $test_settings['time_between_attempts'] ?> мин.</p>
+                <?php endif; ?>
+            </div>
+            
+            <?php if ($error): ?>
+                <div class="ui error message">
+                    <p><?= htmlspecialchars($error) ?></p>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($need_wait): ?>
+                <div class="ui warning message">
+                    <p>Необходимо подождать до <?= date('d.m.Y H:i', strtotime($wait_until)) ?> перед следующей попыткой.</p>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (!$can_start_new_attempt && !$need_wait && !$test_settings['practice_mode']): ?>
+                <div class="ui warning message">
+                    <p>Вы использовали все доступные попытки или уже успешно прошли этот тест.</p>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($can_start_new_attempt): ?>
+                <a href="test_pass.php?test_id=<?= $test_id ?>&start=1" class="ui primary button">Начать тест</a>
+            <?php endif; ?>
+            
+            <a href="lesson.php?id=<?= $test_info['id_lesson'] ?>" class="ui button">Вернуться к уроку</a>
+        </div>
+    <?php endif; ?>
+</div>
+<script>
+$(function(){
+    $('.ui.checkbox').checkbox();
+    $('.ui.dropdown').dropdown();
+    $('.ui.accordion').accordion();
 });
 </script>
 </body>

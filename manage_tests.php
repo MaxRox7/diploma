@@ -155,19 +155,58 @@ try {
             elseif ($_POST['action'] === 'add_test') {
                 $test_name = trim($_POST['test_name']);
                 $test_description = trim($_POST['test_description']);
-                $passing_score = (int)$_POST['passing_score'];
+                $passing_percentage = (int)$_POST['passing_percentage'];
+                $max_attempts = (int)$_POST['max_attempts'];
+                $time_between_attempts = (int)$_POST['time_between_attempts'];
+                $show_results = isset($_POST['show_results']) ? 'true' : 'false';
+                $practice_mode = isset($_POST['practice_mode']) ? 'true' : 'false';
                 
                 if (empty($test_name)) {
                     $error = 'Введите название теста';
                 } else {
                     try {
                         $stmt = $pdo->prepare("
-                            INSERT INTO Tests (id_step, name_test, desc_test)
-                            VALUES (?, ?, ?)
+                            INSERT INTO Tests (id_step, name_test, desc_test, 
+                                              passing_percentage, max_attempts, 
+                                              time_between_attempts, show_results_after_completion,
+                                              practice_mode)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                             RETURNING id_test
                         ");
-                        $stmt->execute([$step_id, $test_name, $test_description]);
+                        $stmt->execute([
+                            $step_id, 
+                            $test_name, 
+                            $test_description,
+                            $passing_percentage,
+                            $max_attempts,
+                            $time_between_attempts,
+                            $show_results,
+                            $practice_mode
+                        ]);
                         $test_id = $stmt->fetchColumn();
+                        
+                        // Создаем уровни оценок по умолчанию
+                        $default_levels = [
+                            ['0', '59', 'Не пройдено', '#DB2828'], // красный
+                            ['60', '74', 'Удовлетворительно', '#F2711C'], // оранжевый
+                            ['75', '89', 'Хорошо', '#2185D0'], // синий
+                            ['90', '100', 'Отлично', '#21BA45'] // зеленый
+                        ];
+                        
+                        $stmt = $pdo->prepare("
+                            INSERT INTO test_grade_levels (id_test, min_percentage, max_percentage, grade_name, grade_color)
+                            VALUES (?, ?, ?, ?, ?)
+                        ");
+                        
+                        foreach ($default_levels as $level) {
+                            $stmt->execute([
+                                $test_id,
+                                $level[0],
+                                $level[1],
+                                $level[2],
+                                $level[3]
+                            ]);
+                        }
                         
                         $success = 'Тест успешно создан';
                         header("Location: edit_test.php?test_id=" . $test_id);
@@ -309,7 +348,27 @@ try {
                     
                     <div class="field">
                         <label>Проходной балл (в процентах)</label>
-                        <input type="number" name="passing_score" min="0" max="100" value="70" required>
+                        <input type="number" name="passing_percentage" min="0" max="100" value="70" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Максимальное количество попыток</label>
+                        <input type="number" name="max_attempts" min="1" value="3" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Время между попытками (в секундах)</label>
+                        <input type="number" name="time_between_attempts" min="0" value="60" required>
+                    </div>
+
+                    <div class="field">
+                        <label>Показывать результаты после завершения</label>
+                        <input type="checkbox" name="show_results" value="1">
+                    </div>
+
+                    <div class="field">
+                        <label>Режим практики</label>
+                        <input type="checkbox" name="practice_mode" value="1">
                     </div>
 
                     <button type="submit" class="ui primary button">Создать тест</button>
@@ -332,7 +391,9 @@ try {
                             <tr>
                                 <th>Название</th>
                                 <th>Описание</th>
-                                <th>Проходной балл</th>
+                                <th>Проходной %</th>
+                                <th>Макс. попыток</th>
+                                <th>Режим</th>
                                 <th>Вопросов</th>
                                 <th>Попыток</th>
                                 <th>Действия</th>
@@ -343,7 +404,9 @@ try {
                                 <tr>
                                     <td><?= htmlspecialchars($test['name_test']) ?></td>
                                     <td><?= htmlspecialchars($test['desc_test'] ?? '') ?></td>
-                                    <td>70%</td>
+                                    <td><?= $test['passing_percentage'] ?? 70 ?>%</td>
+                                    <td><?= $test['max_attempts'] ?? 3 ?></td>
+                                    <td><?= $test['practice_mode'] ? 'Практика' : 'Экзамен' ?></td>
                                     <td><?= $test['question_count'] ?></td>
                                     <td><?= $test['attempt_count'] ?></td>
                                     <td>

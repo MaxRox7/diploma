@@ -212,11 +212,7 @@ try {
                     
                     if ($user_answer !== null) {
                         // Получаем правильный ответ
-                        $stmt = $pdo->prepare("
-                            SELECT id_option 
-                            FROM Answer_options 
-                            WHERE id_question = ? AND is_correct = true
-                        ");
+                        $stmt = $pdo->prepare("SELECT answer_question FROM Questions WHERE id_question = ?");
                         $stmt->execute([$question_id]);
                         $correct_option = $stmt->fetchColumn();
                         
