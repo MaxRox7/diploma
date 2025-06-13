@@ -59,7 +59,7 @@ try {
     }
     
     // Если у пользователя есть интересы, получаем рекомендации
-    if (!empty($user_tags)) {
+    if (is_student() && !empty($user_tags)) {
         // Формируем список ID тегов
         $tag_ids = array_column($user_tags, 'id_tag');
         
@@ -76,7 +76,7 @@ try {
             FROM course c
             JOIN course_tags ct ON c.id_course = ct.id_course
             LEFT JOIN user_tag_interests uti ON ct.id_tag = uti.id_tag AND uti.id_user = ?
-            LEFT JOIN feedback f ON c.id_course = f.id_course
+            LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
             LEFT JOIN create_passes cp2 ON c.id_course = cp2.id_course
             LEFT JOIN lessons l ON c.id_course = l.id_lesson
             WHERE ct.id_tag IN (" . implode(',', array_fill(0, count($tag_ids), '?')) . ")
@@ -109,7 +109,7 @@ try {
                false as is_enrolled
         FROM course c
         LEFT JOIN course_statistics cs ON c.id_course = cs.id_course
-        LEFT JOIN feedback f ON c.id_course = f.id_course
+        LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
         LEFT JOIN create_passes cp2 ON c.id_course = cp2.id_course
         LEFT JOIN lessons l ON c.id_course = l.id_lesson
         WHERE c.status_course = 'approved'
@@ -132,7 +132,7 @@ try {
                COUNT(DISTINCT l.id_lesson) as lessons_count,
                false as is_enrolled
         FROM course c
-        LEFT JOIN feedback f ON c.id_course = f.id_course
+        LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
         LEFT JOIN create_passes cp2 ON c.id_course = cp2.id_course
         LEFT JOIN lessons l ON c.id_course = l.id_lesson
         WHERE c.status_course = 'approved'
@@ -162,8 +162,8 @@ try {
                ) as is_enrolled
         FROM course c
         LEFT JOIN create_passes cp ON c.id_course = cp.id_course
-        LEFT JOIN lessons l ON c.id_course = l.id_lesson
-        LEFT JOIN feedback f ON c.id_course = f.id_course
+        LEFT JOIN lessons l ON c.id_course = l.id_course
+        LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
         $where_sql $search_condition
         GROUP BY c.id_course
         ORDER BY c.id_course DESC
@@ -210,7 +210,7 @@ try {
     <?php endif; ?>
 
     <!-- Секция рекомендуемых курсов -->
-    <?php if (!empty($recommended_courses)): ?>
+    <?php if (is_student() && !empty($recommended_courses)): ?>
         <div class="ui segment">
             <h2 class="ui header">
                 <i class="lightbulb outline icon"></i>
@@ -273,7 +273,7 @@ try {
     <?php endif; ?>
     
     <!-- Секция популярных курсов -->
-    <?php if (!empty($popular_courses)): ?>
+    <?php if (is_student() && !empty($popular_courses)): ?>
         <div class="ui segment">
             <h2 class="ui header">
                 <i class="fire icon"></i>
@@ -326,7 +326,7 @@ try {
     <?php endif; ?>
     
     <!-- Секция высокооцененных курсов -->
-    <?php if (!empty($top_rated_courses)): ?>
+    <?php if (is_student() && !empty($top_rated_courses)): ?>
         <div class="ui segment">
             <h2 class="ui header">
                 <i class="star icon"></i>

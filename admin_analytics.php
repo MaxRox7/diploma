@@ -9,6 +9,21 @@ if (!is_admin()) {
 }
 
 $error = '';
+$success = '';
+
+// Обработка действий модерации
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id_feedback'])) {
+    $id_feedback = (int)$_POST['id_feedback'];
+    if ($_POST['action'] === 'approve') {
+        $stmt = get_db_connection()->prepare("UPDATE feedback SET status = 'approved' WHERE id_feedback = ?");
+        $stmt->execute([$id_feedback]);
+        $success = 'Отзыв одобрен.';
+    } elseif ($_POST['action'] === 'reject') {
+        $stmt = get_db_connection()->prepare("UPDATE feedback SET status = 'rejected' WHERE id_feedback = ?");
+        $stmt->execute([$id_feedback]);
+        $success = 'Отзыв отклонен.';
+    }
+}
 
 try {
     $pdo = get_db_connection();

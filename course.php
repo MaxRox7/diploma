@@ -25,7 +25,7 @@ try {
         FROM course c
         LEFT JOIN create_passes cp ON c.id_course = cp.id_course
         LEFT JOIN lessons l ON c.id_course = l.id_course
-        LEFT JOIN feedback f ON c.id_course = f.id_course
+        LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
         WHERE c.id_course = ?
         GROUP BY c.id_course
     ");
@@ -156,12 +156,12 @@ try {
         }
     }
     
-    // Получаем отзывы
+    // Получаем отзывы только со статусом approved
     $stmt = $pdo->prepare("
         SELECT f.*, u.fn_user
         FROM feedback f
         JOIN users u ON f.id_user = u.id_user
-        WHERE f.id_course = ?
+        WHERE f.id_course = ? AND f.status = 'approved'
         ORDER BY f.date_feedback DESC
     ");
     $stmt->execute([$course_id]);
@@ -264,8 +264,8 @@ try {
                 } else {
                     try {
                         $stmt = $pdo->prepare("
-                            INSERT INTO feedback (id_course, id_user, text_feedback, date_feedback, rate_feedback)
-                            VALUES (?, ?, ?, CURRENT_DATE, ?)
+                            INSERT INTO feedback (id_course, id_user, text_feedback, date_feedback, rate_feedback, status)
+                            VALUES (?, ?, ?, CURRENT_DATE, ?, 'pending')
                         ");
                         $stmt->execute([$course_id, $user_id, $text_feedback, $rate_feedback]);
                         $success = 'Отзыв успешно добавлен';
@@ -275,7 +275,7 @@ try {
                             SELECT f.*, u.fn_user
                             FROM feedback f
                             JOIN users u ON f.id_user = u.id_user
-                            WHERE f.id_course = ?
+                            WHERE f.id_course = ? AND f.status = 'approved'
                             ORDER BY f.date_feedback DESC
                         ");
                         $stmt->execute([$course_id]);

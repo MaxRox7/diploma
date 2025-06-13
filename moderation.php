@@ -141,6 +141,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: moderation.php?tab=courses&success=1');
         exit;
     }
+
+    if (isset($_POST['action']) && in_array($_POST['action'], ['approve_feedback','reject_feedback']) && isset($_POST['id_feedback'])) {
+        $id_feedback = (int)$_POST['id_feedback'];
+        if ($_POST['action'] === 'approve_feedback') {
+            $stmt = $pdo->prepare("UPDATE feedback SET status = 'approved' WHERE id_feedback = ?");
+            $stmt->execute([$id_feedback]);
+            $success = 'Отзыв одобрен.';
+        } elseif ($_POST['action'] === 'reject_feedback') {
+            $stmt = $pdo->prepare("UPDATE feedback SET status = 'rejected' WHERE id_feedback = ?");
+            $stmt->execute([$id_feedback]);
+            $success = 'Отзыв отклонен.';
+        }
+    }
 }
 
 // Получаем заявки с учётом поиска
@@ -193,6 +206,7 @@ function file_link($path) {
         <a href="?tab=students" class="item<?= !isset($_GET['tab']) || $_GET['tab'] === 'students' ? ' active' : '' ?>" data-tab="students">Студенты</a>
         <a href="?tab=teachers" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'teachers' ? ' active' : '' ?>" data-tab="teachers">Преподаватели</a>
         <a href="?tab=courses" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'courses' ? ' active' : '' ?>" data-tab="courses">Курсы</a>
+        <a href="?tab=feedback" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'feedback' ? ' active' : '' ?>" data-tab="feedback">Отзывы</a>
     </div>
     <div class="ui bottom attached tab segment<?= !isset($_GET['tab']) || $_GET['tab'] === 'students' ? ' active' : '' ?>" data-tab="students">
         <?php if (empty($students)): ?>
@@ -392,6 +406,56 @@ function file_link($path) {
             </form>
         </div>
         <?php endif; } ?>
+    </div>
+    <div class="ui bottom attached tab segment<?= isset($_GET['tab']) && $_GET['tab'] === 'feedback' ? ' active' : '' ?>" data-tab="feedback">
+        <h2 class="ui header">Модерация отзывов</h2>
+        <?php
+        // Получаем отзывы на модерацию
+        $stmt = $pdo->prepare("
+            SELECT f.*, u.fn_user, c.name_course
+            FROM feedback f
+            JOIN users u ON f.id_user = u.id_user
+            JOIN course c ON f.id_course = c.id_course
+            WHERE f.status = 'pending'
+            ORDER BY f.date_feedback DESC
+        ");
+        $stmt->execute();
+        $pending_feedbacks = $stmt->fetchAll();
+        ?>
+        <?php if (empty($pending_feedbacks)): ?>
+            <div class="ui message">Нет отзывов на модерацию.</div>
+        <?php else: ?>
+            <table class="ui celled table">
+                <thead>
+                    <tr>
+                        <th>Курс</th>
+                        <th>Пользователь</th>
+                        <th>Дата</th>
+                        <th>Оценка</th>
+                        <th>Текст</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($pending_feedbacks as $fb): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($fb['name_course']) ?></td>
+                            <td><?= htmlspecialchars($fb['fn_user']) ?></td>
+                            <td><?= htmlspecialchars($fb['date_feedback']) ?></td>
+                            <td><?= htmlspecialchars($fb['rate_feedback']) ?></td>
+                            <td><?= nl2br(htmlspecialchars($fb['text_feedback'])) ?></td>
+                            <td>
+                                <form method="post" style="display:inline;">
+                                    <input type="hidden" name="id_feedback" value="<?= $fb['id_feedback'] ?>">
+                                    <button class="ui green button" name="action" value="approve_feedback">Одобрить</button>
+                                    <button class="ui red button" name="action" value="reject_feedback">Отклонить</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
     </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
