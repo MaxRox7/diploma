@@ -68,7 +68,8 @@ function get_status_label($status) {
             return ['Неизвестно', 'black'];
     }
 }
-?>
+
+<?php include_once 'courses.php'; ?>
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -121,60 +122,36 @@ function get_status_label($status) {
                     <a href="add_course.php" class="ui primary button">Создать курс</a>
                 </div>
             <?php else: ?>
-                <div class="ui cards">
+                <div class="ui three stackable cards">
                     <?php foreach ($courses as $course): ?>
-                        <?php 
+                        <?php render_course_card($course); ?>
+                        <div class="ui segment" style="border-top: none; border-radius: 0 0 8px 8px;">
+                            <?php 
                             $status_info = get_status_label($course['status_course']);
                             $status_label = $status_info[0];
                             $status_color = $status_info[1];
-                        ?>
-                        <div class="ui fluid card">
-                            <div class="content">
-                                <div class="right floated">
-                                    <div class="ui <?= $status_color ?> label"><?= htmlspecialchars($status_label) ?></div>
+                            ?>
+                            <div class="ui <?= $status_color ?> label"><?= htmlspecialchars($status_label) ?></div>
+                            <a href="edit_course.php?id=<?= $course['id_course'] ?>" class="ui blue button"><i class="edit icon"></i> Редактировать</a>
+                            <a href="course.php?id=<?= $course['id_course'] ?>" class="ui button"><i class="eye icon"></i> Просмотр</a>
+                            <?php if ($course['status_course'] === 'draft' || $course['status_course'] === 'correction'): ?>
+                                <form method="post" style="display:inline;">
+                                    <input type="hidden" name="action" value="send_to_moderation">
+                                    <input type="hidden" name="course_id" value="<?= $course['id_course'] ?>">
+                                    <button type="submit" class="ui orange button"><i class="paper plane icon"></i> Отправить на модерацию</button>
+                                </form>
+                            <?php endif; ?>
+                            <?php if ($course['status_course'] === 'correction' && !empty($course['moderation_comment'])): ?>
+                                <div class="ui warning message" style="margin-top: 10px;">
+                                    <div class="header">Комментарий модератора:</div>
+                                    <p><?= nl2br(htmlspecialchars($course['moderation_comment'])) ?></p>
                                 </div>
-                                <div class="header"><?= htmlspecialchars($course['name_course']) ?></div>
-                                <div class="meta">
-                                    <span>Сложность: <?= htmlspecialchars($course['level_course'] ?: 'Не указана') ?></span>
-                                    <span>Длительность: <?= htmlspecialchars($course['hourse_course']) ?> ч.</span>
+                            <?php elseif ($course['status_course'] === 'rejected' && !empty($course['moderation_comment'])): ?>
+                                <div class="ui negative message" style="margin-top: 10px;">
+                                    <div class="header">Причина отклонения:</div>
+                                    <p><?= nl2br(htmlspecialchars($course['moderation_comment'])) ?></p>
                                 </div>
-                                <div class="description">
-                                    <?= nl2br(htmlspecialchars(mb_substr($course['desc_course'], 0, 150))) ?>
-                                    <?= (mb_strlen($course['desc_course']) > 150) ? '...' : '' ?>
-                                </div>
-                            </div>
-                            <div class="extra content">
-                                <div class="ui two buttons">
-                                    <a href="edit_course.php?id=<?= $course['id_course'] ?>" class="ui blue button">
-                                        <i class="edit icon"></i> Редактировать
-                                    </a>
-                                    <a href="course.php?id=<?= $course['id_course'] ?>" class="ui button">
-                                        <i class="eye icon"></i> Просмотр
-                                    </a>
-                                </div>
-                                
-                                <?php if ($course['status_course'] === 'draft' || $course['status_course'] === 'correction'): ?>
-                                    <form method="post" style="margin-top: 10px;">
-                                        <input type="hidden" name="action" value="send_to_moderation">
-                                        <input type="hidden" name="course_id" value="<?= $course['id_course'] ?>">
-                                        <button type="submit" class="ui fluid orange button">
-                                            <i class="paper plane icon"></i> Отправить на модерацию
-                                        </button>
-                                    </form>
-                                    
-                                    <?php if ($course['status_course'] === 'correction' && !empty($course['moderation_comment'])): ?>
-                                        <div class="ui warning message" style="margin-top: 10px;">
-                                            <div class="header">Комментарий модератора:</div>
-                                            <p><?= nl2br(htmlspecialchars($course['moderation_comment'])) ?></p>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php elseif ($course['status_course'] === 'rejected' && !empty($course['moderation_comment'])): ?>
-                                    <div class="ui negative message" style="margin-top: 10px;">
-                                        <div class="header">Причина отклонения:</div>
-                                        <p><?= nl2br(htmlspecialchars($course['moderation_comment'])) ?></p>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>

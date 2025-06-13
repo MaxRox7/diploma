@@ -6,12 +6,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Получаем данные из формы
     $fn_user = trim($_POST['fn_user']);
     $birth_user = trim($_POST['birth_user']);
-    $uni_user = trim($_POST['uni_user']);
-    $spec_user = trim($_POST['spec_user']);
-    $year_user = (int)$_POST['year_user'];
     $login_user = trim($_POST['login_user']);
     $password_user = trim($_POST['password_user']);
     $role_user = $_POST['role_user'] ?? 'student';
+    // Опциональные поля
+    $uni_user = isset($_POST['uni_user']) ? trim($_POST['uni_user']) : null;
+    $spec_user = isset($_POST['spec_user']) ? trim($_POST['spec_user']) : null;
+    $year_user = isset($_POST['year_user']) ? (int)$_POST['year_user'] : null;
 
     // Валидация email
     if (!filter_var($login_user, FILTER_VALIDATE_EMAIL)) {
@@ -19,22 +20,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Проверяем обязательные поля
-    if (empty($fn_user) || empty($birth_user) || empty($uni_user) || 
-        empty($spec_user) || empty($year_user) || empty($login_user) || 
-        empty($password_user)) {
+    if (empty($fn_user) || empty($birth_user) || empty($login_user) || empty($password_user)) {
         $error = 'Заполните все обязательные поля';
     }
 
-    // Проверка файлов
-    $student_card_path = null;
+    // Проверка файлов только для преподавателей
     $passport_path = null;
     $diploma_path = null;
     $criminal_path = null;
-    if ($role_user === 'student') {
-        if (!isset($_FILES['student_card']) || $_FILES['student_card']['error'] !== UPLOAD_ERR_OK) {
-            $error = 'Загрузите фото студенческого билета';
-        }
-    } elseif ($role_user === 'teacher') {
+    if ($role_user === 'teacher') {
         if (!isset($_FILES['passport_file']) || $_FILES['passport_file']['error'] !== UPLOAD_ERR_OK) {
             $error = 'Загрузите паспорт';
         }
@@ -55,13 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'Пользователь с такой почтой уже существует';
             } else {
                 $password_hash = password_hash($password_user, PASSWORD_DEFAULT);
-                // Сохраняем файлы
-                if ($role_user === 'student') {
-                    $student_dir = 'uploads/students';
-                    if (!file_exists($student_dir)) mkdir($student_dir, 0777, true);
-                    $student_card_path = $student_dir . '/' . uniqid('student_card_') . '_' . basename($_FILES['student_card']['name']);
-                    move_uploaded_file($_FILES['student_card']['tmp_name'], $student_card_path);
-                } elseif ($role_user === 'teacher') {
+                if ($role_user === 'teacher') {
                     $passport_dir = 'uploads/teachers/passport';
                     $diploma_dir = 'uploads/teachers/diploma';
                     $criminal_dir = 'uploads/teachers/criminal';
@@ -75,13 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     move_uploaded_file($_FILES['diploma_file']['tmp_name'], $diploma_path);
                     move_uploaded_file($_FILES['criminal_record_file']['tmp_name'], $criminal_path);
                 }
-                // Добавляем пользователя
                 $stmt = $pdo->prepare("
                     INSERT INTO users (
                         fn_user, birth_user, uni_user, role_user, 
                         spec_user, year_user, login_user, password_user, status, student_card, passport_file, diploma_file, criminal_record_file
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?)
                 ");
+                $status = ($role_user === 'student') ? 'approved' : 'pending';
                 $stmt->execute([
                     $fn_user,
                     $birth_user,
@@ -91,13 +79,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $year_user,
                     $login_user,
                     $password_hash,
-                    $student_card_path,
+                    $status,
                     $passport_path,
                     $diploma_path,
                     $criminal_path
                 ]);
-                // Сообщение об успешной регистрации
-                header('Location: register_success.php');
+                // Сразу логиним пользователя
+                $user_id = $pdo->lastInsertId('users_id_user_seq');
+                $stmt = $pdo->prepare('SELECT * FROM users WHERE id_user = ?');
+                $stmt->execute([$user_id]);
+                $user = $stmt->fetch();
+                $_SESSION['user'] = $user;
+                $_SESSION['jwt'] = generate_jwt([
+                    'id_user' => $user['id_user'],
+                    'role_user' => $user['role_user'],
+                    'exp' => time() + JWT_EXPIRATION
+                ]);
+                // Отправляем письмо студенту
+                if ($role_user === 'student') {
+                    $subject = 'Добро пожаловать в CodeSphere!';
+                    $message = '<p>Поздравляем с успешной регистрацией на платформе CodeSphere!</p><p>Теперь вы можете приступить к обучению и пользоваться всеми возможностями платформы.</p>';
+                    send_email_smtp($login_user, $subject, $message);
+                }
+                // Для преподавателя — стандартное письмо (оставляем как есть)
+                header('Location: index.php');
                 exit;
             }
         } catch (PDOException $e) {
@@ -141,29 +146,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="required field">
-            <label>Университет</label>
-            <input type="text" name="uni_user" placeholder="Введите название университета" required>
-        </div>
-
-        <div class="required field">
-            <label>Специальность</label>
-            <input type="text" name="spec_user" placeholder="Введите специальность" required>
-        </div>
-
-        <div class="required field">
-            <label>Год обучения</label>
-            <select name="year_user" class="ui dropdown" required>
-                <option value="">Выберите год обучения</option>
-                <option value="1">1 курс</option>
-                <option value="2">2 курс</option>
-                <option value="3">3 курс</option>
-                <option value="4">4 курс</option>
-                <option value="5">5 курс</option>
-                <option value="6">6 курс</option>
-            </select>
-        </div>
-
-        <div class="required field">
             <label>Почта</label>
             <input type="text" name="login_user" placeholder="Введите почту" required>
         </div>
@@ -181,11 +163,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </select>
         </div>
 
-        <div class="required field" id="student_card_field">
-            <label>Фото студенческого билета</label>
-            <input type="file" name="student_card">
+        <!-- Кнопка для показа опциональных данных об обучении -->
+        <div class="field">
+            <button type="button" class="ui button" id="show_edu_fields_btn">Заполнить данные об обучении (опционально)</button>
         </div>
-
+        <div id="edu_fields" style="display:none;">
+            <div class="field">
+                <label>Университет</label>
+                <input type="text" name="uni_user" placeholder="Введите название университета">
+            </div>
+            <div class="field">
+                <label>Специальность</label>
+                <input type="text" name="spec_user" placeholder="Введите специальность">
+            </div>
+            <div class="field">
+                <label>Год обучения</label>
+                <select name="year_user" class="ui dropdown">
+                    <option value="">Выберите год обучения</option>
+                    <option value="1">1 курс</option>
+                    <option value="2">2 курс</option>
+                    <option value="3">3 курс</option>
+                    <option value="4">4 курс</option>
+                    <option value="5">5 курс</option>
+                    <option value="6">6 курс</option>
+                </select>
+            </div>
+        </div>
         <div id="teacher_files" style="display:none;">
             <div class="required field">
                 <label>Паспорт</label>
@@ -214,24 +217,22 @@ $(document).ready(function() {
     $('.ui.dropdown').dropdown();
     function toggleRoleFields() {
         var role = $('#role_user_select').val();
-        if (role === 'student') {
-            $('#student_card_field').show();
-            $('#teacher_files').hide();
-        } else {
-            $('#student_card_field').hide();
+        if (role === 'teacher') {
             $('#teacher_files').show();
+        } else {
+            $('#teacher_files').hide();
         }
     }
     $('#role_user_select').change(toggleRoleFields);
     toggleRoleFields();
-    
+    // Кнопка для показа/скрытия опциональных полей об обучении
+    $('#show_edu_fields_btn').click(function() {
+        $('#edu_fields').toggle();
+    });
     $('.ui.form').form({
         fields: {
             fn_user: 'empty',
             birth_user: 'empty',
-            uni_user: 'empty',
-            spec_user: 'empty',
-            year_user: 'empty',
             login_user: 'empty',
             password_user: 'empty'
         }

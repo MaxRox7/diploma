@@ -18,7 +18,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($password_user, $user['password_user'])) {
-                if ($user['status'] !== 'approved') {
+                if (empty($user['status'])) {
+                    // Если статус не установлен, считаем студента одобренным, преподавателя — на модерации
+                    if ($user['role_user'] === 'teacher') {
+                        $user['status'] = 'pending';
+                    } else {
+                        $user['status'] = 'approved';
+                    }
+                }
+                if ($user['status'] === 'banned') {
+                    $error = 'Ваш аккаунт заблокирован администратором.';
+                } elseif ($user['status'] !== 'approved') {
                     $error = 'Ваша заявка ещё не одобрена администратором.';
                 } else {
                     // Создаем JWT токен

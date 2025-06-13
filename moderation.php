@@ -86,6 +86,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             header('Location: moderation.php?success=edit');
             exit;
+        } elseif ($action === 'ban') {
+            $stmt = $pdo->prepare("UPDATE users SET status='banned', moderation_comment=? WHERE id_user=?");
+            $stmt->execute([$moderation_comment, $user_id]);
+            header('Location: moderation.php?success=ban');
+            exit;
+        } elseif ($action === 'unban') {
+            $stmt = $pdo->prepare("UPDATE users SET status='approved', moderation_comment=? WHERE id_user=?");
+            $stmt->execute([$moderation_comment, $user_id]);
+            header('Location: moderation.php?success=unban');
+            exit;
         }
     } catch (PDOException $e) {
         header('Location: moderation.php?error=' . urlencode($e->getMessage()));
@@ -154,23 +164,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = 'Отзыв отклонен.';
         }
     }
+
+    if ($user_id) {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE id_user=?");
+        $stmt->execute([$user_id]);
+        $user = $stmt->fetch();
+        if ($user && !$user['status']) {
+            $new_status = $user['role_user']==='teacher' ? 'pending' : 'approved';
+            $stmt = $pdo->prepare("UPDATE users SET status=? WHERE id_user=?");
+            $stmt->execute([$new_status, $user_id]);
+            $user['status'] = $new_status;
+        }
+    }
 }
 
 // Получаем заявки с учётом поиска
 $search = trim($_GET['search'] ?? '');
-$where = "WHERE status='pending'";
+$role_filter = trim($_GET['role'] ?? '');
+$sort = trim($_GET['sort'] ?? 'role');
+$where = 'WHERE 1=1';
 $params = [];
 if ($search !== '') {
-    $where .= " AND (fn_user ILIKE ? OR login_user ILIKE ? OR uni_user ILIKE ? OR spec_user ILIKE ? OR CAST(year_user AS TEXT) ILIKE ?)";
+    $where .= " AND (fn_user ILIKE ? OR login_user ILIKE ? OR uni_user ILIKE ? OR spec_user ILIKE ? OR CAST(year_user AS TEXT) ILIKE ? )";
     $search_param = "%$search%";
-    $params = array_fill(0, 5, $search_param);
+    $params = array_merge($params, array_fill(0, 5, $search_param));
 }
-$students = $pdo->prepare("SELECT * FROM users $where AND role_user='student' ORDER BY id_user");
-$students->execute($params);
-$students = $students->fetchAll();
-$teachers = $pdo->prepare("SELECT * FROM users $where AND role_user='teacher' ORDER BY id_user");
-$teachers->execute($params);
-$teachers = $teachers->fetchAll();
+if ($role_filter !== '') {
+    $where .= " AND role_user = ?";
+    $params[] = $role_filter;
+}
+$order = ($sort === 'name') ? 'ORDER BY fn_user' : (($sort === 'status') ? "ORDER BY (status='pending') DESC, status, fn_user" : 'ORDER BY role_user, fn_user');
+$users_stmt = $pdo->prepare("SELECT * FROM users $where $order");
+$users_stmt->execute($params);
+$users = $users_stmt->fetchAll();
 
 function file_link($path) {
     return $path && file_exists($path) ? '<a href="' . htmlspecialchars($path) . '" target="_blank">Смотреть</a>' : '<span style="color:#888">Нет</span>';
@@ -203,87 +229,73 @@ function file_link($path) {
         <div class="ui success message"><?= htmlspecialchars($success) ?></div>
     <?php endif; ?>
     <div class="ui top attached tabular menu">
-        <a href="?tab=students" class="item<?= !isset($_GET['tab']) || $_GET['tab'] === 'students' ? ' active' : '' ?>" data-tab="students">Студенты</a>
-        <a href="?tab=teachers" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'teachers' ? ' active' : '' ?>" data-tab="teachers">Преподаватели</a>
+        <a href="?tab=users" class="item<?= !isset($_GET['tab']) || $_GET['tab'] === 'users' ? ' active' : '' ?>" data-tab="users">Пользователи</a>
         <a href="?tab=courses" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'courses' ? ' active' : '' ?>" data-tab="courses">Курсы</a>
         <a href="?tab=feedback" class="item<?= isset($_GET['tab']) && $_GET['tab'] === 'feedback' ? ' active' : '' ?>" data-tab="feedback">Отзывы</a>
     </div>
-    <div class="ui bottom attached tab segment<?= !isset($_GET['tab']) || $_GET['tab'] === 'students' ? ' active' : '' ?>" data-tab="students">
-        <?php if (empty($students)): ?>
-            <div class="ui message">Нет заявок студентов.</div>
-        <?php else: ?>
-            <form method="get" class="ui form" style="margin-bottom:20px;">
-                <div class="ui action input" style="width:350px;">
+    <div class="ui bottom attached tab segment<?= !isset($_GET['tab']) || $_GET['tab'] === 'users' ? ' active' : '' ?>" data-tab="users">
+        <form method="get" class="ui form" style="margin-bottom:20px;">
+            <div class="fields">
+                <div class="field">
                     <input type="text" name="search" placeholder="Поиск по имени, почте, вузу, спецу, году..." value="<?= htmlspecialchars($search) ?>">
-                    <button class="ui button" type="submit">Поиск</button>
-                    <a href="moderation.php" class="ui button">Сбросить</a>
                 </div>
-            </form>
+                <div class="field">
+                    <select name="role" class="ui dropdown">
+                        <option value="">Все роли</option>
+                        <option value="student"<?= $role_filter==='student'?' selected':'' ?>>Студент</option>
+                        <option value="teacher"<?= $role_filter==='teacher'?' selected':'' ?>>Преподаватель</option>
+                        <option value="admin"<?= $role_filter==='admin'?' selected':'' ?>>Администратор</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <select name="sort" class="ui dropdown">
+                        <option value="role"<?= $sort==='role'?' selected':'' ?>>Сортировать по роли</option>
+                        <option value="name"<?= $sort==='name'?' selected':'' ?>>Сортировать по имени</option>
+                        <option value="status"<?= $sort==='status'?' selected':'' ?>>Сортировать по статусу</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <button class="ui button" type="submit">Поиск</button>
+                    <a href="moderation.php?tab=users" class="ui button">Сбросить</a>
+                </div>
+            </div>
+        </form>
+        <?php if (empty($users)): ?>
+            <div class="ui message">Нет пользователей.</div>
+        <?php else: ?>
             <table class="ui celled table">
                 <thead>
                     <tr>
-                        <th>ID</th><th>ФИО</th><th>Почта</th><th>Университет</th><th>Спец.</th><th>Год</th><th>Студ. билет</th><th>Комментарий</th><th>Действия</th>
+                        <th>ID</th><th>ФИО</th><th>Почта</th><th>Роль</th><th>Университет</th><th>Спец.</th><th>Год</th><th>Статус</th><th>Комментарий</th><th>Паспорт</th><th>Диплом</th><th>Справка</th><th>Действия</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($students as $u): ?>
+                <?php foreach ($users as $u): ?>
                     <tr>
                         <form method="post">
                         <td><?= $u['id_user'] ?><input type="hidden" name="user_id" value="<?= $u['id_user'] ?>"></td>
                         <td><input type="text" name="fn_user" value="<?= htmlspecialchars($u['fn_user']) ?>" style="width:120px"></td>
                         <td><input type="email" name="login_user" value="<?= htmlspecialchars($u['login_user']) ?>" style="width:150px"></td>
+                        <td><?= htmlspecialchars($u['role_user']) ?></td>
                         <td><input type="text" name="uni_user" value="<?= htmlspecialchars($u['uni_user']) ?>" style="width:100px"></td>
                         <td><input type="text" name="spec_user" value="<?= htmlspecialchars($u['spec_user']) ?>" style="width:100px"></td>
                         <td><input type="number" name="year_user" value="<?= htmlspecialchars($u['year_user']) ?>" style="width:60px"></td>
-                        <td><?= file_link($u['student_card']) ?></td>
+                        <td><?= htmlspecialchars($u['status']) ?></td>
                         <td><input type="text" name="moderation_comment" value="<?= htmlspecialchars($u['moderation_comment'] ?? '') ?>" style="width:120px"></td>
+                        <td><?= $u['role_user']==='teacher'?file_link($u['passport_file']):'' ?></td>
+                        <td><?= $u['role_user']==='teacher'?file_link($u['diploma_file']):'' ?></td>
+                        <td><?= $u['role_user']==='teacher'?file_link($u['criminal_record_file']):'' ?></td>
                         <td>
+                        <?php if ($u['role_user']==='teacher'): ?>
                             <button class="ui green mini button" name="action" value="approve">Одобрить</button>
                             <button class="ui red mini button" name="action" value="reject">Отклонить</button>
                             <button class="ui blue mini button" name="action" value="edit">Сохранить</button>
-                        </td>
-                        </form>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-    </div>
-    <div class="ui bottom attached tab segment<?= isset($_GET['tab']) && $_GET['tab'] === 'teachers' ? ' active' : '' ?>" data-tab="teachers">
-        <?php if (empty($teachers)): ?>
-            <div class="ui message">Нет заявок преподавателей.</div>
-        <?php else: ?>
-            <form method="get" class="ui form" style="margin-bottom:20px;">
-                <div class="ui action input" style="width:350px;">
-                    <input type="text" name="search" placeholder="Поиск по имени, почте, вузу, спецу, году..." value="<?= htmlspecialchars($search) ?>">
-                    <button class="ui button" type="submit">Поиск</button>
-                    <a href="moderation.php" class="ui button">Сбросить</a>
-                </div>
-            </form>
-            <table class="ui celled table">
-                <thead>
-                    <tr>
-                        <th>ID</th><th>ФИО</th><th>Почта</th><th>Университет</th><th>Спец.</th><th>Год</th><th>Паспорт</th><th>Диплом</th><th>Справка</th><th>Комментарий</th><th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($teachers as $u): ?>
-                    <tr>
-                        <form method="post">
-                        <td><?= $u['id_user'] ?><input type="hidden" name="user_id" value="<?= $u['id_user'] ?>"></td>
-                        <td><input type="text" name="fn_user" value="<?= htmlspecialchars($u['fn_user']) ?>" style="width:120px"></td>
-                        <td><input type="email" name="login_user" value="<?= htmlspecialchars($u['login_user']) ?>" style="width:150px"></td>
-                        <td><input type="text" name="uni_user" value="<?= htmlspecialchars($u['uni_user']) ?>" style="width:100px"></td>
-                        <td><input type="text" name="spec_user" value="<?= htmlspecialchars($u['spec_user']) ?>" style="width:100px"></td>
-                        <td><input type="number" name="year_user" value="<?= htmlspecialchars($u['year_user']) ?>" style="width:60px"></td>
-                        <td><?= file_link($u['passport_file']) ?></td>
-                        <td><?= file_link($u['diploma_file']) ?></td>
-                        <td><?= file_link($u['criminal_record_file']) ?></td>
-                        <td><input type="text" name="moderation_comment" value="<?= htmlspecialchars($u['moderation_comment'] ?? '') ?>" style="width:120px"></td>
-                        <td>
-                            <button class="ui green mini button" name="action" value="approve">Одобрить</button>
-                            <button class="ui red mini button" name="action" value="reject">Отклонить</button>
-                            <button class="ui blue mini button" name="action" value="edit">Сохранить</button>
+                        <?php endif; ?>
+                        <?php if ($u['status'] !== 'banned'): ?>
+                            <button class="ui orange mini button" name="action" value="ban" onclick="return confirm('Забанить пользователя?');">Забанить</button>
+                        <?php else: ?>
+                            <button class="ui olive mini button" name="action" value="unban" onclick="return confirm('Разбанить пользователя?');">Разбанить</button>
+                        <?php endif; ?>
                         </td>
                         </form>
                     </tr>

@@ -106,49 +106,9 @@ unset($course); // Break the reference
                     <a href="courses.php" class="ui primary button">Найти курсы</a>
                 </div>
             <?php else: ?>
-                <div class="ui cards">
+                <div class="ui three stackable cards">
                     <?php foreach ($courses as $course): ?>
-                        <div class="ui fluid card">
-                            <div class="content">
-                                <div class="right floated">
-                                    <?php if ($course['progress'] == 100): ?>
-                                        <div class="ui green label">
-                                            <i class="check icon"></i> Завершен
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="ui blue label">
-                                            В процессе
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="header"><?= htmlspecialchars($course['name_course']) ?></div>
-                                <div class="meta">
-                                    <span>Сложность: <?= htmlspecialchars($course['level_course'] ?: 'Не указана') ?></span>
-                                    <span>Длительность: <?= htmlspecialchars($course['hourse_course']) ?> ч.</span>
-                                </div>
-                                <div class="description">
-                                    <?= nl2br(htmlspecialchars(mb_substr($course['desc_course'], 0, 150))) ?>
-                                    <?= (mb_strlen($course['desc_course']) > 150) ? '...' : '' ?>
-                                </div>
-                            </div>
-                            <div class="extra content">
-                                <div class="ui indicating progress" data-value="<?= $course['progress'] ?>" data-total="100">
-                                    <div class="bar">
-                                        <div class="progress"></div>
-                                    </div>
-                                    <div class="label">Прогресс: <?= $course['progress'] ?>%</div>
-                                </div>
-                                <a href="course.php?id=<?= $course['id_course'] ?>" class="ui fluid blue button">
-                                    <?php if ($course['progress'] == 0): ?>
-                                        <i class="play icon"></i> Начать обучение
-                                    <?php elseif ($course['progress'] == 100): ?>
-                                        <i class="eye icon"></i> Просмотреть материалы
-                                    <?php else: ?>
-                                        <i class="right arrow icon"></i> Продолжить обучение
-                                    <?php endif; ?>
-                                </a>
-                            </div>
-                        </div>
+                        <?php render_course_card($course, false, true); ?>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
