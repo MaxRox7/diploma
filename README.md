@@ -39,7 +39,7 @@ make up
 
 
 ```bash
-docker exec -i $(docker ps -qf "name=postgres") psql -U pguser -d diplomaaa < dump-diploma.sql
+docker exec -i $(docker ps -qf "name=postgres") psql -U pguser -d diploma < dump-diploma.sql
 ```
 
 ### 3. Настройка переменных окружения
@@ -68,8 +68,8 @@ DB_PASS=password
 Из дампа базы данных доступны следующие тестовые учетные записи:
 
 **Администратор:**
-- Логин: `garshina`
-- Пароль: (см. в таблице users, пароли захешированы)
+- Логин: `quixotesoulasas@gmail.com`
+- Пароль: 123456 у всех пользователей
 
 **Преподаватель:**
 - Логин: `quixotesoul@gmail.com`
@@ -116,7 +116,7 @@ make clean   # Очистить контейнеры и volumes
 
 - **Backend**: PHP 8.1
 - **Database**: PostgreSQL 17
-- **Web Server**: Apache 2.4
+- **Web Server**: Nginx
 - **Frontend**: Semantic UI, jQuery
 - **Code Editor**: Monaco Editor
 - **Containerization**: Docker, Docker Compose
@@ -163,7 +163,7 @@ make restart
 ## Лицензия
 
 Дипломный проект - CodeSphere
-Разработано для ЛГТУ им. В.Г. Шухова
+Разработано для ЛГТУ 
 
 ---
 
