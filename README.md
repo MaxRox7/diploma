@@ -34,14 +34,20 @@ make up
 
 ### 2. Восстановление базы данных
 
-После запуска контейнеров загрузите дамп базы данных:
-
-
+Сначала создаем базу данных
 
 ```bash
-docker exec -i $(docker ps -qf "name=postgres") psql -U pguser -d diploma < dump-diploma.sql
+docker-compose exec postgres psql -U pguser -d postgres -c "CREATE DATABASE diploma;"
 ```
 
+Далее копируем дамп в докер контейнер
+```bash
+docker cp backup_2025-06-18.sql $(docker-compose ps -q postgres):/tmp/dump.sql
+```
+Загружаем дамп в базу данных
+```bash
+docker-compose exec postgres psql -U pguser -d diploma -f /tmp/dump.sql
+```
 ### 3. Настройка переменных окружения
 
 Убедитесь, что в корневой директории есть файл `.env` с необходимыми переменными:
@@ -61,7 +67,7 @@ DB_PASS=password
 
 ### Доступ к системе
 
-После запуска система будет доступна по адресу: **http://localhost**
+После запуска система будет доступна по адресу: **http://localhost:81/**
 
 ### Учетные записи по умолчанию
 
