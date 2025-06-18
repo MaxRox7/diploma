@@ -360,6 +360,14 @@ try {
                         </div>
                     </div>
                     
+                    <?php if (!empty($is_completed) && !empty($course['with_certificate'])): ?>
+                        <div class="ui positive message" style="margin-bottom: 20px;">
+                            <i class="certificate icon"></i>
+                            Поздравляем! Вы успешно завершили курс и можете получить сертификат.
+                            <a href="#" class="ui green button" style="margin-left: 20px;"><i class="certificate icon"></i> Скачать сертификат</a>
+                        </div>
+                    <?php endif; ?>
+                    
                     <?php if ($is_creator && ($is_actual_creator || isset($admin_view))): ?>
                         <!-- Панель управления для создателя курса -->
                         <div class="ui segment">
@@ -560,6 +568,12 @@ try {
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
+                </div>
+
+                <div class="ui positive message" style="margin: 30px 0 0 0;">
+                    <i class="certificate icon"></i>
+                    Вы можете скачать сертификат об окончании курса.
+                    <a href="#" class="ui green button" style="margin-left: 20px;"><i class="certificate icon"></i> Скачать сертификат</a>
                 </div>
             </div>
         </div>

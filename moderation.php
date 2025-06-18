@@ -209,6 +209,31 @@ function file_link($path) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Модерация заявок - CodeSphere</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <style>
+    /* Горизонтальный скролл для таблицы модерации */
+    .ui.bottom.attached.tab.segment[data-tab="users"] {
+        overflow-x: visible;
+    }
+    .ui.celled.table {
+        white-space: nowrap;
+    }
+    .mini-input {
+        font-size: 12px !important;
+        padding: 2px 4px !important;
+        height: 24px !important;
+        min-width: 0 !important;
+        width: 90px !important;
+    }
+    .ui.celled.table td, .ui.celled.table th {
+        padding: 4px 6px !important;
+        font-size: 13px !important;
+    }
+    .ui.button.mini.compact {
+        font-size: 12px !important;
+        padding: 3px 8px !important;
+        height: 24px !important;
+    }
+    </style>
 </head>
 <body>
 <?php include 'header.php'; ?>
@@ -263,7 +288,8 @@ function file_link($path) {
         <?php if (empty($users)): ?>
             <div class="ui message">Нет пользователей.</div>
         <?php else: ?>
-            <table class="ui celled table">
+            <div style="overflow-x: auto; width: 100%;">
+            <table class="ui celled table" style="min-width: 1200px;">
                 <thead>
                     <tr>
                         <th>ID</th><th>ФИО</th><th>Почта</th><th>Роль</th><th>Университет</th><th>Спец.</th><th>Год</th><th>Статус</th><th>Комментарий</th><th>Паспорт</th><th>Диплом</th><th>Справка</th><th>Действия</th>
@@ -274,27 +300,27 @@ function file_link($path) {
                     <tr>
                         <form method="post">
                         <td><?= $u['id_user'] ?><input type="hidden" name="user_id" value="<?= $u['id_user'] ?>"></td>
-                        <td><input type="text" name="fn_user" value="<?= htmlspecialchars($u['fn_user']) ?>" style="width:120px"></td>
-                        <td><input type="email" name="login_user" value="<?= htmlspecialchars($u['login_user']) ?>" style="width:150px"></td>
+                        <td><input type="text" name="fn_user" value="<?= htmlspecialchars($u['fn_user']) ?>" class="mini-input"></td>
+                        <td><input type="email" name="login_user" value="<?= htmlspecialchars($u['login_user']) ?>" class="mini-input"></td>
                         <td><?= htmlspecialchars($u['role_user']) ?></td>
-                        <td><input type="text" name="uni_user" value="<?= htmlspecialchars($u['uni_user']) ?>" style="width:100px"></td>
-                        <td><input type="text" name="spec_user" value="<?= htmlspecialchars($u['spec_user']) ?>" style="width:100px"></td>
-                        <td><input type="number" name="year_user" value="<?= htmlspecialchars($u['year_user']) ?>" style="width:60px"></td>
+                        <td><input type="text" name="uni_user" value="<?= htmlspecialchars($u['uni_user']) ?>" class="mini-input"></td>
+                        <td><input type="text" name="spec_user" value="<?= htmlspecialchars($u['spec_user']) ?>" class="mini-input"></td>
+                        <td><input type="number" name="year_user" value="<?= htmlspecialchars($u['year_user']) ?>" class="mini-input" style="width:50px"></td>
                         <td><?= htmlspecialchars($u['status']) ?></td>
-                        <td><input type="text" name="moderation_comment" value="<?= htmlspecialchars($u['moderation_comment'] ?? '') ?>" style="width:120px"></td>
+                        <td><input type="text" name="moderation_comment" value="<?= htmlspecialchars($u['moderation_comment'] ?? '') ?>" class="mini-input"></td>
                         <td><?= $u['role_user']==='teacher'?file_link($u['passport_file']):'' ?></td>
                         <td><?= $u['role_user']==='teacher'?file_link($u['diploma_file']):'' ?></td>
                         <td><?= $u['role_user']==='teacher'?file_link($u['criminal_record_file']):'' ?></td>
                         <td>
-                        <?php if ($u['role_user']==='teacher'): ?>
-                            <button class="ui green mini button" name="action" value="approve">Одобрить</button>
-                            <button class="ui red mini button" name="action" value="reject">Отклонить</button>
-                            <button class="ui blue mini button" name="action" value="edit">Сохранить</button>
+                        <?php if ($u['role_user']==='teacher' && $u['status']!=='approved'): ?>
+                            <button class="ui green mini compact button" name="action" value="approve">Одобрить</button>
+                            <button class="ui red mini compact button" name="action" value="reject">Отклонить</button>
+                            <button class="ui blue mini compact button" name="action" value="edit">Сохранить</button>
                         <?php endif; ?>
                         <?php if ($u['status'] !== 'banned'): ?>
-                            <button class="ui orange mini button" name="action" value="ban" onclick="return confirm('Забанить пользователя?');">Забанить</button>
+                            <button class="ui orange mini compact button" name="action" value="ban" onclick="return confirm('Забанить пользователя?');">Забанить</button>
                         <?php else: ?>
-                            <button class="ui olive mini button" name="action" value="unban" onclick="return confirm('Разбанить пользователя?');">Разбанить</button>
+                            <button class="ui olive mini compact button" name="action" value="unban" onclick="return confirm('Разбанить пользователя?');">Разбанить</button>
                         <?php endif; ?>
                         </td>
                         </form>
@@ -302,6 +328,7 @@ function file_link($path) {
                 <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
         <?php endif; ?>
     </div>
     <div class="ui bottom attached tab segment<?= isset($_GET['tab']) && $_GET['tab'] === 'courses' ? ' active' : '' ?>" data-tab="courses">

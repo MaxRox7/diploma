@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'render_course_card.php';
 redirect_unauthenticated();
 
 $error = '';
@@ -72,6 +73,7 @@ try {
                   COUNT(DISTINCT f.id_feedback) as feedback_count,
                   COUNT(DISTINCT cp2.id_user) as students_count,
                   COUNT(DISTINCT l.id_lesson) as lessons_count,
+                  COALESCE(cs.views_count, 0) as views_count,
                   false as is_enrolled
             FROM course c
             JOIN course_tags ct ON c.id_course = ct.id_course
@@ -79,12 +81,13 @@ try {
             LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
             LEFT JOIN create_passes cp2 ON c.id_course = cp2.id_course
             LEFT JOIN lessons l ON c.id_course = l.id_lesson
+            LEFT JOIN course_statistics cs ON c.id_course = cs.id_course
             WHERE ct.id_tag IN (" . implode(',', array_fill(0, count($tag_ids), '?')) . ")
             AND c.id_course NOT IN (
                 SELECT cp.id_course FROM create_passes cp WHERE cp.id_user = ?
             )
             AND c.status_course = 'approved'
-            GROUP BY c.id_course
+            GROUP BY c.id_course, cs.views_count
             ORDER BY total_weight DESC, matching_tags_count DESC
             LIMIT 6
         ";
@@ -130,16 +133,18 @@ try {
                COUNT(DISTINCT f.id_feedback) as feedback_count,
                COUNT(DISTINCT cp2.id_user) as students_count,
                COUNT(DISTINCT l.id_lesson) as lessons_count,
+               COALESCE(cs.views_count, 0) as views_count,
                false as is_enrolled
         FROM course c
         LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
         LEFT JOIN create_passes cp2 ON c.id_course = cp2.id_course
         LEFT JOIN lessons l ON c.id_course = l.id_lesson
+        LEFT JOIN course_statistics cs ON c.id_course = cs.id_course
         WHERE c.status_course = 'approved'
         AND c.id_course NOT IN (
             SELECT cp.id_course FROM create_passes cp WHERE cp.id_user = ?
         )
-        GROUP BY c.id_course
+        GROUP BY c.id_course, cs.views_count
         HAVING COUNT(DISTINCT f.id_feedback) > 0
         ORDER BY COALESCE(AVG(CAST(f.rate_feedback AS FLOAT)), 0) DESC
         LIMIT 6
@@ -154,6 +159,7 @@ try {
                COUNT(DISTINCT l.id_lesson) as lessons_count,
                AVG(CAST(f.rate_feedback AS FLOAT)) as average_rating,
                COUNT(DISTINCT f.id_feedback) as feedback_count,
+               COALESCE(cs.views_count, 0) as views_count,
                EXISTS(
                    SELECT 1 
                    FROM create_passes cp2 
@@ -164,8 +170,9 @@ try {
         LEFT JOIN create_passes cp ON c.id_course = cp.id_course
         LEFT JOIN lessons l ON c.id_course = l.id_course
         LEFT JOIN feedback f ON c.id_course = f.id_course AND f.status = 'approved'
+        LEFT JOIN course_statistics cs ON c.id_course = cs.id_course
         $where_sql $search_condition
-        GROUP BY c.id_course
+        GROUP BY c.id_course, cs.views_count
         ORDER BY c.id_course DESC
     ");
     
@@ -185,81 +192,6 @@ try {
     
 } catch (PDOException $e) {
     $error = 'Ошибка базы данных: ' . $e->getMessage();
-}
-
-// Вспомогательная функция для рендера карточки курса в едином стиле
-function render_course_card($course, $show_stats = false, $show_enrolled = false) {
-    ?>
-    <div class="ui card">
-        <div class="content">
-            <div class="header"><?= htmlspecialchars($course['name_course']) ?></div>
-            <div class="meta">
-                <?php if (isset($course['average_rating']) && $course['average_rating']): ?>
-                    <div class="ui star rating" data-rating="<?= round($course['average_rating']) ?>" data-max-rating="5"></div>
-                    (<?= number_format($course['average_rating'], 1) ?> / 5.0 - <?= $course['feedback_count'] ?? 0 ?> отзывов)
-                <?php else: ?>
-                    Нет оценок
-                <?php endif; ?>
-            </div>
-            <div class="description">
-                <?= nl2br(htmlspecialchars(mb_substr($course['desc_course'], 0, 150) . (mb_strlen($course['desc_course']) > 150 ? '...' : ''))) ?>
-            </div>
-        </div>
-        <?php if ($show_stats && (isset($course['views_count']) || isset($course['enrollment_count']))): ?>
-        <div class="extra content">
-            <div class="ui mini statistics">
-                <?php if (isset($course['views_count'])): ?>
-                <div class="statistic">
-                    <div class="value">
-                        <i class="eye icon"></i> <?= $course['views_count'] ?>
-                    </div>
-                </div>
-                <?php endif; ?>
-                <?php if (isset($course['enrollment_count'])): ?>
-                <div class="statistic">
-                    <div class="value">
-                        <i class="users icon"></i> <?= $course['enrollment_count'] ?>
-                    </div>
-                </div>
-                <?php endif; ?>
-            </div>
-        </div>
-        <?php endif; ?>
-        <div class="extra content">
-            <div class="ui labels">
-                <?php 
-                $tags = array_map('trim', explode(',', $course['tags_course'] ?? ''));
-                $tags = array_slice($tags, 0, 3); // Ограничиваем количество тегов
-                foreach ($tags as $tag): 
-                ?>
-                    <?php if (trim($tag)): ?>
-                        <a href="?search=<?= urlencode(trim($tag)) ?>" class="ui label">
-                            <?= htmlspecialchars(trim($tag)) ?>
-                        </a>
-                    <?php endif; ?>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        <div class="extra content">
-            <span class="right floated">
-                <?= $course['students_count'] ?? 0 ?> студентов
-            </span>
-            <span>
-                <i class="book icon"></i>
-                <?= $course['lessons_count'] ?? 0 ?> уроков
-            </span>
-        </div>
-        <div class="extra content">
-            <a href="course.php?id=<?= $course['id_course'] ?>" class="ui fluid primary button">
-                <?php if ($show_enrolled && !empty($course['is_enrolled'])): ?>
-                    Перейти к курсу
-                <?php else: ?>
-                    Подробнее
-                <?php endif; ?>
-            </a>
-        </div>
-    </div>
-    <?php
 }
 ?>
 <!DOCTYPE html>
@@ -297,7 +229,7 @@ function render_course_card($course, $show_stats = false, $show_enrolled = false
             
             <div class="ui three stackable cards">
                 <?php foreach ($recommended_courses as $course): ?>
-                    <?php render_course_card($course); ?>
+                    <?php render_course_card($course, true); ?>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -335,7 +267,7 @@ function render_course_card($course, $show_stats = false, $show_enrolled = false
             
             <div class="ui three stackable cards">
                 <?php foreach ($top_rated_courses as $course): ?>
-                    <?php render_course_card($course); ?>
+                    <?php render_course_card($course, true); ?>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -379,7 +311,7 @@ function render_course_card($course, $show_stats = false, $show_enrolled = false
             </h2>
             <div class="ui three stackable cards">
                 <?php foreach ($courses as $course): ?>
-                    <?php render_course_card($course, isset($course['views_count']) || isset($course['enrollment_count']), true); ?>
+                    <?php render_course_card($course, true, true); ?>
                 <?php endforeach; ?>
             </div>
         </div>

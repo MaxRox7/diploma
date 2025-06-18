@@ -5,7 +5,7 @@
 -- Dumped from database version 17.5
 -- Dumped by pg_dump version 17.0
 
--- Started on 2025-06-08 15:21:16
+-- Started on 2025-06-15 10:31:56
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -54,7 +54,7 @@ CREATE SEQUENCE public.answer_options_id_option_seq
 ALTER SEQUENCE public.answer_options_id_option_seq OWNER TO pguser;
 
 --
--- TOC entry 3753 (class 0 OID 0)
+-- TOC entry 3705 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: answer_options_id_option_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
@@ -63,47 +63,7 @@ ALTER SEQUENCE public.answer_options_id_option_seq OWNED BY public.answer_option
 
 
 --
--- TOC entry 220 (class 1259 OID 24588)
--- Name: answers; Type: TABLE; Schema: public; Owner: pguser
---
-
-CREATE TABLE public.answers (
-    id_answer integer NOT NULL,
-    id_question integer,
-    id_user integer,
-    text_answer character varying(255) NOT NULL
-);
-
-
-ALTER TABLE public.answers OWNER TO pguser;
-
---
--- TOC entry 219 (class 1259 OID 24587)
--- Name: answers_id_answer_seq; Type: SEQUENCE; Schema: public; Owner: pguser
---
-
-CREATE SEQUENCE public.answers_id_answer_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.answers_id_answer_seq OWNER TO pguser;
-
---
--- TOC entry 3754 (class 0 OID 0)
--- Dependencies: 219
--- Name: answers_id_answer_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
---
-
-ALTER SEQUENCE public.answers_id_answer_seq OWNED BY public.answers.id_answer;
-
-
---
--- TOC entry 244 (class 1259 OID 24821)
+-- TOC entry 238 (class 1259 OID 24821)
 -- Name: certificates; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -119,7 +79,7 @@ CREATE TABLE public.certificates (
 ALTER TABLE public.certificates OWNER TO pguser;
 
 --
--- TOC entry 243 (class 1259 OID 24820)
+-- TOC entry 237 (class 1259 OID 24820)
 -- Name: certificates_id_certificate_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -135,8 +95,8 @@ CREATE SEQUENCE public.certificates_id_certificate_seq
 ALTER SEQUENCE public.certificates_id_certificate_seq OWNER TO pguser;
 
 --
--- TOC entry 3755 (class 0 OID 0)
--- Dependencies: 243
+-- TOC entry 3706 (class 0 OID 0)
+-- Dependencies: 237
 -- Name: certificates_id_certificate_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -144,7 +104,7 @@ ALTER SEQUENCE public.certificates_id_certificate_seq OWNED BY public.certificat
 
 
 --
--- TOC entry 233 (class 1259 OID 24661)
+-- TOC entry 227 (class 1259 OID 24661)
 -- Name: code_tasks; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -163,8 +123,8 @@ CREATE TABLE public.code_tasks (
 ALTER TABLE public.code_tasks OWNER TO pguser;
 
 --
--- TOC entry 3756 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3707 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: TABLE code_tasks; Type: COMMENT; Schema: public; Owner: pguser
 --
 
@@ -172,8 +132,8 @@ COMMENT ON TABLE public.code_tasks IS 'Stores code tasks for programming questio
 
 
 --
--- TOC entry 3757 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3708 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: COLUMN code_tasks.input_ct; Type: COMMENT; Schema: public; Owner: pguser
 --
 
@@ -181,8 +141,8 @@ COMMENT ON COLUMN public.code_tasks.input_ct IS 'Input data or description for t
 
 
 --
--- TOC entry 3758 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3709 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: COLUMN code_tasks.output_ct; Type: COMMENT; Schema: public; Owner: pguser
 --
 
@@ -190,8 +150,8 @@ COMMENT ON COLUMN public.code_tasks.output_ct IS 'Expected output that the code 
 
 
 --
--- TOC entry 3759 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3710 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: COLUMN code_tasks.execution_timeout; Type: COMMENT; Schema: public; Owner: pguser
 --
 
@@ -199,8 +159,8 @@ COMMENT ON COLUMN public.code_tasks.execution_timeout IS 'Maximum execution time
 
 
 --
--- TOC entry 3760 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3711 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: COLUMN code_tasks.template_code; Type: COMMENT; Schema: public; Owner: pguser
 --
 
@@ -208,8 +168,8 @@ COMMENT ON COLUMN public.code_tasks.template_code IS 'Starting template code pro
 
 
 --
--- TOC entry 3761 (class 0 OID 0)
--- Dependencies: 233
+-- TOC entry 3712 (class 0 OID 0)
+-- Dependencies: 227
 -- Name: COLUMN code_tasks.language; Type: COMMENT; Schema: public; Owner: pguser
 --
 
@@ -217,7 +177,7 @@ COMMENT ON COLUMN public.code_tasks.language IS 'Programming language for the ta
 
 
 --
--- TOC entry 232 (class 1259 OID 24660)
+-- TOC entry 226 (class 1259 OID 24660)
 -- Name: code_tasks_id_ct_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -233,8 +193,8 @@ CREATE SEQUENCE public.code_tasks_id_ct_seq
 ALTER SEQUENCE public.code_tasks_id_ct_seq OWNER TO pguser;
 
 --
--- TOC entry 3762 (class 0 OID 0)
--- Dependencies: 232
+-- TOC entry 3713 (class 0 OID 0)
+-- Dependencies: 226
 -- Name: code_tasks_id_ct_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -242,7 +202,7 @@ ALTER SEQUENCE public.code_tasks_id_ct_seq OWNED BY public.code_tasks.id_ct;
 
 
 --
--- TOC entry 235 (class 1259 OID 24672)
+-- TOC entry 229 (class 1259 OID 24672)
 -- Name: course; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -265,7 +225,7 @@ CREATE TABLE public.course (
 ALTER TABLE public.course OWNER TO pguser;
 
 --
--- TOC entry 234 (class 1259 OID 24671)
+-- TOC entry 228 (class 1259 OID 24671)
 -- Name: course_id_course_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -281,8 +241,8 @@ CREATE SEQUENCE public.course_id_course_seq
 ALTER SEQUENCE public.course_id_course_seq OWNER TO pguser;
 
 --
--- TOC entry 3763 (class 0 OID 0)
--- Dependencies: 234
+-- TOC entry 3714 (class 0 OID 0)
+-- Dependencies: 228
 -- Name: course_id_course_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -290,7 +250,7 @@ ALTER SEQUENCE public.course_id_course_seq OWNED BY public.course.id_course;
 
 
 --
--- TOC entry 254 (class 1259 OID 41291)
+-- TOC entry 248 (class 1259 OID 41291)
 -- Name: course_statistics; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -307,7 +267,7 @@ CREATE TABLE public.course_statistics (
 ALTER TABLE public.course_statistics OWNER TO pguser;
 
 --
--- TOC entry 252 (class 1259 OID 41260)
+-- TOC entry 246 (class 1259 OID 41260)
 -- Name: course_tags; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -320,7 +280,7 @@ CREATE TABLE public.course_tags (
 ALTER TABLE public.course_tags OWNER TO pguser;
 
 --
--- TOC entry 256 (class 1259 OID 41307)
+-- TOC entry 250 (class 1259 OID 41307)
 -- Name: course_views; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -335,7 +295,7 @@ CREATE TABLE public.course_views (
 ALTER TABLE public.course_views OWNER TO pguser;
 
 --
--- TOC entry 255 (class 1259 OID 41306)
+-- TOC entry 249 (class 1259 OID 41306)
 -- Name: course_views_id_view_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -351,8 +311,8 @@ CREATE SEQUENCE public.course_views_id_view_seq
 ALTER SEQUENCE public.course_views_id_view_seq OWNER TO pguser;
 
 --
--- TOC entry 3764 (class 0 OID 0)
--- Dependencies: 255
+-- TOC entry 3715 (class 0 OID 0)
+-- Dependencies: 249
 -- Name: course_views_id_view_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -360,7 +320,7 @@ ALTER SEQUENCE public.course_views_id_view_seq OWNED BY public.course_views.id_v
 
 
 --
--- TOC entry 236 (class 1259 OID 24681)
+-- TOC entry 230 (class 1259 OID 24681)
 -- Name: create_passes; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -375,7 +335,7 @@ CREATE TABLE public.create_passes (
 ALTER TABLE public.create_passes OWNER TO pguser;
 
 --
--- TOC entry 238 (class 1259 OID 24690)
+-- TOC entry 232 (class 1259 OID 24690)
 -- Name: feedback; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -385,14 +345,15 @@ CREATE TABLE public.feedback (
     text_feedback character varying(5000),
     date_feedback date NOT NULL,
     rate_feedback character varying(5) NOT NULL,
-    id_user integer
+    id_user integer,
+    status character varying(20) DEFAULT 'pending'::character varying
 );
 
 
 ALTER TABLE public.feedback OWNER TO pguser;
 
 --
--- TOC entry 237 (class 1259 OID 24689)
+-- TOC entry 231 (class 1259 OID 24689)
 -- Name: feedback_id_feedback_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -408,8 +369,8 @@ CREATE SEQUENCE public.feedback_id_feedback_seq
 ALTER SEQUENCE public.feedback_id_feedback_seq OWNER TO pguser;
 
 --
--- TOC entry 3765 (class 0 OID 0)
--- Dependencies: 237
+-- TOC entry 3716 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: feedback_id_feedback_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -417,7 +378,7 @@ ALTER SEQUENCE public.feedback_id_feedback_seq OWNED BY public.feedback.id_feedb
 
 
 --
--- TOC entry 240 (class 1259 OID 24701)
+-- TOC entry 234 (class 1259 OID 24701)
 -- Name: lessons; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -433,7 +394,7 @@ CREATE TABLE public.lessons (
 ALTER TABLE public.lessons OWNER TO pguser;
 
 --
--- TOC entry 239 (class 1259 OID 24700)
+-- TOC entry 233 (class 1259 OID 24700)
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -449,8 +410,8 @@ CREATE SEQUENCE public.lessons_id_lesson_seq
 ALTER SEQUENCE public.lessons_id_lesson_seq OWNER TO pguser;
 
 --
--- TOC entry 3766 (class 0 OID 0)
--- Dependencies: 239
+-- TOC entry 3717 (class 0 OID 0)
+-- Dependencies: 233
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -458,7 +419,7 @@ ALTER SEQUENCE public.lessons_id_lesson_seq OWNED BY public.lessons.id_lesson;
 
 
 --
--- TOC entry 221 (class 1259 OID 24597)
+-- TOC entry 219 (class 1259 OID 24597)
 -- Name: material; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -473,7 +434,7 @@ CREATE TABLE public.material (
 ALTER TABLE public.material OWNER TO pguser;
 
 --
--- TOC entry 223 (class 1259 OID 24607)
+-- TOC entry 221 (class 1259 OID 24607)
 -- Name: questions; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -490,7 +451,7 @@ CREATE TABLE public.questions (
 ALTER TABLE public.questions OWNER TO pguser;
 
 --
--- TOC entry 222 (class 1259 OID 24606)
+-- TOC entry 220 (class 1259 OID 24606)
 -- Name: questions_id_question_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -506,8 +467,8 @@ CREATE SEQUENCE public.questions_id_question_seq
 ALTER SEQUENCE public.questions_id_question_seq OWNER TO pguser;
 
 --
--- TOC entry 3767 (class 0 OID 0)
--- Dependencies: 222
+-- TOC entry 3718 (class 0 OID 0)
+-- Dependencies: 220
 -- Name: questions_id_question_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -515,88 +476,7 @@ ALTER SEQUENCE public.questions_id_question_seq OWNED BY public.questions.id_que
 
 
 --
--- TOC entry 225 (class 1259 OID 24618)
--- Name: results; Type: TABLE; Schema: public; Owner: pguser
---
-
-CREATE TABLE public.results (
-    id_result integer NOT NULL,
-    id_answer integer NOT NULL,
-    id_test integer NOT NULL,
-    score_result character varying(255) NOT NULL
-);
-
-
-ALTER TABLE public.results OWNER TO pguser;
-
---
--- TOC entry 224 (class 1259 OID 24617)
--- Name: results_id_result_seq; Type: SEQUENCE; Schema: public; Owner: pguser
---
-
-CREATE SEQUENCE public.results_id_result_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.results_id_result_seq OWNER TO pguser;
-
---
--- TOC entry 3768 (class 0 OID 0)
--- Dependencies: 224
--- Name: results_id_result_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
---
-
-ALTER SEQUENCE public.results_id_result_seq OWNED BY public.results.id_result;
-
-
---
--- TOC entry 227 (class 1259 OID 24628)
--- Name: stat; Type: TABLE; Schema: public; Owner: pguser
---
-
-CREATE TABLE public.stat (
-    id_stat integer NOT NULL,
-    id_user integer,
-    id_course integer,
-    id_result integer,
-    prec_through character varying(255) NOT NULL
-);
-
-
-ALTER TABLE public.stat OWNER TO pguser;
-
---
--- TOC entry 226 (class 1259 OID 24627)
--- Name: stat_id_stat_seq; Type: SEQUENCE; Schema: public; Owner: pguser
---
-
-CREATE SEQUENCE public.stat_id_stat_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.stat_id_stat_seq OWNER TO pguser;
-
---
--- TOC entry 3769 (class 0 OID 0)
--- Dependencies: 226
--- Name: stat_id_stat_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
---
-
-ALTER SEQUENCE public.stat_id_stat_seq OWNED BY public.stat.id_stat;
-
-
---
--- TOC entry 229 (class 1259 OID 24639)
+-- TOC entry 223 (class 1259 OID 24639)
 -- Name: steps; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -612,7 +492,7 @@ CREATE TABLE public.steps (
 ALTER TABLE public.steps OWNER TO pguser;
 
 --
--- TOC entry 228 (class 1259 OID 24638)
+-- TOC entry 222 (class 1259 OID 24638)
 -- Name: steps_id_step_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -628,8 +508,8 @@ CREATE SEQUENCE public.steps_id_step_seq
 ALTER SEQUENCE public.steps_id_step_seq OWNER TO pguser;
 
 --
--- TOC entry 3770 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3719 (class 0 OID 0)
+-- Dependencies: 222
 -- Name: steps_id_step_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -637,7 +517,7 @@ ALTER SEQUENCE public.steps_id_step_seq OWNED BY public.steps.id_step;
 
 
 --
--- TOC entry 257 (class 1259 OID 41324)
+-- TOC entry 251 (class 1259 OID 41324)
 -- Name: student_analytics; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -657,7 +537,7 @@ CREATE TABLE public.student_analytics (
 ALTER TABLE public.student_analytics OWNER TO pguser;
 
 --
--- TOC entry 260 (class 1259 OID 41367)
+-- TOC entry 254 (class 1259 OID 41367)
 -- Name: student_test_settings; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -671,7 +551,7 @@ CREATE TABLE public.student_test_settings (
 ALTER TABLE public.student_test_settings OWNER TO pguser;
 
 --
--- TOC entry 251 (class 1259 OID 41252)
+-- TOC entry 245 (class 1259 OID 41252)
 -- Name: tags; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -684,7 +564,7 @@ CREATE TABLE public.tags (
 ALTER TABLE public.tags OWNER TO pguser;
 
 --
--- TOC entry 250 (class 1259 OID 41251)
+-- TOC entry 244 (class 1259 OID 41251)
 -- Name: tags_id_tag_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -700,8 +580,8 @@ CREATE SEQUENCE public.tags_id_tag_seq
 ALTER SEQUENCE public.tags_id_tag_seq OWNER TO pguser;
 
 --
--- TOC entry 3771 (class 0 OID 0)
--- Dependencies: 250
+-- TOC entry 3720 (class 0 OID 0)
+-- Dependencies: 244
 -- Name: tags_id_tag_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -709,7 +589,7 @@ ALTER SEQUENCE public.tags_id_tag_seq OWNED BY public.tags.id_tag;
 
 
 --
--- TOC entry 249 (class 1259 OID 24884)
+-- TOC entry 243 (class 1259 OID 24884)
 -- Name: test_answers; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -728,8 +608,8 @@ CREATE TABLE public.test_answers (
 ALTER TABLE public.test_answers OWNER TO pguser;
 
 --
--- TOC entry 3772 (class 0 OID 0)
--- Dependencies: 249
+-- TOC entry 3721 (class 0 OID 0)
+-- Dependencies: 243
 -- Name: COLUMN test_answers.ai_feedback; Type: COMMENT; Schema: public; Owner: pguser
 --
 
@@ -737,7 +617,7 @@ COMMENT ON COLUMN public.test_answers.ai_feedback IS 'Отзыв ИИ о код�
 
 
 --
--- TOC entry 248 (class 1259 OID 24883)
+-- TOC entry 242 (class 1259 OID 24883)
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -753,8 +633,8 @@ CREATE SEQUENCE public.test_answers_id_answer_seq
 ALTER SEQUENCE public.test_answers_id_answer_seq OWNER TO pguser;
 
 --
--- TOC entry 3773 (class 0 OID 0)
--- Dependencies: 248
+-- TOC entry 3722 (class 0 OID 0)
+-- Dependencies: 242
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -762,7 +642,7 @@ ALTER SEQUENCE public.test_answers_id_answer_seq OWNED BY public.test_answers.id
 
 
 --
--- TOC entry 247 (class 1259 OID 24863)
+-- TOC entry 241 (class 1259 OID 24863)
 -- Name: test_attempts; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -782,7 +662,7 @@ CREATE TABLE public.test_attempts (
 ALTER TABLE public.test_attempts OWNER TO pguser;
 
 --
--- TOC entry 246 (class 1259 OID 24862)
+-- TOC entry 240 (class 1259 OID 24862)
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -798,8 +678,8 @@ CREATE SEQUENCE public.test_attempts_id_attempt_seq
 ALTER SEQUENCE public.test_attempts_id_attempt_seq OWNER TO pguser;
 
 --
--- TOC entry 3774 (class 0 OID 0)
--- Dependencies: 246
+-- TOC entry 3723 (class 0 OID 0)
+-- Dependencies: 240
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -807,7 +687,7 @@ ALTER SEQUENCE public.test_attempts_id_attempt_seq OWNED BY public.test_attempts
 
 
 --
--- TOC entry 259 (class 1259 OID 41352)
+-- TOC entry 253 (class 1259 OID 41352)
 -- Name: test_grade_levels; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -827,7 +707,7 @@ CREATE TABLE public.test_grade_levels (
 ALTER TABLE public.test_grade_levels OWNER TO pguser;
 
 --
--- TOC entry 258 (class 1259 OID 41351)
+-- TOC entry 252 (class 1259 OID 41351)
 -- Name: test_grade_levels_id_level_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -843,8 +723,8 @@ CREATE SEQUENCE public.test_grade_levels_id_level_seq
 ALTER SEQUENCE public.test_grade_levels_id_level_seq OWNER TO pguser;
 
 --
--- TOC entry 3775 (class 0 OID 0)
--- Dependencies: 258
+-- TOC entry 3724 (class 0 OID 0)
+-- Dependencies: 252
 -- Name: test_grade_levels_id_level_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -852,7 +732,7 @@ ALTER SEQUENCE public.test_grade_levels_id_level_seq OWNED BY public.test_grade_
 
 
 --
--- TOC entry 231 (class 1259 OID 24650)
+-- TOC entry 225 (class 1259 OID 24650)
 -- Name: tests; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -874,7 +754,7 @@ CREATE TABLE public.tests (
 ALTER TABLE public.tests OWNER TO pguser;
 
 --
--- TOC entry 230 (class 1259 OID 24649)
+-- TOC entry 224 (class 1259 OID 24649)
 -- Name: tests_id_test_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -890,8 +770,8 @@ CREATE SEQUENCE public.tests_id_test_seq
 ALTER SEQUENCE public.tests_id_test_seq OWNER TO pguser;
 
 --
--- TOC entry 3776 (class 0 OID 0)
--- Dependencies: 230
+-- TOC entry 3725 (class 0 OID 0)
+-- Dependencies: 224
 -- Name: tests_id_test_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -899,7 +779,7 @@ ALTER SEQUENCE public.tests_id_test_seq OWNED BY public.tests.id_test;
 
 
 --
--- TOC entry 245 (class 1259 OID 24846)
+-- TOC entry 239 (class 1259 OID 24846)
 -- Name: user_material_progress; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -913,7 +793,7 @@ CREATE TABLE public.user_material_progress (
 ALTER TABLE public.user_material_progress OWNER TO pguser;
 
 --
--- TOC entry 253 (class 1259 OID 41275)
+-- TOC entry 247 (class 1259 OID 41275)
 -- Name: user_tag_interests; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -927,7 +807,7 @@ CREATE TABLE public.user_tag_interests (
 ALTER TABLE public.user_tag_interests OWNER TO pguser;
 
 --
--- TOC entry 242 (class 1259 OID 24713)
+-- TOC entry 236 (class 1259 OID 24713)
 -- Name: users; Type: TABLE; Schema: public; Owner: pguser
 --
 
@@ -937,8 +817,8 @@ CREATE TABLE public.users (
     birth_user date NOT NULL,
     uni_user character varying(255) NOT NULL,
     role_user character varying(255) NOT NULL,
-    spec_user character varying(255) NOT NULL,
-    year_user integer NOT NULL,
+    spec_user character varying(255),
+    year_user integer,
     login_user character varying(255) NOT NULL,
     password_user character varying(255) NOT NULL,
     criminal_record_file character varying(255),
@@ -953,7 +833,7 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO pguser;
 
 --
--- TOC entry 241 (class 1259 OID 24712)
+-- TOC entry 235 (class 1259 OID 24712)
 -- Name: users_id_user_seq; Type: SEQUENCE; Schema: public; Owner: pguser
 --
 
@@ -969,8 +849,8 @@ CREATE SEQUENCE public.users_id_user_seq
 ALTER SEQUENCE public.users_id_user_seq OWNER TO pguser;
 
 --
--- TOC entry 3777 (class 0 OID 0)
--- Dependencies: 241
+-- TOC entry 3726 (class 0 OID 0)
+-- Dependencies: 235
 -- Name: users_id_user_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: pguser
 --
 
@@ -978,7 +858,7 @@ ALTER SEQUENCE public.users_id_user_seq OWNED BY public.users.id_user;
 
 
 --
--- TOC entry 3370 (class 2604 OID 24582)
+-- TOC entry 3355 (class 2604 OID 24582)
 -- Name: answer_options id_option; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -986,15 +866,7 @@ ALTER TABLE ONLY public.answer_options ALTER COLUMN id_option SET DEFAULT nextva
 
 
 --
--- TOC entry 3371 (class 2604 OID 24591)
--- Name: answers id_answer; Type: DEFAULT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.answers ALTER COLUMN id_answer SET DEFAULT nextval('public.answers_id_answer_seq'::regclass);
-
-
---
--- TOC entry 3394 (class 2604 OID 24824)
+-- TOC entry 3377 (class 2604 OID 24824)
 -- Name: certificates id_certificate; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1002,7 +874,7 @@ ALTER TABLE ONLY public.certificates ALTER COLUMN id_certificate SET DEFAULT nex
 
 
 --
--- TOC entry 3384 (class 2604 OID 24664)
+-- TOC entry 3366 (class 2604 OID 24664)
 -- Name: code_tasks id_ct; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1010,7 +882,7 @@ ALTER TABLE ONLY public.code_tasks ALTER COLUMN id_ct SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3387 (class 2604 OID 24675)
+-- TOC entry 3369 (class 2604 OID 24675)
 -- Name: course id_course; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1018,7 +890,7 @@ ALTER TABLE ONLY public.course ALTER COLUMN id_course SET DEFAULT nextval('publi
 
 
 --
--- TOC entry 3408 (class 2604 OID 41310)
+-- TOC entry 3391 (class 2604 OID 41310)
 -- Name: course_views id_view; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1026,7 +898,7 @@ ALTER TABLE ONLY public.course_views ALTER COLUMN id_view SET DEFAULT nextval('p
 
 
 --
--- TOC entry 3390 (class 2604 OID 24693)
+-- TOC entry 3372 (class 2604 OID 24693)
 -- Name: feedback id_feedback; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1034,7 +906,7 @@ ALTER TABLE ONLY public.feedback ALTER COLUMN id_feedback SET DEFAULT nextval('p
 
 
 --
--- TOC entry 3391 (class 2604 OID 24704)
+-- TOC entry 3374 (class 2604 OID 24704)
 -- Name: lessons id_lesson; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1042,7 +914,7 @@ ALTER TABLE ONLY public.lessons ALTER COLUMN id_lesson SET DEFAULT nextval('publ
 
 
 --
--- TOC entry 3372 (class 2604 OID 24610)
+-- TOC entry 3356 (class 2604 OID 24610)
 -- Name: questions id_question; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1050,23 +922,7 @@ ALTER TABLE ONLY public.questions ALTER COLUMN id_question SET DEFAULT nextval('
 
 
 --
--- TOC entry 3373 (class 2604 OID 24621)
--- Name: results id_result; Type: DEFAULT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.results ALTER COLUMN id_result SET DEFAULT nextval('public.results_id_result_seq'::regclass);
-
-
---
--- TOC entry 3374 (class 2604 OID 24631)
--- Name: stat id_stat; Type: DEFAULT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.stat ALTER COLUMN id_stat SET DEFAULT nextval('public.stat_id_stat_seq'::regclass);
-
-
---
--- TOC entry 3375 (class 2604 OID 24642)
+-- TOC entry 3357 (class 2604 OID 24642)
 -- Name: steps id_step; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1074,7 +930,7 @@ ALTER TABLE ONLY public.steps ALTER COLUMN id_step SET DEFAULT nextval('public.s
 
 
 --
--- TOC entry 3401 (class 2604 OID 41255)
+-- TOC entry 3384 (class 2604 OID 41255)
 -- Name: tags id_tag; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1082,7 +938,7 @@ ALTER TABLE ONLY public.tags ALTER COLUMN id_tag SET DEFAULT nextval('public.tag
 
 
 --
--- TOC entry 3399 (class 2604 OID 24887)
+-- TOC entry 3382 (class 2604 OID 24887)
 -- Name: test_answers id_answer; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1090,7 +946,7 @@ ALTER TABLE ONLY public.test_answers ALTER COLUMN id_answer SET DEFAULT nextval(
 
 
 --
--- TOC entry 3397 (class 2604 OID 24866)
+-- TOC entry 3380 (class 2604 OID 24866)
 -- Name: test_attempts id_attempt; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1098,7 +954,7 @@ ALTER TABLE ONLY public.test_attempts ALTER COLUMN id_attempt SET DEFAULT nextva
 
 
 --
--- TOC entry 3415 (class 2604 OID 41355)
+-- TOC entry 3398 (class 2604 OID 41355)
 -- Name: test_grade_levels id_level; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1106,7 +962,7 @@ ALTER TABLE ONLY public.test_grade_levels ALTER COLUMN id_level SET DEFAULT next
 
 
 --
--- TOC entry 3378 (class 2604 OID 24653)
+-- TOC entry 3360 (class 2604 OID 24653)
 -- Name: tests id_test; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1114,7 +970,7 @@ ALTER TABLE ONLY public.tests ALTER COLUMN id_test SET DEFAULT nextval('public.t
 
 
 --
--- TOC entry 3392 (class 2604 OID 24716)
+-- TOC entry 3375 (class 2604 OID 24716)
 -- Name: users id_user; Type: DEFAULT; Schema: public; Owner: pguser
 --
 
@@ -1122,7 +978,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id_user SET DEFAULT nextval('public.u
 
 
 --
--- TOC entry 3705 (class 0 OID 24579)
+-- TOC entry 3663 (class 0 OID 24579)
 -- Dependencies: 218
 -- Data for Name: answer_options; Type: TABLE DATA; Schema: public; Owner: pguser
 --
@@ -1261,18 +1117,8 @@ COPY public.answer_options (id_option, id_question, text_option) FROM stdin;
 
 
 --
--- TOC entry 3707 (class 0 OID 24588)
--- Dependencies: 220
--- Data for Name: answers; Type: TABLE DATA; Schema: public; Owner: pguser
---
-
-COPY public.answers (id_answer, id_question, id_user, text_answer) FROM stdin;
-\.
-
-
---
--- TOC entry 3731 (class 0 OID 24821)
--- Dependencies: 244
+-- TOC entry 3683 (class 0 OID 24821)
+-- Dependencies: 238
 -- Data for Name: certificates; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1282,8 +1128,8 @@ COPY public.certificates (id_certificate, id_user, id_course, date_issued, certi
 
 
 --
--- TOC entry 3720 (class 0 OID 24661)
--- Dependencies: 233
+-- TOC entry 3672 (class 0 OID 24661)
+-- Dependencies: 227
 -- Data for Name: code_tasks; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1305,8 +1151,8 @@ COPY public.code_tasks (id_ct, id_question, input_ct, output_ct, execution_timeo
 
 
 --
--- TOC entry 3722 (class 0 OID 24672)
--- Dependencies: 235
+-- TOC entry 3674 (class 0 OID 24672)
+-- Dependencies: 229
 -- Data for Name: course; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1332,8 +1178,8 @@ COPY public.course (id_course, name_course, desc_course, with_certificate, hours
 
 
 --
--- TOC entry 3741 (class 0 OID 41291)
--- Dependencies: 254
+-- TOC entry 3693 (class 0 OID 41291)
+-- Dependencies: 248
 -- Data for Name: course_statistics; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1345,22 +1191,22 @@ COPY public.course_statistics (id_course, views_count, enrollment_count, complet
 17	0	11	0	0	2025-06-08 13:42:54.10812
 20	0	5	0	0	2025-06-08 13:42:54.10812
 18	0	11	0	0	2025-06-08 13:42:54.10812
-27	0	21	0	0	2025-06-08 13:42:54.10812
 8	0	9	0	0	2025-06-08 13:42:54.10812
-28	2	4	0	0	2025-06-08 10:56:00.214788
-25	1	3	0	0	2025-06-08 11:14:33.025309
-29	18	0	0	0	2025-06-08 11:35:30.898043
-23	1	4	0	0	2025-06-08 11:42:48.893537
-30	5	0	0	0	2025-06-08 11:47:48.589103
+24	13	23	0	0	2025-06-08 12:33:31.764304
+23	12	4	0	0	2025-06-08 14:01:48.877959
+29	30	0	0	0	2025-06-08 14:02:03.48284
 26	5	22	0	0	2025-06-08 11:48:22.256336
-31	1	0	0	0	2025-06-08 11:52:48.752859
-24	11	23	0	0	2025-06-08 12:05:13.401709
+28	14	4	0	0	2025-06-08 14:04:03.181705
+25	8	3	0	0	2025-06-08 14:11:06.631032
+30	22	0	0	0	2025-06-13 10:43:31.259927
+31	45	0	0	0	2025-06-13 11:21:28.76743
+27	3	21	0	0	2025-06-08 12:31:29.009343
 \.
 
 
 --
--- TOC entry 3739 (class 0 OID 41260)
--- Dependencies: 252
+-- TOC entry 3691 (class 0 OID 41260)
+-- Dependencies: 246
 -- Data for Name: course_tags; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1373,8 +1219,8 @@ COPY public.course_tags (id_course, id_tag) FROM stdin;
 
 
 --
--- TOC entry 3743 (class 0 OID 41307)
--- Dependencies: 256
+-- TOC entry 3695 (class 0 OID 41307)
+-- Dependencies: 250
 -- Data for Name: course_views; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1423,12 +1269,120 @@ COPY public.course_views (id_view, id_course, id_user, view_timestamp) FROM stdi
 42	24	35	2025-06-08 12:03:33.128241
 43	24	35	2025-06-08 12:03:34.02155
 44	24	28	2025-06-08 12:05:13.39857
+45	23	35	2025-06-08 12:30:12.718834
+46	23	35	2025-06-08 12:30:13.188854
+47	23	35	2025-06-08 12:30:13.942397
+48	23	35	2025-06-08 12:30:16.243829
+49	25	35	2025-06-08 12:30:19.937452
+50	25	35	2025-06-08 12:30:20.428678
+51	25	35	2025-06-08 12:30:21.166716
+52	31	35	2025-06-08 12:30:46.868301
+53	31	35	2025-06-08 12:30:47.532763
+54	31	35	2025-06-08 12:30:48.215952
+55	27	35	2025-06-08 12:31:27.654962
+56	27	35	2025-06-08 12:31:28.133532
+57	27	35	2025-06-08 12:31:29.006124
+58	31	35	2025-06-08 12:32:04.802515
+59	30	35	2025-06-08 12:33:10.975076
+60	29	35	2025-06-08 12:33:13.366998
+61	28	35	2025-06-08 12:33:15.41023
+62	28	35	2025-06-08 12:33:21.109765
+63	24	35	2025-06-08 12:33:26.341394
+64	24	35	2025-06-08 12:33:31.761338
+65	31	35	2025-06-08 12:33:33.576381
+66	30	2	2025-06-08 12:33:52.901758
+67	30	2	2025-06-08 12:33:53.713369
+68	30	2	2025-06-08 12:33:54.495
+69	30	2	2025-06-08 12:33:56.518921
+70	30	2	2025-06-08 12:33:58.595093
+71	29	2	2025-06-08 12:34:01.215481
+72	29	2	2025-06-08 12:34:01.763796
+73	29	2	2025-06-08 12:34:02.416958
+74	29	2	2025-06-08 12:34:05.559755
+75	30	2	2025-06-08 12:34:09.248656
+76	31	2	2025-06-08 12:34:11.016527
+77	31	2	2025-06-08 12:34:11.726736
+78	31	2	2025-06-08 12:34:12.278774
+79	31	2	2025-06-08 12:34:33.280105
+80	31	2	2025-06-08 12:43:11.563925
+81	28	2	2025-06-08 12:43:13.683833
+82	28	2	2025-06-08 12:43:14.172322
+83	28	2	2025-06-08 12:43:16.221361
+84	31	2	2025-06-08 12:55:48.397232
+85	31	2	2025-06-08 12:59:35.737963
+86	31	2	2025-06-08 13:09:14.098807
+87	31	2	2025-06-08 13:09:15.099028
+88	31	2	2025-06-08 13:16:03.082482
+89	31	2	2025-06-08 13:16:50.501325
+90	28	2	2025-06-08 13:16:53.935545
+91	29	6	2025-06-08 13:22:20.191206
+92	29	6	2025-06-08 13:22:20.683172
+93	29	6	2025-06-08 13:22:21.469342
+94	23	6	2025-06-08 13:22:27.401603
+95	23	6	2025-06-08 13:22:28.030236
+96	23	6	2025-06-08 13:22:28.571208
+97	23	6	2025-06-08 13:22:30.015478
+98	30	6	2025-06-08 13:22:31.422747
+99	30	6	2025-06-08 13:22:31.911988
+100	30	6	2025-06-08 13:22:32.556263
+101	30	6	2025-06-08 13:22:34.032905
+102	31	6	2025-06-08 13:22:36.334856
+103	31	6	2025-06-08 13:22:36.765482
+104	31	6	2025-06-08 13:22:37.426327
+105	25	6	2025-06-08 13:39:55.653195
+106	25	6	2025-06-08 13:39:56.211059
+107	25	6	2025-06-08 13:39:57.199826
+108	31	6	2025-06-08 13:40:20.15804
+109	31	6	2025-06-08 13:40:21.992374
+110	28	6	2025-06-08 13:40:24.805788
+111	28	6	2025-06-08 13:40:28.876581
+112	31	9	2025-06-08 13:40:42.996886
+113	31	9	2025-06-08 13:40:43.426658
+114	31	9	2025-06-08 13:40:44.08709
+115	31	9	2025-06-08 13:40:55.815372
+116	31	9	2025-06-08 13:40:59.597951
+117	31	8	2025-06-08 13:41:07.510984
+118	31	8	2025-06-08 13:41:07.948615
+119	31	8	2025-06-08 13:41:08.549141
+120	31	8	2025-06-08 13:41:21.832671
+121	31	28	2025-06-08 13:42:19.489649
+122	31	28	2025-06-08 13:42:21.775192
+123	31	8	2025-06-08 13:44:49.767148
+124	31	22	2025-06-08 13:45:01.900162
+125	31	22	2025-06-08 13:45:02.342952
+126	31	22	2025-06-08 13:45:03.354587
+127	31	22	2025-06-08 13:45:24.36863
+128	31	22	2025-06-08 13:48:33.751626
+129	31	15	2025-06-08 13:48:51.188666
+130	31	15	2025-06-08 13:48:51.772411
+131	31	15	2025-06-08 13:48:52.463631
+132	23	15	2025-06-08 14:01:47.534514
+133	23	15	2025-06-08 14:01:48.234358
+134	23	15	2025-06-08 14:01:48.875265
+135	29	15	2025-06-08 14:01:54.671128
+136	28	15	2025-06-08 14:02:00.168985
+137	29	15	2025-06-08 14:02:02.134544
+138	29	15	2025-06-08 14:02:02.671439
+139	29	15	2025-06-08 14:02:03.479399
+140	30	15	2025-06-08 14:02:08.385405
+141	30	15	2025-06-08 14:02:11.136598
+142	30	15	2025-06-08 14:02:13.574778
+143	30	15	2025-06-08 14:03:32.714605
+144	30	15	2025-06-08 14:03:34.522852
+145	28	15	2025-06-08 14:04:01.91286
+146	28	15	2025-06-08 14:04:02.410501
+147	28	15	2025-06-08 14:04:03.178701
+148	25	15	2025-06-08 14:11:06.62787
+149	31	28	2025-06-08 14:25:17.173232
+150	31	6	2025-06-08 14:33:32.496096
+151	30	1	2025-06-13 10:43:31.254248
+152	31	38	2025-06-13 11:21:28.728198
 \.
 
 
 --
--- TOC entry 3723 (class 0 OID 24681)
--- Dependencies: 236
+-- TOC entry 3675 (class 0 OID 24681)
+-- Dependencies: 230
 -- Data for Name: create_passes; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1566,34 +1520,55 @@ COPY public.create_passes (id_course, id_user, is_creator, date_complete) FROM s
 29	34	f	2025-06-08 11:15:51.031309
 24	34	f	\N
 29	35	f	2025-06-08 11:36:26.512575
-28	35	f	\N
 31	28	t	\N
 30	35	f	2025-06-08 11:47:46.280317
 26	35	f	\N
 24	35	f	\N
+23	35	f	2025-06-08 12:30:16.256285
+25	35	f	\N
+31	35	f	\N
+27	35	f	\N
+28	35	f	2025-06-08 12:33:21.127502
+30	2	f	2025-06-08 12:33:56.536788
+29	2	f	2025-06-08 12:34:05.575917
+31	2	f	\N
+28	2	f	\N
+29	6	f	\N
+23	6	f	\N
+30	6	f	\N
+25	6	f	\N
+31	6	f	2025-06-08 13:40:20.170467
+31	9	f	2025-06-08 13:40:55.828997
+31	8	f	2025-06-08 13:41:21.845745
+31	22	f	2025-06-08 13:45:24.418189
+31	15	f	\N
+23	15	f	\N
+29	15	f	\N
+30	15	f	\N
+28	15	f	\N
 \.
 
 
 --
--- TOC entry 3725 (class 0 OID 24690)
--- Dependencies: 238
+-- TOC entry 3677 (class 0 OID 24690)
+-- Dependencies: 232
 -- Data for Name: feedback; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
-COPY public.feedback (id_feedback, id_course, text_feedback, date_feedback, rate_feedback, id_user) FROM stdin;
-9	18	sdfdsf	2025-05-30	5	2
-10	19	Классный курс	2025-06-02	5	2
-11	19	asas	2025-06-02	5	3
-12	23	оформила кредит с кайфом, спасибо!	2025-06-03	5	28
-13	25	asas	2025-06-03	5	17
-14	29	Хороший	2025-06-08	5	7
-15	30	фы	2025-06-08	5	35
+COPY public.feedback (id_feedback, id_course, text_feedback, date_feedback, rate_feedback, id_user, status) FROM stdin;
+14	29	Хороший	2025-06-08	5	7	approved
+15	30	фы	2025-06-08	5	35	approved
+13	25	asas	2025-06-03	5	17	approved
+12	23	оформила кредит с кайфом, спасибо!	2025-06-03	5	28	approved
+10	19	Классный курс	2025-06-02	5	2	approved
+11	19	asas	2025-06-02	5	3	approved
+9	18	sdfdsf	2025-05-30	5	2	approved
 \.
 
 
 --
--- TOC entry 3727 (class 0 OID 24701)
--- Dependencies: 240
+-- TOC entry 3679 (class 0 OID 24701)
+-- Dependencies: 234
 -- Data for Name: lessons; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1622,8 +1597,8 @@ COPY public.lessons (id_lesson, id_course, id_stat, name_lesson, status_lesson) 
 
 
 --
--- TOC entry 3708 (class 0 OID 24597)
--- Dependencies: 221
+-- TOC entry 3664 (class 0 OID 24597)
+-- Dependencies: 219
 -- Data for Name: material; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1649,8 +1624,8 @@ MAT6051717                                                                      
 
 
 --
--- TOC entry 3710 (class 0 OID 24607)
--- Dependencies: 223
+-- TOC entry 3666 (class 0 OID 24607)
+-- Dependencies: 221
 -- Data for Name: questions; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1713,28 +1688,8 @@ COPY public.questions (id_question, id_test, text_question, answer_question, typ
 
 
 --
--- TOC entry 3712 (class 0 OID 24618)
--- Dependencies: 225
--- Data for Name: results; Type: TABLE DATA; Schema: public; Owner: pguser
---
-
-COPY public.results (id_result, id_answer, id_test, score_result) FROM stdin;
-\.
-
-
---
--- TOC entry 3714 (class 0 OID 24628)
--- Dependencies: 227
--- Data for Name: stat; Type: TABLE DATA; Schema: public; Owner: pguser
---
-
-COPY public.stat (id_stat, id_user, id_course, id_result, prec_through) FROM stdin;
-\.
-
-
---
--- TOC entry 3716 (class 0 OID 24639)
--- Dependencies: 229
+-- TOC entry 3668 (class 0 OID 24639)
+-- Dependencies: 223
 -- Data for Name: steps; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1770,8 +1725,8 @@ COPY public.steps (id_step, id_lesson, number_steps, status_step, type_step) FRO
 
 
 --
--- TOC entry 3744 (class 0 OID 41324)
--- Dependencies: 257
+-- TOC entry 3696 (class 0 OID 41324)
+-- Dependencies: 251
 -- Data for Name: student_analytics; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1907,18 +1862,19 @@ COPY public.student_analytics (id_user, id_course, lessons_completed, total_less
 
 
 --
--- TOC entry 3747 (class 0 OID 41367)
--- Dependencies: 260
+-- TOC entry 3699 (class 0 OID 41367)
+-- Dependencies: 254
 -- Data for Name: student_test_settings; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
 COPY public.student_test_settings (id_user, id_test, additional_attempts) FROM stdin;
+6	30	3
 \.
 
 
 --
--- TOC entry 3738 (class 0 OID 41252)
--- Dependencies: 251
+-- TOC entry 3690 (class 0 OID 41252)
+-- Dependencies: 245
 -- Data for Name: tags; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1937,8 +1893,8 @@ COPY public.tags (id_tag, name_tag) FROM stdin;
 
 
 --
--- TOC entry 3736 (class 0 OID 24884)
--- Dependencies: 249
+-- TOC entry 3688 (class 0 OID 24884)
+-- Dependencies: 243
 -- Data for Name: test_answers; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -1992,6 +1948,7 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 130	45	60	\N	f	2025-06-05 09:56:04.364035	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>	\N
 131	45	61	\N	f	2025-06-05 09:56:04.368093	\r\n#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    int sum = 0;\r\n    for (int i = 0; i < size; i++) {\r\n        sum += arr[i];\r\n    }\r\n    return sum;\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
 249	86	63	\N	f	2025-06-05 14:34:58.364488	<?php\r\n// Ваш код здесь\r\n?>	НЕПРАВИЛЬНО: код не содержит вывода 'hello world'.
+355	177	68	\N	t	2025-06-08 14:11:02.045091	["0","1"]	\N
 69	29	59	\N	f	2025-06-04 13:03:16.506869	#include <iostream>\r\n#include <vector>\r\n\r\nusing namespace std;\r\n\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param arr Вектор чисел\r\n * @return Сумма элементов\r\n */\r\nint sumArray(const vector<int>& arr) {\r\n    // Замените этот комментарий вашим кодом\r\n    return 0;\r\n}\r\n\r\nint main() {\r\n    // Тестирование функции\r\n    vector<int> testArray = {1, 2, 3, 4, 5};\r\n    cout << "Сумма массива: 15 ";  // Ожидаемый вывод: 15\r\n    return 0;\r\n}	\N
 70	30	30	49	t	2025-06-04 13:10:58.010504	\N	\N
 71	30	57	\N	f	2025-06-04 13:10:58.013414	'<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    // Ваш код здесь\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: 15 " . sum_array($test_array);\r\n?>',	\N
@@ -2047,6 +2004,9 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 133	46	60	\N	f	2025-06-05 09:57:42.132832	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
 134	46	61	\N	f	2025-06-05 09:57:42.13592	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
 135	46	62	\N	f	2025-06-05 09:57:42.13845	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
+349	175	68	\N	f	2025-06-08 14:06:37.931122	null	\N
+350	175	70	\N	f	2025-06-08 14:06:37.933448	\N	
+351	175	71	\N	f	2025-06-08 14:06:37.935537	\N	
 115	41	57	\N	f	2025-06-04 15:03:49.90653	<?php\r\n/**\r\n * Функция для суммирования элементов массива\r\n * \r\n * @param array $arr Массив чисел\r\n * @return int Сумма элементов массива\r\n */\r\nfunction sum_array($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n// Тестирование функции\r\n$test_array = [1, 2, 3, 4, 5];\r\necho "Сумма массива: " . sum_array($test_array); // Вывод: Сумма массива: 15\r\n?>	ВЕРДИКТ: Решение правильное.\n\nКод реализует функцию для суммирования элементов массива с использованием встроенной функции array_sum(), что является оптимальным решением в PHP. Функция корректно принимает массив в качестве аргумента и возвращает сумму всех его элементов.\n\nАлгоритмическая сложность: O(n), где n - количество элементов массива.\n\nКод написан лаконично и соответствует стандартам PSR. Использование встроенной функции array_sum() является предпочтительным подходом, так как она оптимизирована и обрабатывает все краевые случаи.
 118	42	30	49	t	2025-06-04 15:10:43.846051	\N	\N
 120	42	58	\N	f	2025-06-04 15:10:43.85559	def sum_array(arr):\r\n    """\r\n    Функция для суммирования элементов массива\r\n    \r\n    :param arr: Список чисел\r\n    :return: Сумма элементов\r\n    """\r\n    total = 0\r\n    for num in arr:\r\n        total += num\r\n    return total\r\n\r\n# Тестирование функции\r\ntest_array = [1, 2, 3, 4, 5]\r\nprint(f"Сумма массива: {sum_array(test_array)}")  # Вывод: Сумма массива: 15	\N
@@ -2084,6 +2044,7 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 156	55	62	\N	f	2025-06-05 10:47:02.667784	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint("15")	\N
 157	56	60	\N	f	2025-06-05 10:50:19.323976	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    return array_sum($arr);\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // выведет 15\r\n?>\r\n	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
 158	56	61	\N	f	2025-06-05 10:50:19.325865	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
+352	175	72	\N	f	2025-06-08 14:06:37.937511	\N	
 159	56	62	\N	f	2025-06-05 10:50:19.327084	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint("15")	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
 160	57	60	\N	f	2025-06-05 10:52:56.685056	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
 161	57	61	\N	f	2025-06-05 10:52:56.687255	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	Автоматический анализ кода недоступен. Код проверен по соответствию выходных данных.
@@ -2104,6 +2065,7 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 176	62	61	\N	f	2025-06-05 11:38:29.390204	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
 177	62	62	\N	f	2025-06-05 11:38:29.392751	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
 178	63	60	\N	f	2025-06-05 11:38:33.117399	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
+353	177	66	143	t	2025-06-08 14:11:02.040681	\N	\N
 179	63	61	\N	f	2025-06-05 11:38:33.120586	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	\N
 180	63	62	\N	f	2025-06-05 11:38:33.123087	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	\N
 181	64	60	\N	f	2025-06-05 11:42:37.244379	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	\N
@@ -2202,16 +2164,56 @@ COPY public.test_answers (id_answer, id_attempt, id_question, id_selected_option
 308	124	67	147	t	2025-06-08 11:38:09.48292	["0","1"]	\N
 309	124	68	\N	t	2025-06-08 11:38:09.484882	["0","1"]	\N
 310	124	70	\N	f	2025-06-08 11:38:09.487964	<?php\r\n\r\nfunction sumOfFourElements($arr) {\r\n    $res = "biba";\r\n    return null;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfFourElements($array);\r\necho "15";\r\n?>	НЕПРАВИЛЬНО: функция sumOfFourElements не выполняет суммирование элементов массива и возвращает null вместо корректного результата.
+354	177	67	147	t	2025-06-08 14:11:02.043463	["0","1"]	\N
 312	124	72	\N	f	2025-06-08 11:38:09.492809	#include <iostream>\r\n\r\nint main() {\r\n    int a = 3;\r\n    int b = 5;\r\n    int res;\r\n\r\n    // Здесь должно быть решение\r\n\r\n    std::cout << "Результат: 8 ";\r\n    return 0;\r\n}	НЕПРАВИЛЬНО: отсутствует операция сложения переменных a и b в переменной res.
 313	125	60	\N	f	2025-06-08 11:48:30.294862	<?php\r\n\r\nfunction sumArrayElements($arr) {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	НЕПРАВИЛЬНО: функция sumArrayElements не содержит корректного алгоритма для суммирования элементов массива.
 314	125	61	\N	t	2025-06-08 11:48:30.297759	#include <iostream>\r\nusing namespace std;\r\n\r\nint sum_of_array(int arr[], int size) {\r\n    // Ваш код здесь\r\n}\r\n\r\nint main() {\r\n    int arr[] = {1, 2, 3, 4, 5};\r\n    int size = sizeof(arr) / sizeof(arr[0]);\r\n    cout << "Сумма элементов массива: " << sum_of_array(arr, size) << endl;\r\n    return 0;\r\n}	ПРАВИЛЬНО: задача решена корректно, функция sum_of_array правильно вычисляет сумму элементов массива.
 315	125	62	\N	f	2025-06-08 11:48:30.299623	def sum_of_elements(arr):\r\n    # Здесь напишите ваш код\r\n    pass\r\n\r\n# Пример использования функции\r\narray = [1, 2, 3, 4, 5]\r\nresult = sum_of_elements(array)\r\nprint(result)	НЕПРАВИЛЬНО: функция sum_of_elements не содержит кода для вычисления суммы элементов массива.
+316	162	73	157	t	2025-06-08 13:39:52.266259	\N	\N
+317	162	74	161	f	2025-06-08 13:39:52.269545	["0"]	\N
+318	162	75	\N	f	2025-06-08 13:39:52.272338	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	НЕПРАВИЛЬНО: функция sumOfArrayElements не содержит корректного алгоритма для вычисления суммы элементов массива.
+319	163	31	50	f	2025-06-08 13:40:18.021932	\N	\N
+320	163	32	53	f	2025-06-08 13:40:18.024535	["0"]	\N
+321	163	33	\N	t	2025-06-08 13:40:18.026163	["0","1"]	\N
+322	163	34	\N	f	2025-06-08 13:40:18.028067	<?php\r\nfunction sum_array($arr) {\r\n    $sum = 0;\r\n    foreach ($arr as $value) {\r\n        $sum += $value;\r\n    }\r\n    return $sum;\r\n}\r\n\r\n// Пример использования\r\n$numbers = [1, 2, 3, 4, 5];\r\necho sum_array($numbers); // Выведет: 15\r\n?>	
+323	164	73	157	t	2025-06-08 13:40:51.840934	\N	\N
+324	164	74	161	f	2025-06-08 13:40:51.843914	["0"]	\N
+325	164	75	\N	f	2025-06-08 13:40:51.846044	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	НЕПРАВИЛЬНО: функция sumOfArrayElements не содержит корректного алгоритма для суммирования элементов массива.
+326	165	73	160	f	2025-06-08 13:41:17.258843	\N	\N
+327	165	74	164	f	2025-06-08 13:41:17.261218	["3"]	\N
+328	165	75	\N	f	2025-06-08 13:41:17.263225	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	НЕПРАВИЛЬНО: функция sumOfArrayElements не содержит корректного алгоритма для вычисления суммы элементов массива.
+329	166	73	160	f	2025-06-08 13:45:15.344847	\N	\N
+330	166	74	164	f	2025-06-08 13:45:15.347534	["3"]	\N
+331	166	75	\N	f	2025-06-08 13:45:15.349652	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	НЕПРАВИЛЬНО: функция sumOfArrayElements не содержит корректного алгоритма для вычисления суммы элементов массива.
+332	171	73	160	f	2025-06-08 13:52:35.364728	\N	\N
+333	171	74	164	f	2025-06-08 13:52:35.368953	["3"]	\N
+334	171	75	\N	f	2025-06-08 13:52:35.372469	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	НЕПРАВИЛЬНО: функция sumOfArrayElements не содержит корректного алгоритма для вычисления суммы элементов массива.
+335	172	73	160	f	2025-06-08 13:54:36.578737	\N	\N
+336	172	74	163	f	2025-06-08 13:54:36.580982	["2"]	\N
+337	172	75	\N	f	2025-06-08 13:54:36.583036	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    // ваш код здесь\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	НЕПРАВИЛЬНО: функция sumOfArrayElements не содержит корректного алгоритма для вычисления суммы элементов массива.
+338	173	73	157	t	2025-06-08 13:55:15.850263	\N	\N
+339	173	74	161	f	2025-06-08 13:55:15.853121	["0"]	\N
+340	173	75	\N	t	2025-06-08 13:55:15.855237	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    $res = array_sum($array);\r\n    return $res;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	ПРАВИЛЬНО: задача решена корректно, функция sumOfArrayElements правильно использует встроенную функцию array_sum для вычисления суммы элементов массива.
+341	174	66	143	t	2025-06-08 14:06:30.790267	\N	\N
+342	174	67	147	t	2025-06-08 14:06:30.793127	["0","1"]	\N
+343	174	68	\N	t	2025-06-08 14:06:30.79461	["0","1"]	\N
+344	174	70	\N	f	2025-06-08 14:06:30.796517	<?php\r\n\r\nfunction sumOfFourElements($arr) {\r\n    // Ваш код здесь\r\n    return null;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfFourElements($array);\r\necho $result;\r\n?>	НЕПРАВИЛЬНО: функция sumOfFourElements не возвращает корректную сумму четырёх элементов массива. Она возвращает null, что не соответствует ожидаемому результату.
+345	174	71	\N	f	2025-06-08 14:06:30.798373	# Напишите ваш код здесь	НЕПРАВИЛЬНО: код не представлен
+346	174	72	\N	f	2025-06-08 14:06:30.800116	#include <iostream>\r\n\r\nint main() {\r\n    int a = 3;\r\n    int b = 5;\r\n    int res;\r\n\r\n    // Здесь должно быть решение\r\n\r\n    std::cout << "Результат: " << res << std::endl;\r\n    return 0;\r\n}	НЕПРАВИЛЬНО: необходимо добавить операцию сложения переменных a и b и присвоить результат переменной res.
+347	175	66	\N	f	2025-06-08 14:06:37.927413	\N	\N
+348	175	67	\N	f	2025-06-08 14:06:37.929609	null	\N
+356	177	70	\N	f	2025-06-08 14:11:02.047897	<?php\r\n\r\nfunction sumOfFourElements($arr) {\r\n    $res = \r\n    return null;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfFourElements($array);\r\necho $result;\r\n?>	НЕПРАВИЛЬНО: функция sumOfFourElements не возвращает корректную сумму элементов массива. Она возвращает null.
+357	177	71	\N	t	2025-06-08 14:11:02.050816	print("hello world")	ПРАВИЛЬНО: код корректно выводит 'hello world'
+358	177	72	\N	t	2025-06-08 14:11:02.05329	#include <iostream>\r\n\r\nint main() {\r\n    int a = 3;\r\n    int b = 5;\r\n    int res = a+b;\r\n\r\n    // Здесь должно быть решение\r\n\r\n    std::cout << "Результат: " << res << std::endl;\r\n    return 0;\r\n}	ПРАВИЛЬНО: задача решена корректно, переменные a и b складываются и результат сохраняется в переменную res, которая затем выводится на экран.
+359	178	73	157	t	2025-06-08 14:34:16.803606	\N	\N
+360	178	74	161	f	2025-06-08 14:34:16.806246	["0"]	\N
+361	178	75	\N	t	2025-06-08 14:34:16.808434	<?php\r\n\r\nfunction sumOfArrayElements(array $array): int {\r\n    $res = array_sum($array);\r\n    return $res;\r\n}\r\n\r\n$array = [1, 2, 3, 4, 5];\r\n$result = sumOfArrayElements($array);\r\n\r\necho $result; // вывод результата\r\n?>	ПРАВИЛЬНО: задача решена корректно, функция sumOfArrayElements правильно использует встроенную функцию array_sum для вычисления суммы элементов массива.
 \.
 
 
 --
--- TOC entry 3734 (class 0 OID 24863)
--- Dependencies: 247
+-- TOC entry 3686 (class 0 OID 24863)
+-- Dependencies: 241
 -- Data for Name: test_attempts; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -2302,12 +2304,54 @@ COPY public.test_attempts (id_attempt, id_test, id_user, start_time, end_time, s
 129	23	35	2025-06-08 12:19:23.895116	\N	\N	\N	in_progress
 130	23	35	2025-06-08 12:19:30.101919	\N	\N	\N	in_progress
 131	23	35	2025-06-08 12:19:34.227591	\N	\N	\N	in_progress
+132	23	35	2025-06-08 12:25:54.448707	\N	\N	\N	in_progress
+133	23	35	2025-06-08 12:26:00.190843	\N	\N	\N	in_progress
+134	23	35	2025-06-08 12:26:15.184422	\N	\N	\N	in_progress
+135	23	35	2025-06-08 12:26:18.66148	\N	\N	\N	in_progress
+136	30	35	2025-06-08 12:32:06.836699	\N	\N	\N	in_progress
+137	30	35	2025-06-08 12:32:17.669045	\N	\N	\N	in_progress
+138	30	35	2025-06-08 12:32:25.566587	\N	\N	\N	in_progress
+139	30	35	2025-06-08 12:33:00.959598	\N	\N	\N	in_progress
+140	30	2	2025-06-08 12:34:35.397621	\N	\N	\N	in_progress
+141	30	2	2025-06-08 12:37:00.238581	\N	\N	\N	in_progress
+142	30	2	2025-06-08 12:37:05.872379	\N	\N	\N	in_progress
+143	30	2	2025-06-08 12:40:21.448249	\N	\N	\N	in_progress
+144	30	2	2025-06-08 12:42:55.031833	\N	\N	\N	in_progress
+145	30	2	2025-06-08 12:43:04.93368	\N	\N	\N	in_progress
+146	29	2	2025-06-08 12:43:18.529954	\N	\N	\N	in_progress
+147	29	2	2025-06-08 12:44:44.479291	\N	\N	\N	in_progress
+148	29	2	2025-06-08 12:45:38.759944	\N	\N	\N	in_progress
+149	29	2	2025-06-08 12:46:45.459908	\N	\N	\N	in_progress
+150	29	2	2025-06-08 12:48:57.852525	\N	\N	\N	in_progress
+151	29	2	2025-06-08 12:55:37.37882	\N	\N	\N	in_progress
+152	30	2	2025-06-08 12:55:51.996402	\N	\N	\N	in_progress
+153	30	2	2025-06-08 12:59:38.724996	\N	\N	\N	in_progress
+154	30	2	2025-06-08 13:09:44.618505	\N	\N	\N	in_progress
+155	30	2	2025-06-08 13:16:05.219618	\N	\N	\N	in_progress
+156	29	2	2025-06-08 13:16:55.804235	\N	\N	\N	in_progress
+157	29	2	2025-06-08 13:19:34.530357	\N	\N	\N	in_progress
+158	30	6	2025-06-08 13:22:40.624343	\N	\N	\N	in_progress
+159	30	6	2025-06-08 13:25:20.516925	\N	\N	\N	in_progress
+160	30	6	2025-06-08 13:25:41.947381	\N	\N	\N	in_progress
+161	30	6	2025-06-08 13:26:59.606356	\N	\N	\N	in_progress
+162	30	6	2025-06-08 13:39:52.261883	2025-06-08 13:39:52.261883	1	3	completed
+163	24	6	2025-06-08 13:40:18.019199	2025-06-08 13:40:18.019199	1	4	completed
+164	30	9	2025-06-08 13:40:51.800491	2025-06-08 13:40:51.800491	1	3	completed
+165	30	8	2025-06-08 13:41:17.219014	2025-06-08 13:41:17.219014	0	3	completed
+166	30	22	2025-06-08 13:45:15.340142	2025-06-08 13:45:15.340142	0	3	completed
+171	30	15	2025-06-08 13:52:35.358612	2025-06-08 13:52:35.358612	0	3	completed
+172	30	15	2025-06-08 13:54:36.574395	2025-06-08 13:54:36.574395	0	3	completed
+173	30	15	2025-06-08 13:55:15.810594	2025-06-08 13:55:15.810594	2	3	completed
+174	29	15	2025-06-08 14:06:30.751323	2025-06-08 14:06:30.751323	3	6	completed
+175	29	15	2025-06-08 14:06:37.923699	2025-06-08 14:06:37.923699	0	6	completed
+177	29	15	2025-06-08 14:11:02.036384	2025-06-08 14:11:02.036384	5	6	completed
+178	30	6	2025-06-08 14:34:16.79889	2025-06-08 14:34:16.79889	2	3	completed
 \.
 
 
 --
--- TOC entry 3746 (class 0 OID 41352)
--- Dependencies: 259
+-- TOC entry 3698 (class 0 OID 41352)
+-- Dependencies: 253
 -- Data for Name: test_grade_levels; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -2320,8 +2364,8 @@ COPY public.test_grade_levels (id_level, id_test, min_percentage, max_percentage
 
 
 --
--- TOC entry 3718 (class 0 OID 24650)
--- Dependencies: 231
+-- TOC entry 3670 (class 0 OID 24650)
+-- Dependencies: 225
 -- Data for Name: tests; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -2335,13 +2379,13 @@ COPY public.tests (id_test, id_step, name_test, desc_test, passing_percentage, m
 28	71	Новый тест		70	3	0	t	f
 29	72	Новый тест		70	3	0	t	f
 30	81	Новый тест		70	3	0	t	f
-23	64	Новый тест		70	1	0	t	f
+23	64	Новый тест		70	3	0	t	f
 \.
 
 
 --
--- TOC entry 3732 (class 0 OID 24846)
--- Dependencies: 245
+-- TOC entry 3684 (class 0 OID 24846)
+-- Dependencies: 239
 -- Data for Name: user_material_progress; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -2380,30 +2424,49 @@ COPY public.user_material_progress (id_user, id_step, completed_at) FROM stdin;
 35	78	2025-06-08 11:36:21.163245
 35	79	2025-06-08 11:36:25.904314
 35	80	2025-06-08 11:47:45.234354
+35	63	2025-06-08 12:30:15.269237
+35	66	2025-06-08 12:30:24.49723
+35	75	2025-06-08 12:33:19.712246
+35	77	2025-06-08 12:33:20.460418
+2	80	2025-06-08 12:33:56.180271
+2	78	2025-06-08 12:34:03.93859
+2	79	2025-06-08 12:34:05.055286
+6	78	2025-06-08 13:22:24.011315
+6	79	2025-06-08 13:22:24.874757
+6	66	2025-06-08 13:39:59.071618
 \.
 
 
 --
--- TOC entry 3740 (class 0 OID 41275)
--- Dependencies: 253
+-- TOC entry 3692 (class 0 OID 41275)
+-- Dependencies: 247
 -- Data for Name: user_tag_interests; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
 COPY public.user_tag_interests (id_user, id_tag, interest_weight) FROM stdin;
+15	5	2
+15	2	1.5
 7	5	1.5
+15	6	1.5
+2	5	2
+2	2	1.5
 34	5	1.5
-28	5	2
-28	2	1.5
-28	6	1.5
+2	6	1.5
+6	2	1.5
+6	5	2
+6	6	1.5
 35	2	1.5
 35	5	2
 35	6	1.5
+28	5	2
+28	2	1.5
+28	6	1.5
 \.
 
 
 --
--- TOC entry 3729 (class 0 OID 24713)
--- Dependencies: 242
+-- TOC entry 3681 (class 0 OID 24713)
+-- Dependencies: 236
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: pguser
 --
 
@@ -2442,11 +2505,14 @@ COPY public.users (id_user, fn_user, birth_user, uni_user, role_user, spec_user,
 33	ыфыфы	2003-03-19	ыв	student	ыв	1	jasjasj@bkk.ru	$2y$12$jILnwfJsvj1AJ2Tvy7NaMeGl5LN4GlRH9QuJ1hb/UukFeIaTvC3ti	\N	approved	\N	uploads/students/student_card_6841a259ea915_main.py	\N	\N
 34	Тестов Тест Тестович	2003-03-19	ЛГТУ	student	Информатика	3	sdfsdf@bkbkbkb.ru	$2y$12$D1WPAk01wOT9vqd.xqe95eBHgxuar5IjshARd/79h5DC1oWjVMXVm	\N	approved		uploads/students/student_card_684570ca4a810_requirements.txt	\N	\N
 35	Зверев Алексей Генадьевич	2002-07-04	ЛГТУ	student	Инфа	1	work.zverev2002@mail.ru	$2y$12$3G6nKu2dh6kLEy4SwfvluOsYF7pXBJ4sfSPzJ0RXa7afC8OcdYU2S	\N	approved	секси	uploads/students/student_card_68457531eeff6_default.jpg	\N	\N
+38	фыфыфыфы фыфыфы фыфыфы	2003-03-19		student		0	sdflgjkdflkg@bkbkb.ru	$2y$12$nHaYehrth5tvn1.x/q7HcOF2fxEmG4dI8P75UMDe6lwfWMxANHIE6	\N	approved	\N	\N	\N	\N
+37	asasasas	2003-03-19	ЛГТУ	student	Информатика	4	dsgfsdgf@basasask.ru	$2y$12$gzwunUnA4cmBbB3FnSvME.cHKTbjZzmJWsNr.kqy0sTQZF/pRNdzu	\N	approved		uploads/students/student_card_684c078f92728_default.jpg	\N	\N
+36	Преподаватель Преподавалов Преподаваловчи	2003-03-19	ЛГТУ	teacher	\N	\N	sfgdfg@bk.ru	$2y$12$YqJxonx9p0bmnVYB2/Xe5Ov.p5fY1UdUsh8I7CDLqtUYlnrH0znRS	uploads/teachers/criminal/criminal_684c0772699f4_default.jpg	approved		\N	uploads/teachers/passport/passport_684c0772699eb_auto_clicker.py	uploads/teachers/diploma/diploma_684c0772699f2_main.py
 \.
 
 
 --
--- TOC entry 3778 (class 0 OID 0)
+-- TOC entry 3727 (class 0 OID 0)
 -- Dependencies: 217
 -- Name: answer_options_id_option_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
@@ -2455,17 +2521,8 @@ SELECT pg_catalog.setval('public.answer_options_id_option_seq', 164, true);
 
 
 --
--- TOC entry 3779 (class 0 OID 0)
--- Dependencies: 219
--- Name: answers_id_answer_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
---
-
-SELECT pg_catalog.setval('public.answers_id_answer_seq', 1, false);
-
-
---
--- TOC entry 3780 (class 0 OID 0)
--- Dependencies: 243
+-- TOC entry 3728 (class 0 OID 0)
+-- Dependencies: 237
 -- Name: certificates_id_certificate_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2473,8 +2530,8 @@ SELECT pg_catalog.setval('public.certificates_id_certificate_seq', 1, true);
 
 
 --
--- TOC entry 3781 (class 0 OID 0)
--- Dependencies: 232
+-- TOC entry 3729 (class 0 OID 0)
+-- Dependencies: 226
 -- Name: code_tasks_id_ct_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2482,8 +2539,8 @@ SELECT pg_catalog.setval('public.code_tasks_id_ct_seq', 13, true);
 
 
 --
--- TOC entry 3782 (class 0 OID 0)
--- Dependencies: 234
+-- TOC entry 3730 (class 0 OID 0)
+-- Dependencies: 228
 -- Name: course_id_course_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2491,17 +2548,17 @@ SELECT pg_catalog.setval('public.course_id_course_seq', 31, true);
 
 
 --
--- TOC entry 3783 (class 0 OID 0)
--- Dependencies: 255
+-- TOC entry 3731 (class 0 OID 0)
+-- Dependencies: 249
 -- Name: course_views_id_view_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.course_views_id_view_seq', 44, true);
+SELECT pg_catalog.setval('public.course_views_id_view_seq', 152, true);
 
 
 --
--- TOC entry 3784 (class 0 OID 0)
--- Dependencies: 237
+-- TOC entry 3732 (class 0 OID 0)
+-- Dependencies: 231
 -- Name: feedback_id_feedback_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2509,8 +2566,8 @@ SELECT pg_catalog.setval('public.feedback_id_feedback_seq', 15, true);
 
 
 --
--- TOC entry 3785 (class 0 OID 0)
--- Dependencies: 239
+-- TOC entry 3733 (class 0 OID 0)
+-- Dependencies: 233
 -- Name: lessons_id_lesson_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2518,8 +2575,8 @@ SELECT pg_catalog.setval('public.lessons_id_lesson_seq', 37, true);
 
 
 --
--- TOC entry 3786 (class 0 OID 0)
--- Dependencies: 222
+-- TOC entry 3734 (class 0 OID 0)
+-- Dependencies: 220
 -- Name: questions_id_question_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2527,26 +2584,8 @@ SELECT pg_catalog.setval('public.questions_id_question_seq', 75, true);
 
 
 --
--- TOC entry 3787 (class 0 OID 0)
--- Dependencies: 224
--- Name: results_id_result_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
---
-
-SELECT pg_catalog.setval('public.results_id_result_seq', 31, true);
-
-
---
--- TOC entry 3788 (class 0 OID 0)
--- Dependencies: 226
--- Name: stat_id_stat_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
---
-
-SELECT pg_catalog.setval('public.stat_id_stat_seq', 1, false);
-
-
---
--- TOC entry 3789 (class 0 OID 0)
--- Dependencies: 228
+-- TOC entry 3735 (class 0 OID 0)
+-- Dependencies: 222
 -- Name: steps_id_step_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2554,8 +2593,8 @@ SELECT pg_catalog.setval('public.steps_id_step_seq', 81, true);
 
 
 --
--- TOC entry 3790 (class 0 OID 0)
--- Dependencies: 250
+-- TOC entry 3736 (class 0 OID 0)
+-- Dependencies: 244
 -- Name: tags_id_tag_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2563,26 +2602,26 @@ SELECT pg_catalog.setval('public.tags_id_tag_seq', 30, true);
 
 
 --
--- TOC entry 3791 (class 0 OID 0)
--- Dependencies: 248
+-- TOC entry 3737 (class 0 OID 0)
+-- Dependencies: 242
 -- Name: test_answers_id_answer_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 315, true);
+SELECT pg_catalog.setval('public.test_answers_id_answer_seq', 361, true);
 
 
 --
--- TOC entry 3792 (class 0 OID 0)
--- Dependencies: 246
+-- TOC entry 3738 (class 0 OID 0)
+-- Dependencies: 240
 -- Name: test_attempts_id_attempt_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 131, true);
+SELECT pg_catalog.setval('public.test_attempts_id_attempt_seq', 178, true);
 
 
 --
--- TOC entry 3793 (class 0 OID 0)
--- Dependencies: 258
+-- TOC entry 3739 (class 0 OID 0)
+-- Dependencies: 252
 -- Name: test_grade_levels_id_level_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2590,8 +2629,8 @@ SELECT pg_catalog.setval('public.test_grade_levels_id_level_seq', 4, true);
 
 
 --
--- TOC entry 3794 (class 0 OID 0)
--- Dependencies: 230
+-- TOC entry 3740 (class 0 OID 0)
+-- Dependencies: 224
 -- Name: tests_id_test_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
@@ -2599,16 +2638,16 @@ SELECT pg_catalog.setval('public.tests_id_test_seq', 30, true);
 
 
 --
--- TOC entry 3795 (class 0 OID 0)
--- Dependencies: 241
+-- TOC entry 3741 (class 0 OID 0)
+-- Dependencies: 235
 -- Name: users_id_user_seq; Type: SEQUENCE SET; Schema: public; Owner: pguser
 --
 
-SELECT pg_catalog.setval('public.users_id_user_seq', 35, true);
+SELECT pg_catalog.setval('public.users_id_user_seq', 38, true);
 
 
 --
--- TOC entry 3488 (class 2606 OID 24827)
+-- TOC entry 3455 (class 2606 OID 24827)
 -- Name: certificates certificates_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2617,7 +2656,7 @@ ALTER TABLE ONLY public.certificates
 
 
 --
--- TOC entry 3508 (class 2606 OID 41300)
+-- TOC entry 3475 (class 2606 OID 41300)
 -- Name: course_statistics course_statistics_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2626,7 +2665,7 @@ ALTER TABLE ONLY public.course_statistics
 
 
 --
--- TOC entry 3504 (class 2606 OID 41264)
+-- TOC entry 3471 (class 2606 OID 41264)
 -- Name: course_tags course_tags_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2635,7 +2674,7 @@ ALTER TABLE ONLY public.course_tags
 
 
 --
--- TOC entry 3510 (class 2606 OID 41313)
+-- TOC entry 3477 (class 2606 OID 41313)
 -- Name: course_views course_views_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2644,7 +2683,7 @@ ALTER TABLE ONLY public.course_views
 
 
 --
--- TOC entry 3428 (class 2606 OID 24584)
+-- TOC entry 3411 (class 2606 OID 24584)
 -- Name: answer_options pk_answer_options; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2653,16 +2692,7 @@ ALTER TABLE ONLY public.answer_options
 
 
 --
--- TOC entry 3433 (class 2606 OID 24593)
--- Name: answers pk_answers; Type: CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.answers
-    ADD CONSTRAINT pk_answers PRIMARY KEY (id_answer);
-
-
---
--- TOC entry 3465 (class 2606 OID 24668)
+-- TOC entry 3432 (class 2606 OID 24668)
 -- Name: code_tasks pk_code_tasks; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2671,7 +2701,7 @@ ALTER TABLE ONLY public.code_tasks
 
 
 --
--- TOC entry 3468 (class 2606 OID 24679)
+-- TOC entry 3435 (class 2606 OID 24679)
 -- Name: course pk_course; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2680,7 +2710,7 @@ ALTER TABLE ONLY public.course
 
 
 --
--- TOC entry 3474 (class 2606 OID 24685)
+-- TOC entry 3441 (class 2606 OID 24685)
 -- Name: create_passes pk_create_passes; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2689,7 +2719,7 @@ ALTER TABLE ONLY public.create_passes
 
 
 --
--- TOC entry 3478 (class 2606 OID 24697)
+-- TOC entry 3445 (class 2606 OID 24697)
 -- Name: feedback pk_feedback; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2698,7 +2728,7 @@ ALTER TABLE ONLY public.feedback
 
 
 --
--- TOC entry 3482 (class 2606 OID 24708)
+-- TOC entry 3449 (class 2606 OID 24708)
 -- Name: lessons pk_lessons; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2707,7 +2737,7 @@ ALTER TABLE ONLY public.lessons
 
 
 --
--- TOC entry 3437 (class 2606 OID 24908)
+-- TOC entry 3415 (class 2606 OID 24908)
 -- Name: material pk_material; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2716,7 +2746,7 @@ ALTER TABLE ONLY public.material
 
 
 --
--- TOC entry 3440 (class 2606 OID 24614)
+-- TOC entry 3418 (class 2606 OID 24614)
 -- Name: questions pk_questions; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2725,25 +2755,7 @@ ALTER TABLE ONLY public.questions
 
 
 --
--- TOC entry 3444 (class 2606 OID 24623)
--- Name: results pk_results; Type: CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.results
-    ADD CONSTRAINT pk_results PRIMARY KEY (id_result);
-
-
---
--- TOC entry 3451 (class 2606 OID 24633)
--- Name: stat pk_stat; Type: CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.stat
-    ADD CONSTRAINT pk_stat PRIMARY KEY (id_stat);
-
-
---
--- TOC entry 3455 (class 2606 OID 24646)
+-- TOC entry 3422 (class 2606 OID 24646)
 -- Name: steps pk_steps; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2752,7 +2764,7 @@ ALTER TABLE ONLY public.steps
 
 
 --
--- TOC entry 3459 (class 2606 OID 24657)
+-- TOC entry 3426 (class 2606 OID 24657)
 -- Name: tests pk_tests; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2761,7 +2773,7 @@ ALTER TABLE ONLY public.tests
 
 
 --
--- TOC entry 3485 (class 2606 OID 24720)
+-- TOC entry 3452 (class 2606 OID 24720)
 -- Name: users pk_users; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2770,7 +2782,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- TOC entry 3512 (class 2606 OID 41333)
+-- TOC entry 3479 (class 2606 OID 41333)
 -- Name: student_analytics student_analytics_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2779,7 +2791,7 @@ ALTER TABLE ONLY public.student_analytics
 
 
 --
--- TOC entry 3517 (class 2606 OID 41372)
+-- TOC entry 3484 (class 2606 OID 41372)
 -- Name: student_test_settings student_test_settings_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2788,7 +2800,7 @@ ALTER TABLE ONLY public.student_test_settings
 
 
 --
--- TOC entry 3500 (class 2606 OID 41259)
+-- TOC entry 3467 (class 2606 OID 41259)
 -- Name: tags tags_name_tag_key; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2797,7 +2809,7 @@ ALTER TABLE ONLY public.tags
 
 
 --
--- TOC entry 3502 (class 2606 OID 41257)
+-- TOC entry 3469 (class 2606 OID 41257)
 -- Name: tags tags_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2806,7 +2818,7 @@ ALTER TABLE ONLY public.tags
 
 
 --
--- TOC entry 3498 (class 2606 OID 24890)
+-- TOC entry 3465 (class 2606 OID 24890)
 -- Name: test_answers test_answers_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2815,7 +2827,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3493 (class 2606 OID 24872)
+-- TOC entry 3460 (class 2606 OID 24872)
 -- Name: test_attempts test_attempts_id_test_id_user_start_time_key; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2824,7 +2836,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3495 (class 2606 OID 24870)
+-- TOC entry 3462 (class 2606 OID 24870)
 -- Name: test_attempts test_attempts_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2833,7 +2845,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3515 (class 2606 OID 41361)
+-- TOC entry 3482 (class 2606 OID 41361)
 -- Name: test_grade_levels test_grade_levels_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2842,7 +2854,7 @@ ALTER TABLE ONLY public.test_grade_levels
 
 
 --
--- TOC entry 3490 (class 2606 OID 24851)
+-- TOC entry 3457 (class 2606 OID 24851)
 -- Name: user_material_progress user_material_progress_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2851,7 +2863,7 @@ ALTER TABLE ONLY public.user_material_progress
 
 
 --
--- TOC entry 3506 (class 2606 OID 41280)
+-- TOC entry 3473 (class 2606 OID 41280)
 -- Name: user_tag_interests user_tag_interests_pkey; Type: CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -2860,7 +2872,7 @@ ALTER TABLE ONLY public.user_tag_interests
 
 
 --
--- TOC entry 3453 (class 1259 OID 24648)
+-- TOC entry 3420 (class 1259 OID 24648)
 -- Name: also_include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2868,7 +2880,7 @@ CREATE INDEX also_include_fk ON public.steps USING btree (id_lesson);
 
 
 --
--- TOC entry 3425 (class 1259 OID 24585)
+-- TOC entry 3408 (class 1259 OID 24585)
 -- Name: answer_options_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2876,31 +2888,7 @@ CREATE UNIQUE INDEX answer_options_pk ON public.answer_options USING btree (id_o
 
 
 --
--- TOC entry 3429 (class 1259 OID 24594)
--- Name: answers_pk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE UNIQUE INDEX answers_pk ON public.answers USING btree (id_answer);
-
-
---
--- TOC entry 3430 (class 1259 OID 24596)
--- Name: asnwers_to_fk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE INDEX asnwers_to_fk ON public.answers USING btree (id_user);
-
-
---
--- TOC entry 3431 (class 1259 OID 24595)
--- Name: assume_fk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE INDEX assume_fk ON public.answers USING btree (id_question);
-
-
---
--- TOC entry 3461 (class 1259 OID 24669)
+-- TOC entry 3428 (class 1259 OID 24669)
 -- Name: code_tasks_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2908,15 +2896,7 @@ CREATE UNIQUE INDEX code_tasks_pk ON public.code_tasks USING btree (id_ct);
 
 
 --
--- TOC entry 3447 (class 1259 OID 24637)
--- Name: counts_from_fk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE INDEX counts_from_fk ON public.stat USING btree (id_result);
-
-
---
--- TOC entry 3466 (class 1259 OID 24680)
+-- TOC entry 3433 (class 1259 OID 24680)
 -- Name: course_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2924,7 +2904,7 @@ CREATE UNIQUE INDEX course_pk ON public.course USING btree (id_course);
 
 
 --
--- TOC entry 3469 (class 1259 OID 24687)
+-- TOC entry 3436 (class 1259 OID 24687)
 -- Name: create_passes2_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2932,7 +2912,7 @@ CREATE INDEX create_passes2_fk ON public.create_passes USING btree (id_user);
 
 
 --
--- TOC entry 3470 (class 1259 OID 24688)
+-- TOC entry 3437 (class 1259 OID 24688)
 -- Name: create_passes_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2940,7 +2920,7 @@ CREATE INDEX create_passes_fk ON public.create_passes USING btree (id_course);
 
 
 --
--- TOC entry 3471 (class 1259 OID 24686)
+-- TOC entry 3438 (class 1259 OID 24686)
 -- Name: create_passes_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2948,7 +2928,7 @@ CREATE UNIQUE INDEX create_passes_pk ON public.create_passes USING btree (id_cou
 
 
 --
--- TOC entry 3475 (class 1259 OID 24698)
+-- TOC entry 3442 (class 1259 OID 24698)
 -- Name: feedback_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2956,23 +2936,7 @@ CREATE UNIQUE INDEX feedback_pk ON public.feedback USING btree (id_feedback);
 
 
 --
--- TOC entry 3448 (class 1259 OID 24636)
--- Name: goes_into_fk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE INDEX goes_into_fk ON public.stat USING btree (id_course);
-
-
---
--- TOC entry 3442 (class 1259 OID 24625)
--- Name: goes_to_fk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE INDEX goes_to_fk ON public.results USING btree (id_answer);
-
-
---
--- TOC entry 3476 (class 1259 OID 24699)
+-- TOC entry 3443 (class 1259 OID 24699)
 -- Name: has_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2980,15 +2944,7 @@ CREATE INDEX has_fk ON public.feedback USING btree (id_course);
 
 
 --
--- TOC entry 3449 (class 1259 OID 24635)
--- Name: has_in_courses_fk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE INDEX has_in_courses_fk ON public.stat USING btree (id_user);
-
-
---
--- TOC entry 3462 (class 1259 OID 33057)
+-- TOC entry 3429 (class 1259 OID 33057)
 -- Name: idx_code_tasks_language; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -2996,7 +2952,7 @@ CREATE INDEX idx_code_tasks_language ON public.code_tasks USING btree (language)
 
 
 --
--- TOC entry 3472 (class 1259 OID 24845)
+-- TOC entry 3439 (class 1259 OID 24845)
 -- Name: idx_create_passes_date_complete; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3004,7 +2960,7 @@ CREATE INDEX idx_create_passes_date_complete ON public.create_passes USING btree
 
 
 --
--- TOC entry 3496 (class 1259 OID 24906)
+-- TOC entry 3463 (class 1259 OID 24906)
 -- Name: idx_test_answers_attempt; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3012,7 +2968,7 @@ CREATE INDEX idx_test_answers_attempt ON public.test_answers USING btree (id_att
 
 
 --
--- TOC entry 3491 (class 1259 OID 41383)
+-- TOC entry 3458 (class 1259 OID 41383)
 -- Name: idx_test_attempts_complete_time; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3020,7 +2976,7 @@ CREATE INDEX idx_test_attempts_complete_time ON public.test_attempts USING btree
 
 
 --
--- TOC entry 3513 (class 1259 OID 41384)
+-- TOC entry 3480 (class 1259 OID 41384)
 -- Name: idx_test_grade_levels; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3028,7 +2984,7 @@ CREATE INDEX idx_test_grade_levels ON public.test_grade_levels USING btree (id_t
 
 
 --
--- TOC entry 3479 (class 1259 OID 24710)
+-- TOC entry 3446 (class 1259 OID 24710)
 -- Name: include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3036,7 +2992,7 @@ CREATE INDEX include_fk ON public.lessons USING btree (id_course);
 
 
 --
--- TOC entry 3480 (class 1259 OID 24709)
+-- TOC entry 3447 (class 1259 OID 24709)
 -- Name: lessons_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3044,7 +3000,7 @@ CREATE UNIQUE INDEX lessons_pk ON public.lessons USING btree (id_lesson);
 
 
 --
--- TOC entry 3434 (class 1259 OID 24909)
+-- TOC entry 3412 (class 1259 OID 24909)
 -- Name: material_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3052,7 +3008,7 @@ CREATE UNIQUE INDEX material_pk ON public.material USING btree (id_material);
 
 
 --
--- TOC entry 3457 (class 1259 OID 24659)
+-- TOC entry 3424 (class 1259 OID 24659)
 -- Name: may_also_include2_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3060,7 +3016,7 @@ CREATE INDEX may_also_include2_fk ON public.tests USING btree (id_step);
 
 
 --
--- TOC entry 3435 (class 1259 OID 24605)
+-- TOC entry 3413 (class 1259 OID 24605)
 -- Name: may_include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3068,7 +3024,7 @@ CREATE INDEX may_include_fk ON public.material USING btree (id_step);
 
 
 --
--- TOC entry 3438 (class 1259 OID 24616)
+-- TOC entry 3416 (class 1259 OID 24616)
 -- Name: mean_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3076,7 +3032,7 @@ CREATE INDEX mean_fk ON public.questions USING btree (id_test);
 
 
 --
--- TOC entry 3463 (class 1259 OID 24670)
+-- TOC entry 3430 (class 1259 OID 24670)
 -- Name: might_include_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3084,7 +3040,7 @@ CREATE INDEX might_include_fk ON public.code_tasks USING btree (id_question);
 
 
 --
--- TOC entry 3426 (class 1259 OID 24586)
+-- TOC entry 3409 (class 1259 OID 24586)
 -- Name: must_have_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3092,7 +3048,7 @@ CREATE INDEX must_have_fk ON public.answer_options USING btree (id_question);
 
 
 --
--- TOC entry 3483 (class 1259 OID 24711)
+-- TOC entry 3450 (class 1259 OID 24711)
 -- Name: procent_pass_fk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3100,7 +3056,7 @@ CREATE INDEX procent_pass_fk ON public.lessons USING btree (id_stat);
 
 
 --
--- TOC entry 3441 (class 1259 OID 24615)
+-- TOC entry 3419 (class 1259 OID 24615)
 -- Name: questions_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3108,31 +3064,7 @@ CREATE UNIQUE INDEX questions_pk ON public.questions USING btree (id_question);
 
 
 --
--- TOC entry 3445 (class 1259 OID 24624)
--- Name: results_pk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE UNIQUE INDEX results_pk ON public.results USING btree (id_result);
-
-
---
--- TOC entry 3452 (class 1259 OID 24634)
--- Name: stat_pk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE UNIQUE INDEX stat_pk ON public.stat USING btree (id_stat);
-
-
---
--- TOC entry 3446 (class 1259 OID 24626)
--- Name: stats_in_fk; Type: INDEX; Schema: public; Owner: pguser
---
-
-CREATE INDEX stats_in_fk ON public.results USING btree (id_test);
-
-
---
--- TOC entry 3456 (class 1259 OID 24647)
+-- TOC entry 3423 (class 1259 OID 24647)
 -- Name: steps_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3140,7 +3072,7 @@ CREATE UNIQUE INDEX steps_pk ON public.steps USING btree (id_step);
 
 
 --
--- TOC entry 3460 (class 1259 OID 24658)
+-- TOC entry 3427 (class 1259 OID 24658)
 -- Name: tests_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3148,7 +3080,7 @@ CREATE UNIQUE INDEX tests_pk ON public.tests USING btree (id_test);
 
 
 --
--- TOC entry 3486 (class 1259 OID 24721)
+-- TOC entry 3453 (class 1259 OID 24721)
 -- Name: users_pk; Type: INDEX; Schema: public; Owner: pguser
 --
 
@@ -3156,7 +3088,7 @@ CREATE UNIQUE INDEX users_pk ON public.users USING btree (id_user);
 
 
 --
--- TOC entry 3538 (class 2606 OID 24833)
+-- TOC entry 3496 (class 2606 OID 24833)
 -- Name: certificates certificates_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3165,7 +3097,7 @@ ALTER TABLE ONLY public.certificates
 
 
 --
--- TOC entry 3539 (class 2606 OID 24828)
+-- TOC entry 3497 (class 2606 OID 24828)
 -- Name: certificates certificates_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3174,7 +3106,7 @@ ALTER TABLE ONLY public.certificates
 
 
 --
--- TOC entry 3551 (class 2606 OID 41301)
+-- TOC entry 3509 (class 2606 OID 41301)
 -- Name: course_statistics course_statistics_id_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3183,7 +3115,7 @@ ALTER TABLE ONLY public.course_statistics
 
 
 --
--- TOC entry 3547 (class 2606 OID 41265)
+-- TOC entry 3505 (class 2606 OID 41265)
 -- Name: course_tags course_tags_id_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3192,7 +3124,7 @@ ALTER TABLE ONLY public.course_tags
 
 
 --
--- TOC entry 3548 (class 2606 OID 41270)
+-- TOC entry 3506 (class 2606 OID 41270)
 -- Name: course_tags course_tags_id_tag_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3201,7 +3133,7 @@ ALTER TABLE ONLY public.course_tags
 
 
 --
--- TOC entry 3552 (class 2606 OID 41314)
+-- TOC entry 3510 (class 2606 OID 41314)
 -- Name: course_views course_views_id_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3210,7 +3142,7 @@ ALTER TABLE ONLY public.course_views
 
 
 --
--- TOC entry 3553 (class 2606 OID 41319)
+-- TOC entry 3511 (class 2606 OID 41319)
 -- Name: course_views course_views_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3219,7 +3151,7 @@ ALTER TABLE ONLY public.course_views
 
 
 --
--- TOC entry 3518 (class 2606 OID 24722)
+-- TOC entry 3485 (class 2606 OID 24722)
 -- Name: answer_options fk_answer_o_must_have_question; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3228,25 +3160,7 @@ ALTER TABLE ONLY public.answer_options
 
 
 --
--- TOC entry 3519 (class 2606 OID 24727)
--- Name: answers fk_answers_asnwers_t_users; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.answers
-    ADD CONSTRAINT fk_answers_asnwers_t_users FOREIGN KEY (id_user) REFERENCES public.users(id_user) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3520 (class 2606 OID 24732)
--- Name: answers fk_answers_assume_question; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.answers
-    ADD CONSTRAINT fk_answers_assume_question FOREIGN KEY (id_question) REFERENCES public.questions(id_question) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3531 (class 2606 OID 24782)
+-- TOC entry 3490 (class 2606 OID 24782)
 -- Name: code_tasks fk_code_tas_might_inc_question; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3255,7 +3169,7 @@ ALTER TABLE ONLY public.code_tasks
 
 
 --
--- TOC entry 3532 (class 2606 OID 24787)
+-- TOC entry 3491 (class 2606 OID 24787)
 -- Name: create_passes fk_create_p_create_pa_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3264,7 +3178,7 @@ ALTER TABLE ONLY public.create_passes
 
 
 --
--- TOC entry 3533 (class 2606 OID 24792)
+-- TOC entry 3492 (class 2606 OID 24792)
 -- Name: create_passes fk_create_p_create_pa_users; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3273,7 +3187,7 @@ ALTER TABLE ONLY public.create_passes
 
 
 --
--- TOC entry 3534 (class 2606 OID 24797)
+-- TOC entry 3493 (class 2606 OID 24797)
 -- Name: feedback fk_feedback_has_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3282,7 +3196,7 @@ ALTER TABLE ONLY public.feedback
 
 
 --
--- TOC entry 3535 (class 2606 OID 24815)
+-- TOC entry 3494 (class 2606 OID 24815)
 -- Name: feedback fk_feedback_user; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3291,7 +3205,7 @@ ALTER TABLE ONLY public.feedback
 
 
 --
--- TOC entry 3536 (class 2606 OID 24802)
+-- TOC entry 3495 (class 2606 OID 24802)
 -- Name: lessons fk_lessons_include_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3300,16 +3214,7 @@ ALTER TABLE ONLY public.lessons
 
 
 --
--- TOC entry 3537 (class 2606 OID 24807)
--- Name: lessons fk_lessons_procent_p_stat; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.lessons
-    ADD CONSTRAINT fk_lessons_procent_p_stat FOREIGN KEY (id_stat) REFERENCES public.stat(id_stat) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3521 (class 2606 OID 24737)
+-- TOC entry 3486 (class 2606 OID 24737)
 -- Name: material fk_material_may_inclu_steps; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3318,7 +3223,7 @@ ALTER TABLE ONLY public.material
 
 
 --
--- TOC entry 3522 (class 2606 OID 24742)
+-- TOC entry 3487 (class 2606 OID 24742)
 -- Name: questions fk_question_mean_tests; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3327,52 +3232,7 @@ ALTER TABLE ONLY public.questions
 
 
 --
--- TOC entry 3523 (class 2606 OID 24747)
--- Name: results fk_results_goes_to_answers; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.results
-    ADD CONSTRAINT fk_results_goes_to_answers FOREIGN KEY (id_answer) REFERENCES public.answers(id_answer) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3524 (class 2606 OID 24752)
--- Name: results fk_results_stats_in_tests; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.results
-    ADD CONSTRAINT fk_results_stats_in_tests FOREIGN KEY (id_test) REFERENCES public.tests(id_test) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3526 (class 2606 OID 24757)
--- Name: stat fk_stat_counts_fr_results; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.stat
-    ADD CONSTRAINT fk_stat_counts_fr_results FOREIGN KEY (id_result) REFERENCES public.results(id_result) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3527 (class 2606 OID 24762)
--- Name: stat fk_stat_goes_into_course; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.stat
-    ADD CONSTRAINT fk_stat_goes_into_course FOREIGN KEY (id_course) REFERENCES public.course(id_course) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3528 (class 2606 OID 24767)
--- Name: stat fk_stat_has_in_co_users; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.stat
-    ADD CONSTRAINT fk_stat_has_in_co_users FOREIGN KEY (id_user) REFERENCES public.users(id_user) ON UPDATE RESTRICT ON DELETE RESTRICT;
-
-
---
--- TOC entry 3529 (class 2606 OID 24772)
+-- TOC entry 3488 (class 2606 OID 24772)
 -- Name: steps fk_steps_also_incl_lessons; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3381,7 +3241,7 @@ ALTER TABLE ONLY public.steps
 
 
 --
--- TOC entry 3530 (class 2606 OID 24777)
+-- TOC entry 3489 (class 2606 OID 24777)
 -- Name: tests fk_tests_may_also__steps; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3390,16 +3250,7 @@ ALTER TABLE ONLY public.tests
 
 
 --
--- TOC entry 3525 (class 2606 OID 24840)
--- Name: results results_answer_fk; Type: FK CONSTRAINT; Schema: public; Owner: pguser
---
-
-ALTER TABLE ONLY public.results
-    ADD CONSTRAINT results_answer_fk FOREIGN KEY (id_answer) REFERENCES public.answers(id_answer) ON DELETE CASCADE;
-
-
---
--- TOC entry 3554 (class 2606 OID 41339)
+-- TOC entry 3512 (class 2606 OID 41339)
 -- Name: student_analytics student_analytics_id_course_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3408,7 +3259,7 @@ ALTER TABLE ONLY public.student_analytics
 
 
 --
--- TOC entry 3555 (class 2606 OID 41334)
+-- TOC entry 3513 (class 2606 OID 41334)
 -- Name: student_analytics student_analytics_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3417,7 +3268,7 @@ ALTER TABLE ONLY public.student_analytics
 
 
 --
--- TOC entry 3557 (class 2606 OID 41378)
+-- TOC entry 3515 (class 2606 OID 41378)
 -- Name: student_test_settings student_test_settings_id_test_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3426,7 +3277,7 @@ ALTER TABLE ONLY public.student_test_settings
 
 
 --
--- TOC entry 3558 (class 2606 OID 41373)
+-- TOC entry 3516 (class 2606 OID 41373)
 -- Name: student_test_settings student_test_settings_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3435,7 +3286,7 @@ ALTER TABLE ONLY public.student_test_settings
 
 
 --
--- TOC entry 3544 (class 2606 OID 24891)
+-- TOC entry 3502 (class 2606 OID 24891)
 -- Name: test_answers test_answers_id_attempt_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3444,7 +3295,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3545 (class 2606 OID 24896)
+-- TOC entry 3503 (class 2606 OID 24896)
 -- Name: test_answers test_answers_id_question_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3453,7 +3304,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3546 (class 2606 OID 24901)
+-- TOC entry 3504 (class 2606 OID 24901)
 -- Name: test_answers test_answers_id_selected_option_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3462,7 +3313,7 @@ ALTER TABLE ONLY public.test_answers
 
 
 --
--- TOC entry 3542 (class 2606 OID 24873)
+-- TOC entry 3500 (class 2606 OID 24873)
 -- Name: test_attempts test_attempts_id_test_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3471,7 +3322,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3543 (class 2606 OID 24878)
+-- TOC entry 3501 (class 2606 OID 24878)
 -- Name: test_attempts test_attempts_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3480,7 +3331,7 @@ ALTER TABLE ONLY public.test_attempts
 
 
 --
--- TOC entry 3556 (class 2606 OID 41362)
+-- TOC entry 3514 (class 2606 OID 41362)
 -- Name: test_grade_levels test_grade_levels_id_test_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3489,7 +3340,7 @@ ALTER TABLE ONLY public.test_grade_levels
 
 
 --
--- TOC entry 3540 (class 2606 OID 24857)
+-- TOC entry 3498 (class 2606 OID 24857)
 -- Name: user_material_progress user_material_progress_id_step_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3498,7 +3349,7 @@ ALTER TABLE ONLY public.user_material_progress
 
 
 --
--- TOC entry 3541 (class 2606 OID 24852)
+-- TOC entry 3499 (class 2606 OID 24852)
 -- Name: user_material_progress user_material_progress_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3507,7 +3358,7 @@ ALTER TABLE ONLY public.user_material_progress
 
 
 --
--- TOC entry 3549 (class 2606 OID 41286)
+-- TOC entry 3507 (class 2606 OID 41286)
 -- Name: user_tag_interests user_tag_interests_id_tag_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3516,7 +3367,7 @@ ALTER TABLE ONLY public.user_tag_interests
 
 
 --
--- TOC entry 3550 (class 2606 OID 41281)
+-- TOC entry 3508 (class 2606 OID 41281)
 -- Name: user_tag_interests user_tag_interests_id_user_fkey; Type: FK CONSTRAINT; Schema: public; Owner: pguser
 --
 
@@ -3524,7 +3375,7 @@ ALTER TABLE ONLY public.user_tag_interests
     ADD CONSTRAINT user_tag_interests_id_user_fkey FOREIGN KEY (id_user) REFERENCES public.users(id_user) ON DELETE CASCADE;
 
 
--- Completed on 2025-06-08 15:21:18
+-- Completed on 2025-06-15 10:31:58
 
 --
 -- PostgreSQL database dump complete

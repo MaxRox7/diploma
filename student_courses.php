@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'render_course_card.php';
 redirect_unauthenticated();
 
 // Only students can access this page

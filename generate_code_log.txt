@@ -706,3 +706,50 @@ echo $result; // вывод результата
 Extracted output: 15
 === END ===
 
+=== 2025-06-15 16:37:31 ===
+Raw input: {"question":"Выведите hello world","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Выведите hello world\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 1.189636 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n// Ваш код здесь\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\necho \"hello world\";\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\nhello world\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"140","completionTokens":"55","totalTokens":"195","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+// Ваш код здесь
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+echo "hello world";
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+hello world
+```
+Extracted template: <?php
+// Ваш код здесь
+?>
+Extracted solution: <?php
+echo "hello world";
+?>
+Extracted output: hello world
+=== END ===
+

@@ -1,5 +1,6 @@
 <?php
 // Страница успешной регистрации
+$role = $_GET['role'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -12,10 +13,17 @@
 <body>
 <?php include 'header.php'; ?>
 <div class="ui container" style="margin-top: 50px;">
-    <div class="ui positive message">
-        <div class="header">Регистрация прошла успешно!</div>
-        <p>Ваша заявка отправлена на модерацию. После проверки вы получите письмо на почту, и сможете войти в систему.</p>
-    </div>
+    <?php if ($role === 'teacher'): ?>
+        <div class="ui info message">
+            <div class="header">Ваша заявка отправлена на модерацию</div>
+            <p>Спасибо за регистрацию! Ваша заявка будет рассмотрена администратором. После одобрения вы получите уведомление на почту и сможете войти в систему.</p>
+        </div>
+    <?php else: ?>
+        <div class="ui positive message">
+            <div class="header">Регистрация прошла успешно!</div>
+            <p>Поздравляем! Теперь вы можете войти в систему и начать пользоваться платформой.</p>
+        </div>
+    <?php endif; ?>
     <a href="index.php" class="ui button">На главную</a>
     <a href="login.php" class="ui primary button">Войти</a>
 </div>

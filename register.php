@@ -84,26 +84,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $diploma_path,
                     $criminal_path
                 ]);
-                // Сразу логиним пользователя
+                // После регистрации:
                 $user_id = $pdo->lastInsertId('users_id_user_seq');
                 $stmt = $pdo->prepare('SELECT * FROM users WHERE id_user = ?');
                 $stmt->execute([$user_id]);
                 $user = $stmt->fetch();
-                $_SESSION['user'] = $user;
-                $_SESSION['jwt'] = generate_jwt([
-                    'id_user' => $user['id_user'],
-                    'role_user' => $user['role_user'],
-                    'exp' => time() + JWT_EXPIRATION
-                ]);
-                // Отправляем письмо студенту
                 if ($role_user === 'student') {
+                    // Сразу логиним студента
+                    $_SESSION['user'] = $user;
+                    $_SESSION['jwt'] = generate_jwt([
+                        'id_user' => $user['id_user'],
+                        'role_user' => $user['role_user'],
+                        'exp' => time() + JWT_EXPIRATION
+                    ]);
                     $subject = 'Добро пожаловать в CodeSphere!';
                     $message = '<p>Поздравляем с успешной регистрацией на платформе CodeSphere!</p><p>Теперь вы можете приступить к обучению и пользоваться всеми возможностями платформы.</p>';
                     send_email_smtp($login_user, $subject, $message);
+                    header('Location: index.php');
+                    exit;
+                } else {
+                    // Для преподавателя — не логиним, а показываем сообщение
+                    header('Location: register_success.php?role=teacher');
+                    exit;
                 }
-                // Для преподавателя — стандартное письмо (оставляем как есть)
-                header('Location: index.php');
-                exit;
             }
         } catch (PDOException $e) {
             $error = 'Ошибка при регистрации: ' . $e->getMessage();
