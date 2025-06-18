@@ -86,6 +86,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]);
                 // После регистрации:
                 $user_id = $pdo->lastInsertId('users_id_user_seq');
+                
+                // Копируем дефолтную аватарку для нового пользователя
+                $default_avatar = 'avatars/default.jpg';
+                $user_avatar = "avatars/{$user_id}.jpg";
+                if (file_exists($default_avatar)) {
+                    copy($default_avatar, $user_avatar);
+                }
+                
                 $stmt = $pdo->prepare('SELECT * FROM users WHERE id_user = ?');
                 $stmt->execute([$user_id]);
                 $user = $stmt->fetch();
@@ -100,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $subject = 'Добро пожаловать в CodeSphere!';
                     $message = '<p>Поздравляем с успешной регистрацией на платформе CodeSphere!</p><p>Теперь вы можете приступить к обучению и пользоваться всеми возможностями платформы.</p>';
                     send_email_smtp($login_user, $subject, $message);
-                    header('Location: index.php');
+                    header('Location: courses.php');
                     exit;
                 } else {
                     // Для преподавателя — не логиним, а показываем сообщение

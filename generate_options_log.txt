@@ -1033,3 +1033,872 @@ Final options: Array
 
 === END ===
 
+=== 2025-06-18 15:11:34 ===
+Raw input: {"question":"Что такое переменная?","correct_answer":"Переменная - именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Что такое переменная?\n\nПравильный ответ: Переменная - именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.894978 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это набор констант, используемых в программе.\nПеременная — это команда, которая выполняет определённые действия в программе.\nПеременная — это характеристика, описывающая тип данных, но не их значение."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"41","totalTokens":"133","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это набор констант, используемых в программе.
+Переменная — это команда, которая выполняет определённые действия в программе.
+Переменная — это характеристика, описывающая тип данных, но не их значение.
+Final options: Array
+(
+    [0] => Переменная — это набор констант, используемых в программе.
+    [1] => Переменная — это команда, которая выполняет определённые действия в программе.
+    [2] => Переменная — это характеристика, описывающая тип данных, но не их значение.
+)
+
+=== END ===
+
+=== 2025-06-18 15:14:07 ===
+Raw input: {"question":"Какие функции сортируют массив по значению?","correct_answer":"assort","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие функции сортируют массив по значению?\n\nОдин из правильных ответов: assort\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.270446 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"sort\nsortArray\nunsort"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"109","completionTokens":"7","totalTokens":"116","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: sort
+sortArray
+unsort
+Final options: Array
+(
+    [0] => sort
+    [1] => sortArray
+    [2] => unsort
+)
+
+=== END ===
+
+=== 2025-06-18 15:31:37 ===
+Raw input: {"question":"Что такое переменная?","correct_answer":"Переменная - именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Что такое переменная?\n\nПравильный ответ: Переменная - именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.609512 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это константа, которая не может изменять своё значение.\nПеременная — это команда для выполнения определённых операций.\nПеременная — это тип данных, который определяет формат хранения информации."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"37","totalTokens":"129","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это константа, которая не может изменять своё значение.
+Переменная — это команда для выполнения определённых операций.
+Переменная — это тип данных, который определяет формат хранения информации.
+Final options: Array
+(
+    [0] => Переменная — это константа, которая не может изменять своё значение.
+    [1] => Переменная — это команда для выполнения определённых операций.
+    [2] => Переменная — это тип данных, который определяет формат хранения информации.
+)
+
+=== END ===
+
+=== 2025-06-18 15:33:05 ===
+Raw input: {"question":"Какие функции сортируют массив по значению?","correct_answer":"assort","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие функции сортируют массив по значению?\n\nОдин из правильных ответов: assort\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.28978 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"sort\nsortArray\nunsort"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"109","completionTokens":"7","totalTokens":"116","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: sort
+sortArray
+unsort
+Final options: Array
+(
+    [0] => sort
+    [1] => sortArray
+    [2] => unsort
+)
+
+=== END ===
+
+=== 2025-06-18 15:34:45 ===
+Raw input: {"question":"Что такое переменная?","correct_answer":"Переменная - именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Что такое переменная?\n\nПравильный ответ: Переменная - именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.676479 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это константа, которая не может изменять своё значение.\nПеременная — это команда, которая выполняет определённое действие.\nПеременная — это набор символов, используемый для обозначения типа данных."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"39","totalTokens":"131","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это константа, которая не может изменять своё значение.
+Переменная — это команда, которая выполняет определённое действие.
+Переменная — это набор символов, используемый для обозначения типа данных.
+Final options: Array
+(
+    [0] => Переменная — это константа, которая не может изменять своё значение.
+    [1] => Переменная — это команда, которая выполняет определённое действие.
+    [2] => Переменная — это набор символов, используемый для обозначения типа данных.
+)
+
+=== END ===
+
+=== 2025-06-18 17:56:38 ===
+Raw input: {"question":"Что такое переменная?","correct_answer":"Переменная - именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Что такое переменная?\n\nПравильный ответ: Переменная - именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.623993 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это константа, которая не может изменяться в процессе выполнения программы.\nПеременная — это команда, которая выполняет определённые действия в программе.\nПеременная — это специальный символ, который используется для обозначения типа данных."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"43","totalTokens":"135","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это константа, которая не может изменяться в процессе выполнения программы.
+Переменная — это команда, которая выполняет определённые действия в программе.
+Переменная — это специальный символ, который используется для обозначения типа данных.
+Final options: Array
+(
+    [0] => Переменная — это константа, которая не может изменяться в процессе выполнения программы.
+    [1] => Переменная — это команда, которая выполняет определённые действия в программе.
+    [2] => Переменная — это специальный символ, который используется для обозначения типа данных.
+)
+
+=== END ===
+
+=== 2025-06-18 17:58:24 ===
+Raw input: {"question":"Как сортировать массив по значению в PHP?","correct_answer":"sort()","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Как сортировать массив по значению в PHP?\n\nОдин из правильных ответов: sort()\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.303426 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"sort()\nasort()\nshuffle()"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"110","completionTokens":"9","totalTokens":"119","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: sort()
+asort()
+shuffle()
+Final options: Array
+(
+    [0] => sort()
+    [1] => asort()
+    [2] => shuffle()
+)
+
+=== END ===
+
+=== 2025-06-18 17:58:52 ===
+Raw input: {"question":"Как сортировать массив по значению в PHP?","correct_answer":"asort()","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Как сортировать массив по значению в PHP?\n\nОдин из правильных ответов: asort()\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.265449 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"sort()\narsort()\nasort()"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"111","completionTokens":"10","totalTokens":"121","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: sort()
+arsort()
+asort()
+Final options: Array
+(
+    [0] => sort()
+    [1] => arsort()
+    [2] => asort()
+)
+
+=== END ===
+
+=== 2025-06-18 18:00:22 ===
+Raw input: {"question":"Как сортировать массив по ключу в PHP?","correct_answer":"ksort()","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Как сортировать массив по ключу в PHP?\n\nОдин из правильных ответов: ksort()\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.362959 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"sort()\nksort()\nshuffle()"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"112","completionTokens":"9","totalTokens":"121","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: sort()
+ksort()
+shuffle()
+Final options: Array
+(
+    [0] => sort()
+    [1] => ksort()
+    [2] => shuffle()
+)
+
+=== END ===
+
+=== 2025-06-18 18:01:05 ===
+Raw input: {"question":"Какие типы данных есть в PHP?","correct_answer":"int","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие типы данных есть в PHP?\n\nОдин из правильных ответов: int\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.344671 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"int\nbool\narray_string"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"107","completionTokens":"7","totalTokens":"114","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: int
+bool
+array_string
+Final options: Array
+(
+    [0] => int
+    [1] => bool
+    [2] => array_string
+)
+
+=== END ===
+
+=== 2025-06-18 18:01:29 ===
+Raw input: {"question":"Какие типы данных есть в PHP, связанные с pdf?","correct_answer":"pdfdoc","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие типы данных есть в PHP, связанные с pdf?\n\nОдин из правильных ответов: pdfdoc\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.519992 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"pdfdoc\nstring\nresource"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"112","completionTokens":"6","totalTokens":"118","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: pdfdoc
+string
+resource
+Final options: Array
+(
+    [0] => pdfdoc
+    [1] => string
+    [2] => resource
+)
+
+=== END ===
+
+=== 2025-06-18 18:01:34 ===
+Raw input: {"question":"Какие типы данных есть в PHP, связанные с pdf?","correct_answer":"pdfdoc","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие типы данных есть в PHP, связанные с pdf?\n\nОдин из правильных ответов: pdfdoc\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.273315 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"pdfdoc\nbinary\nstring"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"112","completionTokens":"6","totalTokens":"118","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: pdfdoc
+binary
+string
+Final options: Array
+(
+    [0] => pdfdoc
+    [1] => binary
+    [2] => string
+)
+
+=== END ===
+
+=== 2025-06-18 18:01:35 ===
+Raw input: {"question":"Какие типы данных есть в PHP, связанные с pdf?","correct_answer":"pdfdoc","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие типы данных есть в PHP, связанные с pdf?\n\nОдин из правильных ответов: pdfdoc\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.282491 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"pdffile  \npdfdoc  \nstring"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"112","completionTokens":"9","totalTokens":"121","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: pdffile  
+pdfdoc  
+string
+Final options: Array
+(
+    [0] => pdffile
+    [1] => pdfdoc
+    [2] => string
+)
+
+=== END ===
+
+=== 2025-06-18 18:01:38 ===
+Raw input: {"question":"Какие типы данных есть в PHP, связанные с pdf?","correct_answer":"pdfdoc","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие типы данных есть в PHP, связанные с pdf?\n\nОдин из правильных ответов: pdfdoc\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.261001 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"pdffile  \nstring  \npdfdoc"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"112","completionTokens":"9","totalTokens":"121","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: pdffile  
+string  
+pdfdoc
+Final options: Array
+(
+    [0] => pdffile
+    [1] => string
+    [2] => pdfdoc
+)
+
+=== END ===
+
+=== 2025-06-18 18:01:39 ===
+Raw input: {"question":"Какие типы данных есть в PHP, связанные с pdf?","correct_answer":"pdfdoc","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие типы данных есть в PHP, связанные с pdf?\n\nОдин из правильных ответов: pdfdoc\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.357762 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"pdfdoc\nstring\npdf_file_pointer"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"112","completionTokens":"10","totalTokens":"122","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: pdfdoc
+string
+pdf_file_pointer
+Final options: Array
+(
+    [0] => pdfdoc
+    [1] => string
+    [2] => pdf_file_pointer
+)
+
+=== END ===
+
+=== 2025-06-18 18:04:30 ===
+Raw input: {"question":"Какие два способа являются корректными для получения данных из POST-запроса в PHP?","correct_answer":"$data = $_POST['field_name'];","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n\nОдин из правильных ответов: $data = $_POST['field_name'];\n\nСгенерируй 3 вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.519697 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"$data = $_POST['field_name'];\n$data = $_GET['field_name'];\n$data = $_REQUEST['field_name'];"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"126","completionTokens":"32","totalTokens":"158","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: $data = $_POST['field_name'];
+$data = $_GET['field_name'];
+$data = $_REQUEST['field_name'];
+Final options: Array
+(
+    [0] => $data = $_POST['field_name'];
+    [1] => $data = $_GET['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+=== END ===
+
+=== 2025-06-18 18:06:27 ===
+Raw input: {"question":"Какие два способа являются корректными для получения данных из POST-запроса в PHP?","correct_answer":"$data = $_POST['field_name'];","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос с множественным выбором: Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n\nПравильный ответ (НЕ включать в генерацию): $data = $_POST['field_name'];\n\nСгенерируй 3 НЕПРАВИЛЬНЫХ, но правдоподобных вариантов ответа, которые отличаются от указанного правильного ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. НЕ дублируй правильный ответ."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 2.053819 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"$data = $_GET['field_name'];\n$data = $POST['field_name'];\n$data = $_REQUEST['field_name'];"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"125","completionTokens":"32","totalTokens":"157","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: $data = $_GET['field_name'];
+$data = $POST['field_name'];
+$data = $_REQUEST['field_name'];
+Final options: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $POST['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+=== END ===
+
+=== 2025-06-18 18:07:33 ===
+Raw input: {"question":"Какие два способа являются корректными для получения данных из POST-запроса в PHP?","correct_answer":"$data = $_POST['field_name'];","num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "ВАЖНО: Генерируй ТОЛЬКО НЕПРАВИЛЬНЫЕ варианты ответов!\n\nВопрос с множественным выбором: Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n\nПравильный ответ (ЗАПРЕЩЕНО использовать): $data = $_POST['field_name'];\n\nТвоя задача: сгенерировать 3 вариантов ответов, которые являются НЕПРАВИЛЬНЫМИ для данного вопроса. Каждый вариант должен:\n- Быть НЕПРАВИЛЬНЫМ (ошибочным)\n- Быть правдоподобным и связанным с темой\n- НЕ ПОВТОРЯТЬ правильный ответ '$data = $_POST['field_name'];'\n- Быть коротким (1-2 предложения)\n\nВыведи только неправильные варианты ответов, каждый с новой строки, без нумерации и без дополнительного текста."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.585364 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"$data = $_GET['field_name'];\n$data = $_SESSION['field_name'];\n$data = $HTTP_POST_VARS['field_name'];"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"174","completionTokens":"37","totalTokens":"211","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: $data = $_GET['field_name'];
+$data = $_SESSION['field_name'];
+$data = $HTTP_POST_VARS['field_name'];
+Final options: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_SESSION['field_name'];
+    [2] => $data = $HTTP_POST_VARS['field_name'];
+)
+
+=== END ===
+
+=== 2025-06-18 18:10:59 ===
+Raw input: {"question":"Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n\n","correct_answers":["$data = $_POST['field_name'];","$data = file_get_contents('php://input');"],"num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "ВАЖНО: Генерируй ТОЛЬКО НЕПРАВИЛЬНЫЕ варианты ответов!\n\nВопрос с множественным выбором: Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n\n\n\nПравильные ответы (ЗАПРЕЩЕНО использовать): $data = $_POST['field_name'];, $data = file_get_contents('php:\/\/input');\n\nТвоя задача: сгенерировать 3 вариантов ответов, которые являются НЕПРАВИЛЬНЫМИ для данного вопроса. Каждый вариант должен:\n- Быть НЕПРАВИЛЬНЫМ (ошибочным)\n- Быть правдоподобным и связанным с темой\n- НЕ ПОВТОРЯТЬ ни один из правильных ответов: $data = $_POST['field_name'];, $data = file_get_contents('php:\/\/input');\n- НЕ БЫТЬ похожим на правильные ответы\n- Быть коротким (1-2 предложения)\n\nВыведи только неправильные варианты ответов, каждый с новой строки, без нумерации и без дополнительного текста."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.790044 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"$data = $_GET['field_name'];\n$data = $_FILES['field_name'];\n$data = $_REQUEST['field_name'];"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"217","completionTokens":"32","totalTokens":"249","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: $data = $_GET['field_name'];
+$data = $_FILES['field_name'];
+$data = $_REQUEST['field_name'];
+Filtering for multi type. Correct answers: Array
+(
+    [0] => $data = $_POST['field_name'];
+    [1] => $data = file_get_contents('php://input');
+)
+
+Options before filtering: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+KEPT: '$data = $_GET['field_name'];'
+KEPT: '$data = $_FILES['field_name'];'
+KEPT: '$data = $_REQUEST['field_name'];'
+Options after filtering: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+Final options: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+=== END ===
+
+=== 2025-06-18 18:12:31 ===
+Raw input: {"question":"что такое переменная?","correct_answer":"Переменная — именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: что такое переменная?\n\nПравильный ответ: Переменная — именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.657708 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это константа, которая не может изменять своё значение.\nПеременная — это команда, которая выполняет определённые действия в программе.\nПеременная — это характеристика, описывающая тип данных, но не сохраняющая значение."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"44","totalTokens":"136","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это константа, которая не может изменять своё значение.
+Переменная — это команда, которая выполняет определённые действия в программе.
+Переменная — это характеристика, описывающая тип данных, но не сохраняющая значение.
+Final options: Array
+(
+    [0] => Переменная — это константа, которая не может изменять своё значение.
+    [1] => Переменная — это команда, которая выполняет определённые действия в программе.
+    [2] => Переменная — это характеристика, описывающая тип данных, но не сохраняющая значение.
+)
+
+=== END ===
+
+=== 2025-06-18 18:13:33 ===
+Raw input: {"question":"Что такое переменная?","correct_answer":"Переменная — именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Что такое переменная?\n\nПравильный ответ: Переменная — именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.626843 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это константа, которая не может изменять своё значение.\nПеременная — это команда, которая выполняет определённое действие в программе.\nПеременная — это специальный символ, который используется для обозначения типа данных."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"42","totalTokens":"134","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это константа, которая не может изменять своё значение.
+Переменная — это команда, которая выполняет определённое действие в программе.
+Переменная — это специальный символ, который используется для обозначения типа данных.
+Final options: Array
+(
+    [0] => Переменная — это константа, которая не может изменять своё значение.
+    [1] => Переменная — это команда, которая выполняет определённое действие в программе.
+    [2] => Переменная — это специальный символ, который используется для обозначения типа данных.
+)
+
+=== END ===
+
+=== 2025-06-18 18:16:33 ===
+Raw input: {"question":"Что такое переменная?","correct_answer":"Переменная — именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Что такое переменная?\n\nПравильный ответ: Переменная — именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.642958 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это математическая операция для вычисления значения.\nПеременная — это константа, которая не может изменять своё значение.\nПеременная — это команда для вывода данных на экран."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"36","totalTokens":"128","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это математическая операция для вычисления значения.
+Переменная — это константа, которая не может изменять своё значение.
+Переменная — это команда для вывода данных на экран.
+Final options: Array
+(
+    [0] => Переменная — это математическая операция для вычисления значения.
+    [1] => Переменная — это константа, которая не может изменять своё значение.
+    [2] => Переменная — это команда для вывода данных на экран.
+)
+
+=== END ===
+
+=== 2025-06-18 18:16:55 ===
+Raw input: {"question":"Какие два способа являются корректными для получения данных из POST-запроса в PHP?","correct_answers":["$data = $_POST['field_name'];","$data = file_get_contents('php://input');"],"num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "ВАЖНО: Генерируй ТОЛЬКО НЕПРАВИЛЬНЫЕ варианты ответов!\n\nВопрос с множественным выбором: Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n\nПравильные ответы (ЗАПРЕЩЕНО использовать): $data = $_POST['field_name'];, $data = file_get_contents('php:\/\/input');\n\nТвоя задача: сгенерировать 3 вариантов ответов, которые являются НЕПРАВИЛЬНЫМИ для данного вопроса. Каждый вариант должен:\n- Быть НЕПРАВИЛЬНЫМ (ошибочным)\n- Быть правдоподобным и связанным с темой\n- НЕ ПОВТОРЯТЬ ни один из правильных ответов: $data = $_POST['field_name'];, $data = file_get_contents('php:\/\/input');\n- НЕ БЫТЬ похожим на правильные ответы\n- Быть коротким (1-2 предложения)\n\nВыведи только неправильные варианты ответов, каждый с новой строки, без нумерации и без дополнительного текста."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.560784 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"$data = $_GET['field_name'];\n$data = $_FILES['field_name'];\n$data = $_REQUEST['field_name'];"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"215","completionTokens":"32","totalTokens":"247","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: $data = $_GET['field_name'];
+$data = $_FILES['field_name'];
+$data = $_REQUEST['field_name'];
+Filtering for multi type. Correct answers: Array
+(
+    [0] => $data = $_POST['field_name'];
+    [1] => $data = file_get_contents('php://input');
+)
+
+Options before filtering: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+KEPT: '$data = $_GET['field_name'];'
+KEPT: '$data = $_FILES['field_name'];'
+KEPT: '$data = $_REQUEST['field_name'];'
+Options after filtering: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+Final options: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_REQUEST['field_name'];
+)
+
+=== END ===
+
+=== 2025-06-18 18:38:16 ===
+Raw input: {"question":"Что такое переменная?","correct_answer":"Переменная — именованная область в памяти, которая может принимать определенное значение?","num_options":3,"question_type":"single"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Вопрос: Что такое переменная?\n\nПравильный ответ: Переменная — именованная область в памяти, которая может принимать определенное значение?\n\nСгенерируй 3 неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.727378 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"Переменная — это константа, которая не может изменяться в процессе выполнения программы.\nПеременная — это команда, которая выполняет определённые действия в программе.\nПеременная — это характеристика, описывающая тип данных, но не их значение."},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"92","completionTokens":"45","totalTokens":"137","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: Переменная — это константа, которая не может изменяться в процессе выполнения программы.
+Переменная — это команда, которая выполняет определённые действия в программе.
+Переменная — это характеристика, описывающая тип данных, но не их значение.
+Final options: Array
+(
+    [0] => Переменная — это константа, которая не может изменяться в процессе выполнения программы.
+    [1] => Переменная — это команда, которая выполняет определённые действия в программе.
+    [2] => Переменная — это характеристика, описывающая тип данных, но не их значение.
+)
+
+=== END ===
+
+=== 2025-06-18 18:38:38 ===
+Raw input: {"question":"Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n","correct_answers":["$data = $_POST['field_name'];","$data = file_get_contents('php://input');"],"num_options":3,"question_type":"multi"}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "ВАЖНО: Генерируй ТОЛЬКО НЕПРАВИЛЬНЫЕ варианты ответов!\n\nВопрос с множественным выбором: Какие два способа являются корректными для получения данных из POST-запроса в PHP?\n\n\nПравильные ответы (ЗАПРЕЩЕНО использовать): $data = $_POST['field_name'];, $data = file_get_contents('php:\/\/input');\n\nТвоя задача: сгенерировать 3 вариантов ответов, которые являются НЕПРАВИЛЬНЫМИ для данного вопроса. Каждый вариант должен:\n- Быть НЕПРАВИЛЬНЫМ (ошибочным)\n- Быть правдоподобным и связанным с темой\n- НЕ ПОВТОРЯТЬ ни один из правильных ответов: $data = $_POST['field_name'];, $data = file_get_contents('php:\/\/input');\n- НЕ БЫТЬ похожим на правильные ответы\n- Быть коротким (1-2 предложения)\n\nВыведи только неправильные варианты ответов, каждый с новой строки, без нумерации и без дополнительного текста."
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 0.547153 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"$data = $_GET['field_name'];\n$data = $_FILES['field_name'];\n$data = $_SESSION['field_name'];"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"216","completionTokens":"32","totalTokens":"248","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: $data = $_GET['field_name'];
+$data = $_FILES['field_name'];
+$data = $_SESSION['field_name'];
+Filtering for multi type. Correct answers: Array
+(
+    [0] => $data = $_POST['field_name'];
+    [1] => $data = file_get_contents('php://input');
+)
+
+Options before filtering: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_SESSION['field_name'];
+)
+
+KEPT: '$data = $_GET['field_name'];'
+KEPT: '$data = $_FILES['field_name'];'
+KEPT: '$data = $_SESSION['field_name'];'
+Options after filtering: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_SESSION['field_name'];
+)
+
+Final options: Array
+(
+    [0] => $data = $_GET['field_name'];
+    [1] => $data = $_FILES['field_name'];
+    [2] => $data = $_SESSION['field_name'];
+)
+
+=== END ===
+

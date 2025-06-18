@@ -129,6 +129,20 @@ try {
         ");
         $stmt->execute([$course_id]);
         
+        // 3.1. Удаляем задания с кодом
+        $stmt = $pdo->prepare("
+            DELETE FROM code_tasks 
+            WHERE id_question IN (
+                SELECT q.id_question 
+                FROM Questions q
+                JOIN Tests t ON q.id_test = t.id_test
+                JOIN Steps s ON t.id_step = s.id_step
+                JOIN lessons l ON s.id_lesson = l.id_lesson
+                WHERE l.id_course = ?
+            )
+        ");
+        $stmt->execute([$course_id]);
+        
         // 4. Удаляем вопросы
         $stmt = $pdo->prepare("
             DELETE FROM Questions 

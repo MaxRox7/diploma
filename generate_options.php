@@ -34,15 +34,27 @@ fwrite($log_file, "Raw input: " . $raw_input . "\n");
 $data = json_decode($raw_input, true);
 $question = $data['question'] ?? '';
 $correct_answer = $data['correct_answer'] ?? '';
+$correct_answers = $data['correct_answers'] ?? []; // Массив правильных ответов для multi
 $num_options = $data['num_options'] ?? 3; // По умолчанию генерируем 3 варианта
 $question_type = $data['question_type'] ?? 'single'; // По умолчанию тип вопроса 'single'
 
-if (empty($question) || empty($correct_answer)) {
-    fwrite($log_file, "Error: Missing required parameters\n");
-    http_response_code(400);
-    echo json_encode(['error' => 'Missing required parameters']);
-    fclose($log_file);
-    exit;
+// Для типа multi проверяем массив правильных ответов
+if ($question_type === 'multi') {
+    if (empty($question) || empty($correct_answers)) {
+        fwrite($log_file, "Error: Missing required parameters for multi type\n");
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing required parameters for multi type']);
+        fclose($log_file);
+        exit;
+    }
+} else {
+    if (empty($question) || empty($correct_answer)) {
+        fwrite($log_file, "Error: Missing required parameters\n");
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing required parameters']);
+        fclose($log_file);
+        exit;
+    }
 }
 
 // API-ключ Яндекс GPT
@@ -55,7 +67,8 @@ switch ($question_type) {
         $prompt = "Вопрос: {$question}\n\nПравильный ответ: {$correct_answer}\n\nСгенерируй {$num_options} неправильных, но правдоподобных вариантов ответа. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации.";
         break;
     case 'multi':
-        $prompt = "Вопрос с множественным выбором: {$question}\n\nОдин из правильных ответов: {$correct_answer}\n\nСгенерируй {$num_options} вариантов ответа, включающих как правильные, так и неправильные варианты. Ответы должны быть короткими (не более 1-2 предложений) и относиться к той же теме, что и вопрос. Выведи только варианты ответов, каждый с новой строки, без нумерации. Варианты должны быть разнообразными, некоторые могут быть правильными, а некоторые неправильными.";
+        $correct_answers_text = implode(', ', $correct_answers);
+        $prompt = "ВАЖНО: Генерируй ТОЛЬКО НЕПРАВИЛЬНЫЕ варианты ответов!\n\nВопрос с множественным выбором: {$question}\n\nПравильные ответы (ЗАПРЕЩЕНО использовать): {$correct_answers_text}\n\nТвоя задача: сгенерировать {$num_options} вариантов ответов, которые являются НЕПРАВИЛЬНЫМИ для данного вопроса. Каждый вариант должен:\n- Быть НЕПРАВИЛЬНЫМ (ошибочным)\n- Быть правдоподобным и связанным с темой\n- НЕ ПОВТОРЯТЬ ни один из правильных ответов: {$correct_answers_text}\n- НЕ БЫТЬ похожим на правильные ответы\n- Быть коротким (1-2 предложения)\n\nВыведи только неправильные варианты ответов, каждый с новой строки, без нумерации и без дополнительного текста.";
         break;
     case 'match':
         $prompt = "Вопрос на сопоставление: {$question}\n\nПример пары для сопоставления: {$correct_answer}\n\nСгенерируй {$num_options} пар для сопоставления по этой теме. Каждая пара должна содержать левую и правую части, разделенные символом '||'. Выведи только пары для сопоставления, каждую с новой строки, без нумерации.";
@@ -175,6 +188,55 @@ $options = array_map('trim', explode("\n", $generated_text));
 $options = array_filter($options, function($line) {
     return !empty($line) && strpos($line, 'Вариант') === false && strpos($line, ':') === false;
 });
+
+// Для типа multi удаляем дубликаты правильных ответов и похожие варианты
+if ($question_type === 'multi') {
+    $correct_answers_lower = array_map(function($answer) {
+        return trim(strtolower($answer));
+    }, $correct_answers);
+    
+    fwrite($log_file, "Filtering for multi type. Correct answers: " . print_r($correct_answers, true) . "\n");
+    fwrite($log_file, "Options before filtering: " . print_r($options, true) . "\n");
+    
+    $filtered_options = [];
+    foreach ($options as $option) {
+        $option_lower = trim(strtolower($option));
+        $should_filter = false;
+        
+        foreach ($correct_answers_lower as $correct_lower) {
+            // Проверяем точное совпадение
+            if ($option_lower === $correct_lower) {
+                fwrite($log_file, "FILTERED (exact match with '$correct_lower'): '$option'\n");
+                $should_filter = true;
+                break;
+            }
+            
+            // Проверяем, содержит ли вариант правильный ответ как подстроку
+            if (strpos($option_lower, $correct_lower) !== false || strpos($correct_lower, $option_lower) !== false) {
+                // Исключение: если это очень короткие слова (меньше 4 символов), то проверяем только точное совпадение
+                if (strlen($correct_lower) < 4 && strlen($option_lower) < 4) {
+                    if ($option_lower === $correct_lower) {
+                        fwrite($log_file, "FILTERED (short words, same as '$correct_lower'): '$option'\n");
+                        $should_filter = true;
+                        break;
+                    }
+                } else {
+                    fwrite($log_file, "FILTERED (substring match with '$correct_lower'): '$option'\n");
+                    $should_filter = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!$should_filter) {
+            $filtered_options[] = $option;
+            fwrite($log_file, "KEPT: '$option'\n");
+        }
+    }
+    
+    $options = $filtered_options;
+    fwrite($log_file, "Options after filtering: " . print_r($options, true) . "\n");
+}
 
 $final_options = array_values($options);
 fwrite($log_file, "Final options: " . print_r($final_options, true) . "\n");

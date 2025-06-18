@@ -856,10 +856,7 @@ function get_question_options($pdo, $question_id) {
                                             <label>Шаблон кода</label>
                                             <textarea name="code_template" id="code_template" rows="10"></textarea>
                                         </div>
-                                        <div class="field">
-                                            <label>Входные данные (опционально)</label>
-                                            <textarea name="code_input" id="code_input" rows="2"></textarea>
-                                        </div>
+                                   
                                         <div class="field">
                                             <label>Ожидаемый вывод</label>
                                             <textarea name="code_output" id="code_output" rows="5" required></textarea>
@@ -941,24 +938,30 @@ function renderOptions(type) {
     } else if (type === 'multi') {
         block.innerHTML = `
             <div class="field">
-                <label>Правильный ответ для генерации</label>
-                <div class="ui fluid input">
-                    <input type="text" id="correct_answer_text" placeholder="Введите один из правильных ответов для генерации вариантов">
+                <label>Правильные ответы для генерации</label>
+                <div id="correct-answers-container">
+                    <div class="ui action input" style="margin-bottom: 10px;">
+                        <input type="text" placeholder="Введите правильный ответ" class="correct-answer-input" onkeypress="if(event.key==='Enter'){addCorrectAnswer(); return false;}">
+                        <button type="button" class="ui green button" onclick="addCorrectAnswer()">
+                            <i class="plus icon"></i> Добавить
+                        </button>
+                    </div>
                 </div>
+                <div id="correct-answers-list"></div>
                 <div class="fields" style="margin-top: 10px;">
                     <div class="four wide field">
-                        <label>Количество вариантов</label>
+                        <label>Количество неправильных вариантов</label>
                         <input type="number" id="num_options" min="1" max="10" value="3">
                     </div>
                     <div class="twelve wide field" style="display: flex; align-items: flex-end;">
-                        <button type="button" class="ui teal button" onclick="generateOptions()">
-                            <i class="magic icon"></i> Сгенерировать варианты
+                        <button type="button" class="ui teal button" onclick="generateOptionsMulti()">
+                            <i class="magic icon"></i> Сгенерировать неправильные варианты
                         </button>
                     </div>
                 </div>
             </div>
             <div class="field">
-                <label>Варианты ответов (отметьте правильные)</label>
+                <label>Варианты ответов (правильные и неправильные)</label>
                 <div id="options-container">
                     <div class="field">
                         <input type="text" name="options[]" placeholder="Вариант ответа 1" required>
@@ -1065,6 +1068,51 @@ function addOptionMulti() {
     newField.innerHTML = `<input type="text" name="options[]" placeholder="Вариант ответа ${optionCount + 1}" required> <input type="checkbox" name="correct_options[]" value="${optionCount}"> Правильный`;
     container.appendChild(newField);
 }
+
+// Глобальный массив для хранения правильных ответов
+let correctAnswers = [];
+
+function addCorrectAnswer() {
+    const input = document.querySelector('.correct-answer-input');
+    const answer = input.value.trim();
+    
+    if (answer && !correctAnswers.includes(answer)) {
+        correctAnswers.push(answer);
+        input.value = '';
+        updateCorrectAnswersList();
+    } else if (correctAnswers.includes(answer)) {
+        alert('Этот ответ уже добавлен');
+    }
+}
+
+function removeCorrectAnswer(index) {
+    correctAnswers.splice(index, 1);
+    updateCorrectAnswersList();
+}
+
+function updateCorrectAnswersList() {
+    const listContainer = document.getElementById('correct-answers-list');
+    if (correctAnswers.length === 0) {
+        listContainer.innerHTML = '';
+        return;
+    }
+    
+    let html = '<div class="ui segments" style="margin-top: 10px;">';
+    correctAnswers.forEach((answer, index) => {
+        html += `
+            <div class="ui segment">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><strong>Правильный ответ ${index + 1}:</strong> ${answer}</span>
+                    <button type="button" class="ui red mini button" onclick="removeCorrectAnswer(${index})">
+                        <i class="trash icon"></i> Удалить
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    listContainer.innerHTML = html;
+}
 function addMatchPair() {
     const container = document.getElementById('match-container');
     const pairCount = container.children.length + 1;
@@ -1084,6 +1132,87 @@ function updateCorrectOptions() {
         option.textContent = `Вариант ${i + 1}`;
         select.appendChild(option);
     }
+}
+
+// Функция для генерации неправильных вариантов для множественного выбора
+function generateOptionsMulti() {
+    const questionText = document.querySelector('textarea[name="question_text"]').value;
+    const questionType = 'multi';
+    const numOptions = document.getElementById('num_options')?.value || 3;
+    
+    if (!questionText) {
+        alert('Пожалуйста, введите текст вопроса');
+        return;
+    }
+    
+    if (correctAnswers.length === 0) {
+        alert('Пожалуйста, добавьте хотя бы один правильный ответ');
+        return;
+    }
+    
+    // Показываем индикатор загрузки
+    const container = document.getElementById('options-container');
+    container.innerHTML = '<div class="ui active inline loader"></div> Генерация неправильных вариантов...';
+    
+    // Отправляем запрос к API
+    fetch('generate_options.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            question: questionText,
+            correct_answers: correctAnswers, // Отправляем массив правильных ответов
+            num_options: parseInt(numOptions),
+            question_type: questionType
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`Ошибка сервера (${response.status}): ${text}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Очищаем контейнер
+            container.innerHTML = '';
+            
+            // Добавляем все правильные ответы
+            correctAnswers.forEach((answer, index) => {
+                const correctField = document.createElement('div');
+                correctField.className = 'field';
+                correctField.innerHTML = `
+                    <input type="text" name="options[]" value="${answer}" required>
+                    <input type="checkbox" name="correct_options[]" value="${index}" checked> Правильный
+                `;
+                container.appendChild(correctField);
+            });
+            
+            // Добавляем сгенерированные неправильные варианты
+            data.options.forEach((option, index) => {
+                const newField = document.createElement('div');
+                newField.className = 'field';
+                newField.innerHTML = `
+                    <input type="text" name="options[]" value="${option}" required>
+                    <input type="checkbox" name="correct_options[]" value="${correctAnswers.length + index}"> Правильный
+                `;
+                container.appendChild(newField);
+            });
+        } else {
+            alert('Ошибка при генерации вариантов: ' + (data.error || 'Неизвестная ошибка'));
+            // Восстанавливаем исходное состояние
+            renderOptions('multi');
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при генерации вариантов: ' + error.message);
+        // Восстанавливаем исходное состояние
+        renderOptions('multi');
+    });
 }
 
 // Функция для генерации вариантов ответов через API

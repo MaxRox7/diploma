@@ -26,16 +26,20 @@ try {
         // For teachers, check if they are the creator
         if (is_teacher()) {
             $stmt = $pdo->prepare("
-                SELECT t.*, s.id_step, s.number_steps as name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course,
-                       (SELECT COUNT(*) FROM create_passes WHERE id_course = c.id_course AND id_user = ? AND is_creator = true) as is_creator
+                SELECT t.*, s.id_step, s.number_steps as name_step, l.id_lesson, l.name_lesson, c.id_course, c.name_course
                 FROM Tests t
                 JOIN Steps s ON t.id_step = s.id_step
                 JOIN lessons l ON s.id_lesson = l.id_lesson
                 JOIN course c ON l.id_course = c.id_course
-                JOIN create_passes cp ON c.id_course = cp.id_course
-                WHERE t.id_test = ? AND cp.id_user = ?
+                WHERE t.id_test = ?
             ");
-            $stmt->execute([$_SESSION['user']['id_user'], $test_id, $_SESSION['user']['id_user']]);
+            $stmt->execute([$test_id]);
+            $test_temp = $stmt->fetch();
+            
+            if ($test_temp && !is_course_creator($pdo, $test_temp['id_course'], $_SESSION['user']['id_user'])) {
+                $test_temp = null; // Если не создатель, убираем доступ
+            }
+            $test = $test_temp;
         } else {
             // For students
             $stmt = $pdo->prepare("
@@ -45,12 +49,12 @@ try {
                 JOIN lessons l ON s.id_lesson = l.id_lesson
                 JOIN course c ON l.id_course = c.id_course
                 JOIN create_passes cp ON c.id_course = cp.id_course
-                WHERE t.id_test = ? AND cp.id_user = ?
+                WHERE t.id_test = ? AND cp.id_user = ? AND cp.is_creator = false
             ");
             $stmt->execute([$test_id, $_SESSION['user']['id_user']]);
+            $test = $stmt->fetch();
         }
     }
-    $test = $stmt->fetch();
     
     if (!$test) {
         header('Location: courses.php');
@@ -140,14 +144,21 @@ try {
     }
 
     // Get answer options for each question
-    function get_question_options($pdo, $question_id) {
+    function get_question_options($pdo, $question_id, $shuffle = false) {
         $stmt = $pdo->prepare("
             SELECT * FROM Answer_options
             WHERE id_question = ?
             ORDER BY id_option
         ");
         $stmt->execute([$question_id]);
-        return $stmt->fetchAll();
+        $options = $stmt->fetchAll();
+        
+        // Перемешиваем варианты ответов для студентов
+        if ($shuffle && !empty($options)) {
+            shuffle($options);
+        }
+        
+        return $options;
     }
 
 } catch (PDOException $e) {
@@ -200,7 +211,38 @@ try {
                 </div>
             <?php endif; ?>
 
-            <?php if (!$current_attempt && !$success): ?>
+            <?php if (is_teacher() && is_course_creator($pdo, $test['id_course'], $_SESSION['user']['id_user'])): ?>
+                <div class="ui info message">
+                    <i class="info circle icon"></i>
+                    <strong>Режим преподавателя:</strong> Вы можете просматривать этот тест, но не проходить его.
+                    <a href="edit_test.php?test_id=<?= $test_id ?>" class="ui small right floated button">Редактировать тест</a>
+                </div>
+                
+                <div class="ui segment">
+                    <h3>Предварительный просмотр теста</h3>
+                    <p>Тест содержит <?= count($questions) ?> вопросов.</p>
+                    
+                    <?php foreach ($questions as $index => $question): ?>
+                        <div class="ui segment">
+                            <h4>Вопрос <?= $index + 1 ?>:</h4>
+                            <p><?= htmlspecialchars($question['text_question']) ?></p>
+                            
+                            <?php 
+                            $options = get_question_options($pdo, $question['id_question'], false); // Без перемешивания для преподавателей
+                            foreach ($options as $option): 
+                            ?>
+                                <div class="ui <?= $option['is_correct'] ? 'green' : '' ?> label" style="display: block; margin: 5px 0;">
+                                    <?= htmlspecialchars($option['text_option']) ?>
+                                    <?php if ($option['is_correct']): ?>
+                                        <i class="check icon"></i>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                
+            <?php elseif (!$current_attempt && !$success): ?>
                 <div class="ui segment">
                     <h3>Начать тест</h3>
                     <p>Тест содержит <?= count($questions) ?> вопросов.</p>
@@ -221,7 +263,7 @@ try {
                                 </label>
                                 
                                 <?php 
-                                $options = get_question_options($pdo, $question['id_question']);
+                                $options = get_question_options($pdo, $question['id_question'], true); // Перемешиваем для студентов
                                 foreach ($options as $option): 
                                 ?>
                                     <div class="ui radio checkbox" style="display: block; margin: 10px 0;">
@@ -248,7 +290,7 @@ try {
                         <a href="edit_test.php?test_id=<?= $test_id ?>&admin_view=1" class="ui button">
                             Назад к редактированию теста
                         </a>
-                    <?php elseif (is_teacher() && isset($test['is_creator']) && $test['is_creator'] > 0): ?>
+                    <?php elseif (is_teacher() && is_course_creator($pdo, $test['id_course'], $_SESSION['user']['id_user'])): ?>
                         <a href="edit_test.php?test_id=<?= $test_id ?>" class="ui button">
                             Назад к редактированию теста
                         </a>
@@ -267,7 +309,7 @@ try {
                         <a href="edit_test.php?test_id=<?= $test_id ?>&admin_view=1" class="ui button">
                             Назад к редактированию теста
                         </a>
-                    <?php elseif (is_teacher() && isset($test['is_creator']) && $test['is_creator'] > 0): ?>
+                    <?php elseif (is_teacher() && is_course_creator($pdo, $test['id_course'], $_SESSION['user']['id_user'])): ?>
                         <a href="edit_test.php?test_id=<?= $test_id ?>" class="ui button">
                             Назад к редактированию теста
                         </a>

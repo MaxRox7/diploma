@@ -753,3 +753,776 @@ echo "hello world";
 Extracted output: hello world
 === END ===
 
+=== 2025-06-18 15:18:05 ===
+Raw input: {"question":"Суммируйте элементы массива","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Суммируйте элементы массива\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 2.950692 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\n// Объявите переменную $array и присвойте ей значение массива\n\n// Ваша задача - написать код для суммирования элементов массива\n\n$sum = 0;\n\n// Ваш код здесь\n\necho $sum;\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\n// Объявите переменную $array и присвойте ей значение массива\n$array = [1, 2, 3, 4, 5];\n\n// Инициализируйте переменную $sum для хранения суммы элементов\n$sum = 0;\n\n// Пройдите по всем элементам массива и суммируйте их\nforeach ($array as $number) {\n    $sum += $number;\n}\n\n// Выведите результат\necho $sum;\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"141","completionTokens":"193","totalTokens":"334","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+// Объявите переменную $array и присвойте ей значение массива
+
+// Ваша задача - написать код для суммирования элементов массива
+
+$sum = 0;
+
+// Ваш код здесь
+
+echo $sum;
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+// Объявите переменную $array и присвойте ей значение массива
+$array = [1, 2, 3, 4, 5];
+
+// Инициализируйте переменную $sum для хранения суммы элементов
+$sum = 0;
+
+// Пройдите по всем элементам массива и суммируйте их
+foreach ($array as $number) {
+    $sum += $number;
+}
+
+// Выведите результат
+echo $sum;
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: <?php
+
+// Объявите переменную $array и присвойте ей значение массива
+
+// Ваша задача - написать код для суммирования элементов массива
+
+$sum = 0;
+
+// Ваш код здесь
+
+echo $sum;
+?>
+Extracted solution: <?php
+
+// Объявите переменную $array и присвойте ей значение массива
+$array = [1, 2, 3, 4, 5];
+
+// Инициализируйте переменную $sum для хранения суммы элементов
+$sum = 0;
+
+// Пройдите по всем элементам массива и суммируйте их
+foreach ($array as $number) {
+    $sum += $number;
+}
+
+// Выведите результат
+echo $sum;
+?>
+Extracted output: 15
+=== END ===
+
+=== 2025-06-18 15:18:23 ===
+Raw input: {"question":"Суммируйте элементы массива из функции","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Суммируйте элементы массива из функции\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 3.004138 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\nfunction sumArrayElements($array) {\n    // ваш код здесь\n    return $result;\n}\n\n$array = [1, 2, 3, 4, 5];\n$result = sumArrayElements($array);\n\necho $result; // ожидаем вывод числа\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\nfunction sumArrayElements($array) {\n    $sum = 0;\n    foreach ($array as $value) {\n        $sum += $value;\n    }\n    return $sum;\n}\n\n$array = [1, 2, 3, 4, 5];\n$result = sumArrayElements($array);\n\necho $result; // ожидаем вывод числа 15\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"143","completionTokens":"200","totalTokens":"343","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+function sumArrayElements($array) {
+    // ваш код здесь
+    return $result;
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumArrayElements($array);
+
+echo $result; // ожидаем вывод числа
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+function sumArrayElements($array) {
+    $sum = 0;
+    foreach ($array as $value) {
+        $sum += $value;
+    }
+    return $sum;
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumArrayElements($array);
+
+echo $result; // ожидаем вывод числа 15
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: <?php
+
+function sumArrayElements($array) {
+    // ваш код здесь
+    return $result;
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumArrayElements($array);
+
+echo $result; // ожидаем вывод числа
+?>
+Extracted solution: <?php
+
+function sumArrayElements($array) {
+    $sum = 0;
+    foreach ($array as $value) {
+        $sum += $value;
+    }
+    return $sum;
+}
+
+$array = [1, 2, 3, 4, 5];
+$result = sumArrayElements($array);
+
+echo $result; // ожидаем вывод числа 15
+?>
+Extracted output: 15
+=== END ===
+
+=== 2025-06-18 15:38:36 ===
+Raw input: {"question":"Суммируйте элементы массива из функции","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Суммируйте элементы массива из функции\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 3.037873 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\nfunction sumArrayElements($array) {\n    // Здесь должен быть ваш код\n    return 0;\n}\n\n$inputArray = [1, 2, 3, 4, 5];\n$result = sumArrayElements($inputArray);\n\necho $result; // Должно вывести сумму элементов массива\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\nfunction sumArrayElements($array) {\n    $sum = 0;\n    foreach ($array as $value) {\n        $sum += $value;\n    }\n    return $sum;\n}\n\n$inputArray = [1, 2, 3, 4, 5];\n$result = sumArrayElements($inputArray);\n\necho $result; // Должно вывести 15\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"143","completionTokens":"205","totalTokens":"348","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+function sumArrayElements($array) {
+    // Здесь должен быть ваш код
+    return 0;
+}
+
+$inputArray = [1, 2, 3, 4, 5];
+$result = sumArrayElements($inputArray);
+
+echo $result; // Должно вывести сумму элементов массива
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+function sumArrayElements($array) {
+    $sum = 0;
+    foreach ($array as $value) {
+        $sum += $value;
+    }
+    return $sum;
+}
+
+$inputArray = [1, 2, 3, 4, 5];
+$result = sumArrayElements($inputArray);
+
+echo $result; // Должно вывести 15
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: <?php
+
+function sumArrayElements($array) {
+    // Здесь должен быть ваш код
+    return 0;
+}
+
+$inputArray = [1, 2, 3, 4, 5];
+$result = sumArrayElements($inputArray);
+
+echo $result; // Должно вывести сумму элементов массива
+?>
+Extracted solution: <?php
+
+function sumArrayElements($array) {
+    $sum = 0;
+    foreach ($array as $value) {
+        $sum += $value;
+    }
+    return $sum;
+}
+
+$inputArray = [1, 2, 3, 4, 5];
+$result = sumArrayElements($inputArray);
+
+echo $result; // Должно вывести 15
+?>
+Extracted output: 15
+=== END ===
+
+=== 2025-06-18 18:20:50 ===
+Raw input: {"question":"Выведи сумму элементов массива","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Выведи сумму элементов массива\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 2.872437 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\n// Инициализация массива\n$array = [ ];\n\n// Код для вычисления суммы элементов массива\n\necho \"Сумма элементов массива: \";\necho $sum;\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\n// Инициализация массива\n$array = [1, 2, 3, 4, 5];\n\n// Инициализация переменной для хранения суммы\n$sum = 0;\n\n// Цикл для вычисления суммы элементов массива\nforeach ($array as $value) {\n    $sum += $value;\n}\n\n// Вывод результата\necho \"Сумма элементов массива: \";\necho $sum;\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\nСумма элементов массива: 15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"141","completionTokens":"177","totalTokens":"318","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+// Инициализация массива
+$array = [ ];
+
+// Код для вычисления суммы элементов массива
+
+echo "Сумма элементов массива: ";
+echo $sum;
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+// Инициализация массива
+$array = [1, 2, 3, 4, 5];
+
+// Инициализация переменной для хранения суммы
+$sum = 0;
+
+// Цикл для вычисления суммы элементов массива
+foreach ($array as $value) {
+    $sum += $value;
+}
+
+// Вывод результата
+echo "Сумма элементов массива: ";
+echo $sum;
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+Сумма элементов массива: 15
+```
+Extracted template: <?php
+
+// Инициализация массива
+$array = [ ];
+
+// Код для вычисления суммы элементов массива
+
+echo "Сумма элементов массива: ";
+echo $sum;
+?>
+Extracted solution: <?php
+
+// Инициализация массива
+$array = [1, 2, 3, 4, 5];
+
+// Инициализация переменной для хранения суммы
+$sum = 0;
+
+// Цикл для вычисления суммы элементов массива
+foreach ($array as $value) {
+    $sum += $value;
+}
+
+// Вывод результата
+echo "Сумма элементов массива: ";
+echo $sum;
+?>
+Extracted output: Сумма элементов массива: 15
+=== END ===
+
+=== 2025-06-18 18:21:09 ===
+Raw input: {"question":"Выведи сумму из представленных элементов массива","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Выведи сумму из представленных элементов массива\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 2.375776 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\n$array = [ /* массив будет предоставлен в условии задачи */ ];\n\n// Ваша задача - вывести сумму элементов массива\n\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\n$array = [ /* массив будет предоставлен в условии задачи */ ];\n$sum = 0;\n\nforeach ($array as $value) {\n    $sum += $value;\n}\n\necho $sum;\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n[Ожидаемый вывод будет предоставлен в условии задачи]\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"143","completionTokens":"126","totalTokens":"269","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+$array = [ /* массив будет предоставлен в условии задачи */ ];
+
+// Ваша задача - вывести сумму элементов массива
+
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+$array = [ /* массив будет предоставлен в условии задачи */ ];
+$sum = 0;
+
+foreach ($array as $value) {
+    $sum += $value;
+}
+
+echo $sum;
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+[Ожидаемый вывод будет предоставлен в условии задачи]
+```
+Extracted template: <?php
+
+$array = [ /* массив будет предоставлен в условии задачи */ ];
+
+// Ваша задача - вывести сумму элементов массива
+
+?>
+Extracted solution: <?php
+
+$array = [ /* массив будет предоставлен в условии задачи */ ];
+$sum = 0;
+
+foreach ($array as $value) {
+    $sum += $value;
+}
+
+echo $sum;
+?>
+Extracted output: [Ожидаемый вывод будет предоставлен в условии задачи]
+=== END ===
+
+=== 2025-06-18 18:24:36 ===
+Raw input: {"question":"фыв","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: фыв\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 3.129569 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\n\n// Объявите необходимые переменные\n\n// Получаем входные данные\n$input = $_GET['input'];\n\n// Основная логика решения должна быть здесь\n\n// Вернуть результат\necho $result;\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\n\n// Объявим переменную для результата\n$result = '';\n\n// Получаем входные данные\n$input = $_GET['input'];\n\n// Разбиваем строку на отдельные слова\n$words = explode(' ', $input);\n\n// Перебираем слова и формируем результат\nforeach ($words as $word) {\n    $result .= strrev($word) . ' ';\n}\n\n// Удаляем лишний пробел в конце\n$result = rtrim($result);\n\n// Выводим результат\necho $result;\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\nПример входных данных: \"Hello World\"\nОжидаемый вывод: \"olleH dlroW\"\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"138","completionTokens":"220","totalTokens":"358","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+
+// Объявите необходимые переменные
+
+// Получаем входные данные
+$input = $_GET['input'];
+
+// Основная логика решения должна быть здесь
+
+// Вернуть результат
+echo $result;
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+
+// Объявим переменную для результата
+$result = '';
+
+// Получаем входные данные
+$input = $_GET['input'];
+
+// Разбиваем строку на отдельные слова
+$words = explode(' ', $input);
+
+// Перебираем слова и формируем результат
+foreach ($words as $word) {
+    $result .= strrev($word) . ' ';
+}
+
+// Удаляем лишний пробел в конце
+$result = rtrim($result);
+
+// Выводим результат
+echo $result;
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+Пример входных данных: "Hello World"
+Ожидаемый вывод: "olleH dlroW"
+```
+Extracted template: <?php
+
+// Объявите необходимые переменные
+
+// Получаем входные данные
+$input = $_GET['input'];
+
+// Основная логика решения должна быть здесь
+
+// Вернуть результат
+echo $result;
+?>
+Extracted solution: <?php
+
+// Объявим переменную для результата
+$result = '';
+
+// Получаем входные данные
+$input = $_GET['input'];
+
+// Разбиваем строку на отдельные слова
+$words = explode(' ', $input);
+
+// Перебираем слова и формируем результат
+foreach ($words as $word) {
+    $result .= strrev($word) . ' ';
+}
+
+// Удаляем лишний пробел в конце
+$result = rtrim($result);
+
+// Выводим результат
+echo $result;
+?>
+Extracted output: Пример входных данных: "Hello World"
+Ожидаемый вывод: "olleH dlroW"
+=== END ===
+
+=== 2025-06-18 18:25:06 ===
+Raw input: {"question":"Напишите функцию, которая будет складывать элементы массива","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Напишите функцию, которая будет складывать элементы массива\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 3.153098 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\nfunction sumArray(array $array): int {\n    // Ваше решение здесь\n    return 0;\n}\n\n// Пример использования функции\n$numbers = [1, 2, 3, 4, 5];\necho sumArray($numbers); // Должно вывести 15\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\nfunction sumArray(array $array): int {\n    $sum = 0;\n    foreach ($array as $number) {\n        $sum += $number;\n    }\n    return $sum;\n}\n\n// Пример использования функции\n$numbers = [1, 2, 3, 4, 5];\necho sumArray($numbers); // Должно вывести 15\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"144","completionTokens":"193","totalTokens":"337","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+function sumArray(array $array): int {
+    // Ваше решение здесь
+    return 0;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+function sumArray(array $array): int {
+    $sum = 0;
+    foreach ($array as $number) {
+        $sum += $number;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: <?php
+function sumArray(array $array): int {
+    // Ваше решение здесь
+    return 0;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+Extracted solution: <?php
+function sumArray(array $array): int {
+    $sum = 0;
+    foreach ($array as $number) {
+        $sum += $number;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+Extracted output: 15
+=== END ===
+
+=== 2025-06-18 18:25:30 ===
+Raw input: {"question":"Напишите функцию, которая будет складывать элементы массива","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Напишите функцию, которая будет складывать элементы массива\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 3.220771 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\nfunction sumArray($array) {\n    // Ваш код здесь\n}\n\n// Пример использования функции\n$numbers = [1, 2, 3, 4, 5];\necho sumArray($numbers); // Должно вывести 15\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\nfunction sumArray($array) {\n    $sum = 0;\n    foreach ($array as $number) {\n        $sum += $number;\n    }\n    return $sum;\n}\n\n// Пример использования функции\n$numbers = [1, 2, 3, 4, 5];\necho sumArray($numbers); // Должно вывести 15\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"144","completionTokens":"181","totalTokens":"325","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+function sumArray($array) {
+    // Ваш код здесь
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+function sumArray($array) {
+    $sum = 0;
+    foreach ($array as $number) {
+        $sum += $number;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: <?php
+function sumArray($array) {
+    // Ваш код здесь
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+Extracted solution: <?php
+function sumArray($array) {
+    $sum = 0;
+    foreach ($array as $number) {
+        $sum += $number;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // Должно вывести 15
+?>
+Extracted output: 15
+=== END ===
+
+=== 2025-06-18 18:39:21 ===
+Raw input: {"question":"Напишите функцию, которая будет складывать элементы массива","language":"php","difficulty":"medium","input_example":""}
+API request data: {
+    "modelUri": "gpt:\/\/b1gr2hqj20frbeet0cet\/yandexgpt-lite",
+    "completionOptions": {
+        "stream": false,
+        "temperature": 0.6,
+        "maxTokens": 2000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "text": "Задача: Напишите функцию, которая будет складывать элементы массива\n\nЯзык программирования: php\nСложность: medium\n\nСоздай для этой задачи:\n1. Шаблон кода, который будет предоставлен студенту в качестве отправной точки. Шаблон должен содержать основную структуру решения, но не полное решение.\n2. Правильное решение задачи, которое должно корректно работать и соответствовать всем требованиям.\n3. Пример выходных данных, которые должна генерировать программа при указанных входных данных.\n\nФормат ответа:\nШАБЛОН:\n[код шаблона]\n\nРЕШЕНИЕ:\n[код решения]\n\nВЫХОДНЫЕ ДАННЫЕ:\n[ожидаемый вывод]"
+        }
+    ]
+}
+HTTP-код: 200
+Время запроса: 2.934482 сек
+API response: {"result":{"alternatives":[{"message":{"role":"assistant","text":"ШАБЛОН:\n```php\n\u003c?php\nfunction sumArray(array $array): int {\n    // ваш код здесь\n}\n\n// Пример использования функции\n$numbers = [1, 2, 3, 4, 5];\necho sumArray($numbers); // ожидаем вывод: 15\n?\u003e\n```\n\nРЕШЕНИЕ:\n```php\n\u003c?php\nfunction sumArray(array $array): int {\n    $sum = 0;\n    foreach ($array as $number) {\n        $sum += $number;\n    }\n    return $sum;\n}\n\n// Пример использования функции\n$numbers = [1, 2, 3, 4, 5];\necho sumArray($numbers); // ожидаем вывод: 15\n?\u003e\n```\n\nВЫХОДНЫЕ ДАННЫЕ:\n```\n15\n```"},"status":"ALTERNATIVE_STATUS_FINAL"}],"usage":{"inputTextTokens":"144","completionTokens":"191","totalTokens":"335","completionTokensDetails":{"reasoningTokens":"0"}},"modelVersion":"25.03.2025"}}
+
+Generated text: ШАБЛОН:
+```php
+<?php
+function sumArray(array $array): int {
+    // ваш код здесь
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // ожидаем вывод: 15
+?>
+```
+
+РЕШЕНИЕ:
+```php
+<?php
+function sumArray(array $array): int {
+    $sum = 0;
+    foreach ($array as $number) {
+        $sum += $number;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // ожидаем вывод: 15
+?>
+```
+
+ВЫХОДНЫЕ ДАННЫЕ:
+```
+15
+```
+Extracted template: <?php
+function sumArray(array $array): int {
+    // ваш код здесь
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // ожидаем вывод: 15
+?>
+Extracted solution: <?php
+function sumArray(array $array): int {
+    $sum = 0;
+    foreach ($array as $number) {
+        $sum += $number;
+    }
+    return $sum;
+}
+
+// Пример использования функции
+$numbers = [1, 2, 3, 4, 5];
+echo sumArray($numbers); // ожидаем вывод: 15
+?>
+Extracted output: 15
+=== END ===
+

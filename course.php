@@ -154,6 +154,9 @@ try {
             ");
             $stmt->execute([$course_id, $user_id]);
         }
+        
+        // Определяем, завершен ли курс пользователем
+        $is_completed = ($progress_percentage == 100);
     }
     
     // Получаем отзывы только со статусом approved
@@ -570,11 +573,7 @@ try {
                     <?php endif; ?>
                 </div>
 
-                <div class="ui positive message" style="margin: 30px 0 0 0;">
-                    <i class="certificate icon"></i>
-                    Вы можете скачать сертификат об окончании курса.
-                    <a href="#" class="ui green button" style="margin-left: 20px;"><i class="certificate icon"></i> Скачать сертификат</a>
-                </div>
+
             </div>
         </div>
     <?php else: ?>

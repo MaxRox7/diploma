@@ -371,6 +371,14 @@ if ($total_questions === 0) {
     exit;
 }
 
+// Создаем уникальный идентификатор сессии прохождения теста для перемешивания вариантов
+if (!isset($_SESSION['test_session_id'])) {
+    $_SESSION['test_session_id'] = [];
+}
+if (!isset($_SESSION['test_session_id'][$test_id])) {
+    $_SESSION['test_session_id'][$test_id] = uniqid('test_', true) . '_' . time();
+}
+
 // Сохраняем ответы в сессии
 if (!isset($_SESSION['test_answers'])) {
     $_SESSION['test_answers'] = [];
@@ -689,6 +697,7 @@ if (
     }
     // Очищаем сессию
     unset($_SESSION['test_answers'][$test_id]);
+    unset($_SESSION['test_session_id'][$test_id]);
     
     // Показываем результаты теста
     ?><!DOCTYPE html>
@@ -946,6 +955,34 @@ if (in_array($type, ['single', 'multi', 'match'])) {
     $stmt = $pdo->prepare("SELECT * FROM Answer_options WHERE id_question = ? ORDER BY id_option");
     $stmt->execute([$question['id_question']]);
     $options = $stmt->fetchAll();
+    
+    // Перемешиваем варианты ответов для студентов (уникально для каждой попытки)
+    if (!empty($options)) {
+        // Создаем уникальный seed на основе ID студента, теста, вопроса, ID сессии и PHP session ID
+        $session_id = $_SESSION['test_session_id'][$test_id];
+        $php_session_id = session_id();
+        $seed = $user_id . '_' . $test_id . '_' . $question['id_question'] . '_' . $session_id . '_' . $php_session_id;
+        $seed_number = crc32($seed);
+        
+        // Устанавливаем seed для воспроизводимого перемешивания
+        mt_srand($seed_number);
+        
+        // Создаем массив индексов и перемешиваем их
+        $indices = array_keys($options);
+        shuffle($indices);
+        
+        // Переупорядочиваем массив вариантов
+        $shuffled_options = [];
+        foreach ($indices as $i => $original_index) {
+            $shuffled_options[$i] = $options[$original_index];
+            // Сохраняем оригинальный индекс для корректной обработки ответов
+            $shuffled_options[$i]['original_index'] = $original_index;
+        }
+        $options = $shuffled_options;
+        
+        // Восстанавливаем обычный seed
+        mt_srand();
+    }
 }
 
 // Счетчик
@@ -1365,18 +1402,26 @@ if (isset($_GET['progress_check'])) {
             <label><?= htmlspecialchars($question['text_question']) ?></label>
             <?php if ($type === 'single'): ?>
                 <?php foreach ($options as $opt_index => $option): ?>
+                    <?php 
+                    // Используем оригинальный индекс для value, если варианты были перемешаны
+                    $value_index = isset($option['original_index']) ? $option['original_index'] : $opt_index;
+                    ?>
                     <div class="field">
                         <div class="ui radio checkbox">
-                            <input type="radio" name="answer" value="<?= $opt_index ?>" <?= ($answer_value == $opt_index) ? 'checked' : '' ?> required>
+                            <input type="radio" name="answer" value="<?= $value_index ?>" <?= ($answer_value == $value_index) ? 'checked' : '' ?> required>
                             <label><?= htmlspecialchars($option['text_option']) ?></label>
                         </div>
                     </div>
                 <?php endforeach; ?>
             <?php elseif ($type === 'multi'): ?>
                 <?php foreach ($options as $opt_index => $option): ?>
+                    <?php 
+                    // Используем оригинальный индекс для value, если варианты были перемешаны
+                    $value_index = isset($option['original_index']) ? $option['original_index'] : $opt_index;
+                    ?>
                     <div class="field">
                         <div class="ui checkbox">
-                            <input type="checkbox" name="multi_answer[]" value="<?= $opt_index ?>" <?= (is_array($answer_value) && in_array((string)$opt_index, $answer_value)) ? 'checked' : '' ?>>
+                            <input type="checkbox" name="multi_answer[]" value="<?= $value_index ?>" <?= (is_array($answer_value) && in_array((string)$value_index, $answer_value)) ? 'checked' : '' ?>>
                             <label><?= htmlspecialchars($option['text_option']) ?></label>
                         </div>
                     </div>

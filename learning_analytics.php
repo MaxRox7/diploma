@@ -248,22 +248,6 @@ try {
                     </div>
                 </div>
                 
-                <!-- Активность по дням недели -->
-                <div class="eight wide column">
-                    <div class="ui segment">
-                        <h3 class="ui header">Активность по дням недели</h3>
-                        <canvas id="activityByDayChart"></canvas>
-                    </div>
-                </div>
-                
-                <!-- Активность по времени суток -->
-                <div class="eight wide column">
-                    <div class="ui segment">
-                        <h3 class="ui header">Активность по времени суток</h3>
-                        <canvas id="activityByHourChart"></canvas>
-                    </div>
-                </div>
-                
                 <!-- Статистика по тегам -->
                 <div class="eight wide column">
                     <div class="ui segment">
@@ -329,71 +313,7 @@ try {
 $(document).ready(function() {
     $('.ui.progress').progress();
     
-    // График активности по дням недели
-    const dayLabels = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    const dayData = <?= json_encode($activity_by_day) ?>;
-    
-    new Chart(document.getElementById('activityByDayChart'), {
-        type: 'bar',
-        data: {
-            labels: dayLabels,
-            datasets: [{
-                label: 'Активность',
-                data: dayData,
-                backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Распределение активности по дням недели'
-                }
-            }
-        }
-    });
-    
-    // График активности по времени суток
-    const hourLabels = Array.from({length: 24}, (_, i) => `${i}:00`);
-    const hourData = <?= json_encode($activity_by_hour) ?>;
-    
-    new Chart(document.getElementById('activityByHourChart'), {
-        type: 'line',
-        data: {
-            labels: hourLabels,
-            datasets: [{
-                label: 'Активность',
-                data: hourData,
-                fill: true,
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            },
-            responsive: true,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Распределение активности по времени суток'
-                }
-            }
-        }
-    });
-    
+
     <?php if (!empty($tag_stats)): ?>
     // График статистики по тегам
     const tagLabels = <?= json_encode(array_column($tag_stats, 'name_tag')) ?>;
